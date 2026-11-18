@@ -1,6 +1,9 @@
 # Buku Panduan & Tutorial ARKAS Web
 
-Ada dua buku dengan susunan yang sama: **untuk sekolah** (`Buku-Panduan-ARKAS-Web.*`, 46 halaman) dan **untuk Dinas Pendidikan** (`Buku-Panduan-ARKAS-Web-Dinas.*`, 29 halaman: Verifikator Dinas & Admin Dinas, gambar dari `../tutorial-dinas/`).
+Ada tiga buku dengan susunan yang sama:
+- **untuk sekolah** (`Buku-Panduan-ARKAS-Web.*`, 46 halaman);
+- **untuk Dinas Pendidikan** (`Buku-Panduan-ARKAS-Web-Dinas.*`, 29 halaman: Verifikator Dinas & Admin Dinas, gambar dari `../tutorial-dinas/`);
+- **untuk Balai SDSP** (`Buku-Panduan-ARKAS-Web-Balai.*`, 24 halaman: pengguna tingkat pusat & referensi nasional, gambar dari `../tutorial-balai/`).
 
 ## Buku sekolah
 
@@ -31,4 +34,15 @@ node buat-buku-dinas.cjs
 ```
 ```bash
 python3 perbarui-daftar-isi.py Buku-Panduan-ARKAS-Web-Dinas.docx Buku-Panduan-ARKAS-Web-Dinas.docx Buku-Panduan-ARKAS-Web-Dinas.pdf
+```
+
+## Buku Balai SDSP
+
+Isi: sampul, daftar isi, Bab 1 Pendahuluan (termasuk diagram perjalanan perubahan referensi), Bab 2 Memulai, Bab 3 Mengelola Pengguna Tingkat Pusat, Bab 4 Menjelajah Referensi Nasional (7 tab), Bab 5 Mengubah Batas Komponen (dengan bukti di RKAS sekolah), Bab 6 Menerbitkan Ulang Referensi, Bab 7 Penanganan Masalah, Bab 8 Penutup, dan Lampiran Glosarium. Setiap bab dibuka kotak *Di bab ini*.
+
+```bash
+node buat-buku-balai.cjs
+```
+```bash
+python3 perbarui-daftar-isi.py Buku-Panduan-ARKAS-Web-Balai.docx Buku-Panduan-ARKAS-Web-Balai.docx Buku-Panduan-ARKAS-Web-Balai.pdf
 ```
