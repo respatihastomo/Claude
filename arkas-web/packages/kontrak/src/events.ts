@@ -15,6 +15,7 @@ export interface CloudEvent<T = unknown> {
 }
 
 export const TOPIK = {
+  KERTAS_KERJA_DIAJUKAN: 'arkas.perencanaan.kk-diajukan',
   KERTAS_KERJA_DISAHKAN: 'arkas.perencanaan.kk-disahkan',
   TRANSAKSI_DISETUJUI: 'arkas.tatausaha.transaksi-disetujui',
   PERIODE_DITUTUP: 'arkas.tatausaha.periode-ditutup',
@@ -117,4 +118,9 @@ export interface LaporanDitandatanganiData {
   sha256: string;
   /** SIMULASI_DEV = bukan TTE yang sah; BSRE = TTE tersertifikasi */
   penyediaTte: 'SIMULASI_DEV' | 'BSRE';
+}
+
+/** Diterbitkan svc-perencanaan saat sekolah mengajukan kertas kerja; dikonsumsi svc-integrasi (notifikasi Verifikator Dinas). */
+export interface KertasKerjaDiajukanData {
+  kertasKerjaId: string; npsn: string; tahun: number; sumberDanaKode: string; versi: number; totalAnggaran: number; diajukanOleh: string; diajukanAt: string;
 }

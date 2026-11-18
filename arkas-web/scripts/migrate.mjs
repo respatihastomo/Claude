@@ -15,6 +15,7 @@ const adminUrl = process.env.DATABASE_ADMIN_URL ?? 'postgres://postgres@localhos
 const LAYANAN = {
   'svc-penatausahaan': { db: 'db_tatausaha', api: 'api_tatausaha_login', worker: 'worker_tatausaha_login' },
   'svc-pelaporan': { db: 'db_pelaporan', api: 'api_pelaporan_login', worker: 'worker_pelaporan_login' },
+  'svc-perencanaan': { db: 'db_perencanaan', api: 'api_perencanaan_login', worker: 'worker_perencanaan_login' },
 };
 const lay = LAYANAN[svc];
 if (!lay) { console.error(`layanan tidak dikenal: ${svc}`); process.exit(2); }

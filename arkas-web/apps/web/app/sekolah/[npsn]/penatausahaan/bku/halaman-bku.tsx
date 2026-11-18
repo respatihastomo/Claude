@@ -1,7 +1,7 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { DialogMutasi, JenisMutasi } from '@/components/dialog-mutasi';
+import { Kepala, PeranUi } from '@/components/kepala';
 import { Ringkasan } from '@/components/ringkasan';
 import { TabelBku } from '@/components/tabel-bku';
 import { Kartu, Spanduk, Tombol, cx } from '@/components/ui';
@@ -14,8 +14,19 @@ import { Buku, useBku, usePutuskan, useRingkasan } from '@/lib/hooks';
 
 const TAB = [{ id: undefined, label: 'Buku Kas Umum' }, { id: 'TUNAI', label: 'BKP Tunai' }, { id: 'BANK', label: 'BKP Bank' }, { id: 'PAJAK', label: 'BKP Pajak' }, { id: 'TUTUP', label: 'Penutupan Buku Kas' }, { id: 'LAPORAN', label: 'Laporan' }] as const;
 
-export function HalamanBku({ npsn, tahun, peran, namaPengguna }: { npsn: string; tahun: number; peran: 'BENDAHARA' | 'KEPSEK'; namaPengguna: string }) {
-  const router = useRouter();
+export function HalamanBku({ npsn, tahun, peran: peranUi, namaPengguna }: { npsn: string; tahun: number; peran: PeranUi; namaPengguna: string }) {
+  if (peranUi === 'VERIFIKATOR_DINAS') {
+    return (
+      <div className="min-h-screen">
+        <Kepala npsn={npsn} judul="Penatausahaan" peran={peranUi} namaPengguna={namaPengguna} />
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6"><Spanduk nada="info" judul="Penatausahaan dikelola sekolah">Verifikator Dinas menelaah dan mengesahkan RKAS di menu Penganggaran.</Spanduk></main>
+      </div>
+    );
+  }
+  return <IsiBku npsn={npsn} tahun={tahun} peran={peranUi} namaPengguna={namaPengguna} />;
+}
+
+function IsiBku({ npsn, tahun, peran, namaPengguna }: { npsn: string; tahun: number; peran: 'BENDAHARA' | 'KEPSEK'; namaPengguna: string }) {
   const buku: Buku = { npsn, tahun, sumberDanaKode: 'BOSP_REG' };
   const [tab, setTab] = useState<'TUNAI' | 'BANK' | 'PAJAK' | 'TUTUP' | 'LAPORAN' | undefined>();
   const [wizard, setWizard] = useState(false);
@@ -25,11 +36,6 @@ export function HalamanBku({ npsn, tahun, peran, namaPengguna }: { npsn: string;
   const bku = useBku(buku, tab === 'TUNAI' || tab === 'BANK' ? tab : undefined);
   const putuskan = usePutuskan(buku);
   const galat = [ringkasan.error, bku.error, putuskan.error].find((e) => e instanceof GalatApi) as GalatApi | undefined;
-
-  async function gantiPeran(p: string) {
-    await fetch('/api/dev/peran', { method: 'POST', body: JSON.stringify({ peran: p }) });
-    router.refresh();
-  }
 
   function onPutuskan(id: string, aksi: 'setujui' | 'tolak') {
     const alasan = aksi === 'tolak' ? window.prompt('Alasan penolakan (wajib):')?.trim() : undefined;
@@ -41,23 +47,7 @@ export function HalamanBku({ npsn, tahun, peran, namaPengguna }: { npsn: string;
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-line bg-surface">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-primary">ARKAS Web · Penatausahaan</p>
-            <h1 className="font-display text-lg font-bold">Buku Kas Umum — BOSP Reguler {tahun}</h1>
-            <p className="angka text-xs text-muted">NPSN {npsn}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-muted" htmlFor="peran">Peran aktif (dev)</label>
-            <select id="peran" value={peran} onChange={(e) => gantiPeran(e.target.value)} className="h-9 rounded-ctl border border-line bg-surface px-2 text-sm">
-              <option value="BENDAHARA">Bendahara</option>
-              <option value="KEPSEK">Kepala Sekolah</option>
-            </select>
-            <span className="hidden text-sm text-muted md:inline">{namaPengguna}</span>
-          </div>
-        </div>
-      </header>
+      <Kepala npsn={npsn} judul={`Buku Kas Umum — BOSP Reguler ${tahun}`} peran={peran} namaPengguna={namaPengguna} />
 
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6">
         {ringkasan.data && !ringkasan.data.periodeBerjalan && (

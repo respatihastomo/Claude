@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { BarisBkuDto, BarisRkasDto, BuatTransaksiInput, RingkasanBukuDto, TransaksiDto } from '@arkas/kontrak';
 import type { AjukanTutupInput, BarisBkpPajakDto, DetailPeriodeDto, PajakDto, PeriodeDto, SetorPajakInput } from '@arkas/kontrak';
+import type { BarisKertasKerjaInput, DetailKertasKerjaDto, KertasKerjaDto, KomponenDto } from '@arkas/kontrak';
 import { api, kunciIdempoten } from './api';
 
 export interface Buku { npsn: string; tahun: number; sumberDanaKode: string }
@@ -96,5 +97,46 @@ export function useTandatangani(b: Buku) {
   return useMutation({
     mutationFn: async (l: LaporanDto) => (await api<LaporanDto>(`/laporan/${l.id}/tandatangani`, { method: 'POST', headers: { 'If-Match': `W/"${l.versi}"` } })).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: kunciBuku(b) }),
+  });
+}
+
+// ---------- svc-perencanaan ----------
+
+export function useDaftarKk(b: Buku) {
+  return useQuery({ queryKey: ['kk', b.npsn, b.tahun, b.sumberDanaKode], queryFn: async () => (await api<{ data: KertasKerjaDto[] }>(`/sekolah/${b.npsn}/kertas-kerja?${qs(b)}`)).data.data });
+}
+export function useKk(id?: string) {
+  return useQuery({ queryKey: ['kk', id], enabled: !!id, queryFn: async () => (await api<DetailKertasKerjaDto>(`/kertas-kerja/${id}`)).data });
+}
+export function useKomponen(id?: string) {
+  return useQuery({ queryKey: ['kk', id, 'komponen'], enabled: !!id, staleTime: 60_000, queryFn: async () => (await api<{ data: KomponenDto[] }>(`/kertas-kerja/${id}/komponen`)).data.data });
+}
+export function usePenelaahan(aktif: boolean) {
+  return useQuery({ queryKey: ['penelaahan'], enabled: aktif, queryFn: async () => (await api<{ data: KertasKerjaDto[] }>('/penelaahan')).data.data });
+}
+type AksiKk =
+  | { jenis: 'aktifkan' | 'perubahan'; b: Buku }
+  | { jenis: 'baris'; kk: DetailKertasKerjaDto; input: BarisKertasKerjaInput; barisId?: string }
+  | { jenis: 'hapus'; kk: DetailKertasKerjaDto; barisId: string }
+  | { jenis: 'ajukan' | 'sahkan'; kk: DetailKertasKerjaDto }
+  | { jenis: 'kembalikan'; kk: DetailKertasKerjaDto; alasan: string }
+  | { jenis: 'catatan'; kk: DetailKertasKerjaDto; catatan: string; barisId?: string };
+/** Semua aksi kertas kerja; If-Match memakai rowVersion detail yang sedang ditampilkan. */
+export function useAksiKk() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (a: AksiKk) => {
+      const im = (kk: DetailKertasKerjaDto) => ({ 'If-Match': `W/"${kk.rowVersion}"` });
+      switch (a.jenis) {
+        case 'aktifkan': return (await api<DetailKertasKerjaDto>(`/sekolah/${a.b.npsn}/kertas-kerja`, { method: 'POST', json: { tahun: a.b.tahun, sumberDanaKode: a.b.sumberDanaKode } })).data;
+        case 'perubahan': return (await api<DetailKertasKerjaDto>(`/sekolah/${a.b.npsn}/kertas-kerja/perubahan`, { method: 'POST', json: { tahun: a.b.tahun, sumberDanaKode: a.b.sumberDanaKode } })).data;
+        case 'baris': return (await api<DetailKertasKerjaDto>(`/kertas-kerja/${a.kk.id}/baris${a.barisId ? `/${a.barisId}` : ''}`, { method: a.barisId ? 'PUT' : 'POST', json: a.input, headers: im(a.kk) })).data;
+        case 'hapus': return (await api<DetailKertasKerjaDto>(`/kertas-kerja/${a.kk.id}/baris/${a.barisId}`, { method: 'DELETE', headers: im(a.kk) })).data;
+        case 'kembalikan': return (await api<DetailKertasKerjaDto>(`/kertas-kerja/${a.kk.id}/kembalikan`, { method: 'POST', json: { alasan: a.alasan }, headers: im(a.kk) })).data;
+        case 'catatan': return (await api<DetailKertasKerjaDto>(`/kertas-kerja/${a.kk.id}/catatan`, { method: 'POST', json: { catatan: a.catatan, ...(a.barisId ? { barisId: a.barisId } : {}) } })).data;
+        default: return (await api<DetailKertasKerjaDto>(`/kertas-kerja/${a.kk.id}/${a.jenis}`, { method: 'POST', json: {}, headers: im(a.kk) })).data;
+      }
+    },
+    onSuccess: (kk) => { qc.setQueryData(['kk', kk.id], kk); void qc.invalidateQueries({ queryKey: ['kk'] }); void qc.invalidateQueries({ queryKey: ['penelaahan'] }); },
   });
 }

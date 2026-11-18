@@ -7,6 +7,8 @@ const KODE_TRIGGER = new Set([
   'PAJAK_TIDAK_DAPAT_DIUBAH', 'PAJAK_BELUM_SAH', 'SETOR_PAJAK_TIDAK_SESUAI', 'PAJAK_SUDAH_DISETOR',
   'REKONSILIASI_TERKUNCI', 'PERIODE_TIDAK_DAPAT_DIUBAH', 'TRANSISI_PERIODE_TIDAK_SAH', 'PERIODE_FINAL', 'MASIH_ADA_TRANSAKSI_MENUNGGU',
   'PERIODE_SEBELUMNYA_BELUM_DITUTUP', 'REKONSILIASI_BELUM_ADA', 'PEMISAHAN_TUGAS',
+  'KERTAS_KERJA_TERKUNCI', 'PAGU_TERLAMPAUI', 'TRANSISI_TIDAK_SAH', 'KERTAS_KERJA_FINAL', 'KERTAS_KERJA_TIDAK_DAPAT_DIUBAH',
+  'LAPORAN_FINAL', 'LAPORAN_BELUM_SIAP', 'LAPORAN_TIDAK_DAPAT_DIUBAH',
 ]);
 
 interface PgError { code?: string; message?: string; detail?: string; constraint?: string }
@@ -22,7 +24,7 @@ export function terjemahkanGalatPg(e: unknown): unknown {
   if (pe.code === 'P0001' && pe.message && KODE_TRIGGER.has(pe.message)) {
     let detail: Record<string, unknown> | undefined;
     try { detail = pe.detail ? JSON.parse(pe.detail) : undefined; } catch { detail = { keterangan: pe.detail }; }
-    return new AturanError(pe.message, pe.detail && !detail?.barisId ? pe.detail : pesanBawaan(pe.message), detail);
+    return new AturanError(pe.message, pe.detail && !detail?.barisId && !detail?.pagu ? pe.detail : pesanBawaan(pe.message), detail);
   }
   // Pada tabel berpartisi, constraint yang dilaporkan adalah indeks partisi (mis. transaksi_2026_ntpn_tahun_idx);
   // `detail` tidak tersedia bagi role tanpa hak SELECT pada kolom kunci, jadi dicocokkan dari nama indeks.
@@ -39,6 +41,7 @@ function pesanBawaan(kode: string): string {
   switch (kode) {
     case 'MELEBIHI_ANGGARAN': return 'Nilai belanja melebihi sisa anggaran baris RKAS yang disahkan';
     case 'PERIODE_TERTUTUP': return 'Periode buku kas sudah ditutup';
+    case 'PAGU_TERLAMPAUI': return 'Total anggaran kertas kerja melebihi pagu';
     default: return kode;
   }
 }
