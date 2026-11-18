@@ -3,7 +3,7 @@
 Ada tiga buku dengan susunan yang sama:
 - **untuk sekolah** (`Buku-Panduan-ARKAS-Web.*`, 46 halaman);
 - **untuk Dinas Pendidikan** (`Buku-Panduan-ARKAS-Web-Dinas.*`, 29 halaman: Verifikator Dinas & Admin Dinas, gambar dari `../tutorial-dinas/`);
-- **untuk Balai SDSP** (`Buku-Panduan-ARKAS-Web-Balai.*`, 24 halaman: pengguna tingkat pusat & referensi nasional, gambar dari `../tutorial-balai/`).
+- **untuk Balai SDSP** (`Buku-Panduan-ARKAS-Web-Balai.*`, 33 halaman: pengguna tingkat pusat & referensi nasional termasuk formulir tambah/ubah/nonaktifkan, gambar dari `../tutorial-balai/`).
 
 ## Buku sekolah
 
@@ -38,7 +38,7 @@ python3 perbarui-daftar-isi.py Buku-Panduan-ARKAS-Web-Dinas.docx Buku-Panduan-AR
 
 ## Buku Balai SDSP
 
-Isi: sampul, daftar isi, Bab 1 Pendahuluan (termasuk diagram perjalanan perubahan referensi), Bab 2 Memulai, Bab 3 Mengelola Pengguna Tingkat Pusat, Bab 4 Menjelajah Referensi Nasional (7 tab), Bab 5 Mengubah Batas Komponen (dengan bukti di RKAS sekolah), Bab 6 Menerbitkan Ulang Referensi, Bab 7 Penanganan Masalah, Bab 8 Penutup, dan Lampiran Glosarium. Setiap bab dibuka kotak *Di bab ini*.
+Isi: sampul, daftar isi, Bab 1 Pendahuluan (termasuk diagram perjalanan perubahan referensi), Bab 2 Memulai, Bab 3 Mengelola Pengguna Tingkat Pusat, Bab 4 Menjelajah Referensi Nasional (8 tab), Bab 5 Menambah, Mengubah, dan Menonaktifkan Referensi (kode rekening, tarif pajak, sekolah, batas komponen dengan bukti di RKAS sekolah, nonaktifkan, aturan formulir), Bab 6 Menerbitkan Ulang Referensi, Bab 7 Penanganan Masalah, Bab 8 Penutup, dan Lampiran Glosarium. Setiap bab dibuka kotak *Di bab ini*.
 
 ```bash
 node buat-buku-balai.cjs

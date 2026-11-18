@@ -7,7 +7,7 @@ export class GalatApi extends Error {
 }
 
 /** Kode 16 — klien API: problem+json -> GalatApi; ETag ikut dikembalikan untuk If-Match. */
-export async function api<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<{ data: T; etag: string | null }> {
+export async function api<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<{ data: T; etag: string | null; status: number }> {
   const headers = new Headers(init.headers);
   let body = init.body;
   if (init.json !== undefined) { headers.set('content-type', 'application/json'); body = JSON.stringify(init.json); }
@@ -15,7 +15,7 @@ export async function api<T>(path: string, init: RequestInit & { json?: unknown 
   const teks = await res.text();
   const isi = teks ? JSON.parse(teks) : null;
   if (!res.ok) throw new GalatApi(res.status, isi ?? { type: 'about:blank', title: res.statusText, status: res.status, kode: 'GALAT' });
-  return { data: isi as T, etag: res.headers.get('etag') };
+  return { data: isi as T, etag: res.headers.get('etag'), status: res.status };
 }
 
 export const kunciIdempoten = () => (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);

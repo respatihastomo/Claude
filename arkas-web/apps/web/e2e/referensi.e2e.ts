@@ -47,25 +47,56 @@ describe('UI pajak daerah (Admin Dinas) & referensi nasional (Balai)', () => {
     expect([lain.status, lain.body.kode]).toEqual([422, 'DI_LUAR_CAKUPAN']);
   });
 
-  it('Balai: tab tarif pajak memuat baris wilayah, ubah batas komponen, terbitkan ulang', async () => {
-    let jawab: string | null = '25';
-    const a = await masuk('balai', () => jawab);
+  it('Balai: tab tarif pajak memuat baris wilayah, ubah batas komponen lewat formulir, terbitkan ulang', async () => {
+    const a = await masuk('balai');
     await buka(a, '/admin/referensi');
     await a.getByRole('tab', { name: 'Tarif pajak' }).click();
     await expect.poll(() => a.getByRole('row', { name: /3201/ }).count(), { timeout: 10_000 }).toBeGreaterThan(0);
 
     await a.getByRole('tab', { name: 'Komponen BOSP' }).click();
     const honor = a.getByRole('row', { name: /Pembayaran honor/ });
+    const ubahBatas = async (nilai: string) => {
+      await honor.getByRole('button', { name: 'Ubah' }).click();
+      await a.getByLabel(/Batas maksimal/).fill(nilai);
+      await a.getByRole('dialog').getByRole('button', { name: 'Simpan' }).click();
+      await expect.poll(async () => (await honor.innerText()).includes(`${nilai}%`), { timeout: 10_000 }).toBe(true);
+    };
     try {
-      await honor.getByRole('button', { name: 'Ubah batas' }).click();
-      await expect.poll(async () => (await honor.innerText()).includes('25%'), { timeout: 10_000 }).toBe(true);
+      await ubahBatas('25');
+      await expect.poll(() => a.getByText(/tersimpan \(versi \d+\)/).count(), { timeout: 5_000 }).toBe(1);
     } finally {
-      jawab = '20';
-      await honor.getByRole('button', { name: 'Ubah batas' }).click();
-      await expect.poll(async () => (await honor.innerText()).includes('20%'), { timeout: 10_000 }).toBe(true);
+      await ubahBatas('20');
     }
 
     await a.getByRole('button', { name: 'Terbitkan ulang ke semua layanan' }).click();
     await expect.poll(() => a.getByText(/baris referensi diantrekan/).count(), { timeout: 10_000 }).toBe(1);
+  });
+
+  it('Balai: menonaktifkan & mengaktifkan kode rekening lewat formulir; simpan tanpa perubahan tidak menaikkan versi', async () => {
+    const a = await masuk('balai');
+    await buka(a, '/admin/referensi');
+    await a.getByRole('tab', { name: 'Kode rekening' }).click();
+    const baris = a.getByRole('row', { name: /5\.1\.02\.02\.01\.0061/ });
+    await expect.poll(() => baris.count(), { timeout: 10_000 }).toBe(1);
+    const versi = async () => Number((await baris.getByRole('cell').nth(2).innerText()).trim());
+    const atur = async (aktif: boolean) => {
+      await baris.getByRole('button', { name: 'Ubah' }).click();
+      const c = a.getByRole('dialog').getByRole('checkbox');
+      if (aktif) await c.check(); else await c.uncheck();
+      await a.getByRole('dialog').getByRole('button', { name: 'Simpan' }).click();
+    };
+    const v0 = await versi();
+    try {
+      await atur(false);
+      await expect.poll(async () => (await baris.innerText()).includes('Nonaktif'), { timeout: 10_000 }).toBe(true);
+      expect(await versi()).toBeGreaterThan(v0);
+    } finally {
+      await atur(true);
+      await expect.poll(async () => (await baris.innerText()).includes('Aktif') && !(await baris.innerText()).includes('Nonaktif'), { timeout: 10_000 }).toBe(true);
+    }
+    const v1 = await versi();
+    await atur(true); // isi sama
+    await expect.poll(() => a.getByText('Tidak ada perubahan; isian sama dengan data yang tersimpan.').count(), { timeout: 5_000 }).toBe(1);
+    expect(await versi()).toBe(v1);
   });
 });

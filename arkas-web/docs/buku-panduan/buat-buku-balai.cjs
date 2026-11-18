@@ -130,12 +130,14 @@ P('Buku ini ditulis santai biar enak dibaca sambil praktik. Setiap langkah ada t
 H2('1.1 Untuk siapa buku ini?');
 TABEL(['Pembaca', 'Yang dikerjakan di ARKAS Web', 'Baca bab'], [
   ['Admin Balai SDSP', 'Mengelola akun tingkat pusat (Balai, Admin Ditjen, Admin Dinas baru, Pemantau, Auditor)', 'Bab 3'],
-  ['Tim referensi nasional', 'Memantau tujuh jenis referensi, mengubah batas komponen BOSP, dan menerbitkan ulang referensi', 'Bab 4, 5, 6'],
+  ['Tim referensi nasional', 'Memantau, menambah, mengubah, dan menonaktifkan delapan jenis referensi, serta menerbitkan ulang referensi', 'Bab 4, 5, 6'],
 ], [2600, 5238, 1800]);
 
 H2('1.2 Apa saja yang dikelola Balai?');
+P('Ada delapan jenis referensi nasional, dan semuanya bisa ditambah, diubah, dan dinonaktifkan langsung dari halaman **Referensi**.');
 TABEL(['Referensi', 'Contoh isi', 'Dipakai oleh'], [
   ['Komponen BOSP', '12. Pembayaran honor (maks 20%)', 'Sekolah saat menyusun RKAS; Verifikator saat menelaah'],
+  ['Jenjang', 'SD, SMP, SMA, SMK', 'Data satuan pendidikan'],
   ['Tarif pajak', 'PPN 11%, PPh 23 2%, SSPD 10% (nasional) + tarif daerah dari Dinas', 'Bendahara saat mencatat belanja'],
   ['Kode rekening', '5.1.02.01.01.0024 Belanja Alat Tulis Kantor', 'Sekolah saat menyusun RKAS'],
   ['Satuan pendidikan', 'SMP Negeri Contoh 1 (20100001), wilayah 3201', 'Semua modul: akun, RKAS, buku kas'],
@@ -166,7 +168,7 @@ H2('1.5 Yang perlu disiapkan');
 TABEL(['Untuk', 'Siapkan ini'], [
   ['Semua', 'Komputer dengan browser terbaru, koneksi internet, dan akun SSO berperan Balai SDSP'],
   ['Mengelola akun', 'SK penugasan Admin Dinas, Admin Ditjen, Pemantau, atau surat tugas Auditor, beserta email SSO masing-masing'],
-  ['Mengubah komponen', 'Juknis BOSP terbaru yang menjadi dasar perubahan batas'],
+  ['Mengubah referensi', 'Juknis BOSP, peraturan kode rekening dan pajak, serta data sekolah dan wilayah terbaru yang menjadi dasar perubahan'],
   ['Memantau referensi', 'Peraturan kode rekening, data satuan pendidikan dan wilayah terbaru'],
 ], [2600, 7038]);
 
@@ -187,16 +189,17 @@ KOTAK('PENTING', 'Gambar di atas berasal dari lingkungan uji coba, jadi yang tam
 H2('2.2 Menu milik Balai');
 TABEL(['Menu', 'Isinya', 'Dibahas di'], [
   ['Kelola pengguna', 'Mendaftarkan dan mencabut akun tingkat pusat dan Admin Dinas', 'Bab 3'],
-  ['Referensi', 'Tujuh tab referensi nasional, ubah batas komponen, terbitkan ulang', 'Bab 4, 5, 6'],
+  ['Referensi', 'Delapan tab referensi nasional dengan formulir tambah/ubah/nonaktifkan, dan terbitkan ulang', 'Bab 4, 5, 6'],
 ], [2400, 5238, 2000]);
 
 H2('2.3 Mengenal halaman Referensi');
 P('Cocokkan nomor di gambar dengan tabel di bawahnya (angka berada tepat di bawah kotak yang dimaksud).');
 GAMBAR('s07-referensi.png', 'Bagian-bagian halaman Referensi nasional');
 TABEL(['No.', 'Bagian', 'Gunanya'], [
-  ['1', 'Tab referensi', 'Pindah antarjenis referensi: Komponen BOSP, Tarif pajak, Kode rekening, Satuan pendidikan, Wilayah, Direktorat, Sumber dana'],
+  ['1', 'Tab referensi', 'Pindah antarjenis referensi: Komponen BOSP, Tarif pajak, Kode rekening, Satuan pendidikan, Wilayah, Jenjang, Direktorat, Sumber dana'],
   ['2', 'Terbitkan ulang ke semua layanan', 'Mengirim ulang seluruh referensi ke semua modul (Bab 6)'],
-  ['3', 'Tabel referensi', 'Isi referensi, dengan kolom **Versi** (nomor perubahan terakhir) dan **Aktif** (masih berlaku atau sudah dinonaktifkan)'],
+  ['3', '+ Tambah ...', 'Membuka formulir untuk menambah data baru di tab yang aktif (Bab 5)'],
+  ['4', 'Ubah', 'Membuka formulir untuk mengubah atau menonaktifkan baris itu (Bab 5). Tabel juga menampilkan kolom **Versi** dan **Aktif**'],
 ], [800, 3200, 5638]);
 
 // ======================================================================
@@ -254,63 +257,125 @@ KOTAK('PENTING', 'Bapak/Ibu nggak bisa memberi atau mencabut peran untuk akun se
 // BAB 4 MENJELAJAH REFERENSI
 // ======================================================================
 H1('Menjelajah Referensi Nasional');
-KOTAK('BAB', 'isi ketujuh tab referensi, cara membacanya, dan apa yang perlu Balai pantau di setiap tab.');
-P('Klik menu **Referensi**. Setiap tab menampilkan satu jenis referensi, lengkap dengan kolom **Versi** dan **Aktif**.');
+KOTAK('BAB', 'isi kedelapan tab referensi, cara membacanya, dan apa yang perlu Balai pantau di setiap tab.');
+P('Klik menu **Referensi**. Setiap tab menampilkan satu jenis referensi, lengkap dengan kolom **Versi** dan **Aktif**, tombol **Ubah** di setiap baris, dan tombol **+ Tambah** di kanan atas.');
 
 H2('4.1 Komponen BOSP');
-P('Daftar komponen per sumber dana, beserta batas **Maks** dan **Min** (persentase dari pagu). Batas inilah yang dipakai aplikasi untuk memeriksa RKAS sekolah. Cara mengubah batas dibahas di Bab 5.');
-GAMBAR('s14-ubah-batas.png', 'Tab Komponen BOSP; honor dibatasi maksimal 20%');
-
+P('Daftar komponen per sumber dana, beserta batas **Maks** dan **Min** (persentase dari pagu). Batas inilah yang dipakai aplikasi untuk memeriksa RKAS sekolah.');
+GAMBAR('f09-ubah-komponen.png', 'Tab Komponen BOSP; honor dibatasi maksimal 20%');
 H2('4.2 Tarif pajak');
 P('Berisi tarif nasional (kolom **Wilayah** = *Nasional*) dan tarif daerah yang ditetapkan Dinas (kolom Wilayah berisi kode wilayah). Balai bisa memantau Dinas mana saja yang sudah menetapkan Perda, beserta dasar hukumnya.');
 GAMBAR('s08-tarif-pajak.png', 'Tab Tarif pajak; baris 3201 adalah tarif daerah dari Dinas');
-KOTAK('INGAT', 'Tarif daerah (SSPD) diatur oleh Dinas masing-masing lewat menu *Pajak daerah*. Balai cukup memantau di tab ini.');
-
+KOTAK('INGAT', 'Balai mengelola tarif **nasional**. Tarif daerah (SSPD) diatur Dinas masing-masing lewat menu *Pajak daerah*; Balai cukup memantaunya di tab ini.');
 H2('4.3 Kode rekening');
 P('Daftar kode rekening belanja beserta namanya. Sekolah hanya bisa memakai kode yang **aktif** saat menyusun RKAS.');
 GAMBAR('s09-kode-rekening.png', 'Tab Kode rekening');
-
 H2('4.4 Satuan pendidikan');
 P('Daftar sekolah dengan NPSN, jenjang, wilayah, dan status (negeri/swasta). Wilayah sekolah menentukan Dinas mana yang menelaah RKAS-nya dan tarif pajak daerah mana yang berlaku.');
 GAMBAR('s10-sekolah.png', 'Tab Satuan pendidikan');
-
 H2('4.5 Wilayah');
 P('Daftar provinsi dan kabupaten/kota beserta induknya. Kode wilayah dipakai sebagai cakupan Admin Dinas dan Verifikator.');
 GAMBAR('s11-wilayah.png', 'Tab Wilayah');
-
-H2('4.6 Direktorat');
-P('Daftar direktorat dan direktorat jenderal, yang dipakai sebagai cakupan pengguna tingkat pusat.');
+H2('4.6 Jenjang');
+P('Daftar jenjang pendidikan (SD, SMP, SMA, SMK, dan seterusnya) yang dipilih saat menambah satuan pendidikan.');
+GAMBAR('s11b-jenjang.png', 'Tab Jenjang');
+H2('4.7 Direktorat');
+P('Daftar direktorat beserta direktorat jenderalnya, yang dipakai sebagai cakupan pengguna tingkat pusat.');
 GAMBAR('s12-direktorat.png', 'Tab Direktorat');
-
-H2('4.7 Sumber dana');
+H2('4.8 Sumber dana');
 P('Daftar sumber dana (misalnya BOSP Reguler) beserta kategorinya. Sumber dana menentukan pagu dan buku kas sekolah.');
 GAMBAR('s13-sumber-dana.png', 'Tab Sumber dana');
 
 // ======================================================================
-// BAB 5 UBAH BATAS KOMPONEN
+// BAB 5 FORMULIR REFERENSI
 // ======================================================================
-H1('Mengubah Batas Komponen BOSP');
-KOTAK('BAB', 'cara mengubah batas maksimal komponen sesuai juknis baru, dan bukti perubahannya langsung terlihat di sekolah.');
-P('Juknis BOSP bisa mengubah batas persentase komponen, misalnya batas honor. Contoh berikut menaikkan batas honor dari 20% menjadi 25%.');
-H2('5.1 Langkah mengubah batas');
-H3('Langkah 1: Klik Ubah batas');
-P('Di tab **Komponen BOSP**, cari komponennya (misalnya *12. Pembayaran honor*), lalu klik **Ubah batas** di ujung kanan barisnya.');
-GAMBAR('s14-ubah-batas.png', 'Tombol Ubah batas pada komponen Pembayaran honor');
-H3('Langkah 2: Isi batas baru');
-P('Kotak isian dari browser akan muncul. Ketik angka batas maksimal dalam persen (misalnya `25`), lalu klik **OK**.');
-LI([
-  'Kosongkan isian lalu klik **OK** untuk menghapus batas (komponen tanpa batas maksimal).',
-  'Klik **Cancel** untuk membatalkan. Tidak ada yang berubah.',
+H1('Menambah, Mengubah, dan Menonaktifkan Referensi');
+KOTAK('BAB', 'cara memakai formulir referensi: menambah kode rekening, tarif pajak, dan sekolah baru; mengubah batas komponen; menonaktifkan referensi; serta arti setiap pesan yang muncul.');
+P('Semua jenis referensi memakai formulir yang sama: sebuah laci yang muncul di kanan layar. Polanya selalu begini:');
+OL([
+  'Pilih tab referensi yang mau diolah.',
+  'Klik **+ Tambah ...** untuk data baru, atau **Ubah** di baris yang sudah ada.',
+  'Isi kolomnya. Kolom bertanda *(opsional)* boleh dikosongkan.',
+  'Klik **Simpan**. Kotak hijau memberi tahu nomor versi baru, dan perubahan langsung dikirim ke semua layanan.',
 ]);
-H3('Langkah 3: Cek hasilnya');
-P('Kolom **Maks** berubah menjadi 25%, dan nomor **Versi** baris itu naik. Artinya perubahan sudah tersimpan dan dikabarkan ke modul lain.');
-GAMBAR('s15-batas-baru.png', 'Batas honor menjadi 25%; versi naik');
+KOTAK('TIPS', 'Pesan di kiri bawah laci memberi tahu kalau ada isian yang belum lengkap atau formatnya salah. Selama masih ada pesan, tombol **Simpan** belum bisa diklik.');
 
-H2('5.2 Bukti perubahan sampai ke sekolah');
-P('Beberapa detik kemudian, panel pagu di halaman RKAS sekolah sudah menampilkan batas baru.');
+H2('5.1 Menambah kode rekening');
+H3('Langkah 1: Klik + Tambah kode rekening');
+P('Buka tab **Kode rekening**, lalu klik **+ Tambah kode rekening** di kanan atas.');
+GAMBAR('f01-tambah-rekening.png', 'Tombol + Tambah kode rekening');
+H3('Langkah 2: Isi kode dan nama');
+OL([
+  '**Kode rekening**: angka bertitik sesuai peraturan, misalnya `5.1.02.01.01.0029`.',
+  '**Nama rekening**: misalnya *Belanja Bahan Cetak*.',
+  'Biarkan **Aktif** tercentang, lalu klik **Simpan**.',
+]);
+GAMBAR('f02-laci-rekening.png', 'Laci Tambah kode rekening');
+H3('Langkah 3: Cek hasilnya');
+P('Kotak hijau menampilkan nomor versi baru, dan baris baru langsung muncul di tabel. Sekolah sudah bisa memakai kode ini saat menyusun RKAS.');
+GAMBAR('f03-rekening-baru.png', 'Kode rekening baru tersimpan dan dikirim ke semua layanan');
+
+H2('5.2 Menambah tarif pajak nasional');
+P('Kode rekening baru biasanya perlu tarif pajak. Buka tab **Tarif pajak**, lalu klik **+ Tambah tarif pajak**.');
+OL([
+  '**Kode rekening**: pilih dari daftar (hanya kode yang aktif yang muncul).',
+  '**Jenis pajak**: PPN, PPh 21, PPh 23, atau SSPD.',
+  '**Wilayah**: biarkan *Nasional (semua wilayah)*. Tarif daerah diatur Dinas.',
+  '**Tarif (%)**: ketik dalam persen, misalnya `11`.',
+  '**Tarif bila penyedia tanpa NPWP (%)** (khusus PPh) dan **Dasar hukum** bila ada.',
+  'Klik **Simpan**.',
+]);
+GAMBAR('f04-laci-tarif.png', 'Laci Tambah tarif pajak: rekening, jenis, wilayah, tarif');
+GAMBAR('f05-tarif-baru.png', 'Tarif PPN 11% untuk kode rekening baru');
+KOTAK('INGAT', 'Tarif diketik dalam **persen** (11 untuk 11%). Aplikasi mengubahnya sendiri ke bentuk pecahan saat menyimpan.');
+
+H2('5.3 Menambah satuan pendidikan');
+P('Saat ada sekolah baru, buka tab **Satuan pendidikan** dan klik **+ Tambah satuan pendidikan**.');
+OL([
+  '**NPSN**: 8 digit angka.',
+  '**Nama sekolah**.',
+  '**Jenjang**, **Wilayah (kabupaten/kota)**, dan **Status**: pilih dari daftar.',
+  'Klik **Simpan**.',
+]);
+GAMBAR('f06-laci-sekolah.png', 'Laci Tambah satuan pendidikan dengan pilihan jenjang, wilayah, dan status');
+P('Sekolah baru langsung terkirim ke modul akun, perencanaan, dan penatausahaan. Admin Dinas wilayah itu sudah bisa mendaftarkan Operator untuk sekolah tersebut.');
+GAMBAR('f07-sekolah-baru.png', 'Sekolah baru SD Negeri Contoh 3 tersimpan');
+P('Kalau formatnya salah, misalnya NPSN baru 7 digit, pesan langsung muncul di kiri bawah dan **Simpan** belum bisa diklik.');
+GAMBAR('f08-galat-npsn.png', 'NPSN 7 digit: pesan muncul dan Simpan dinonaktifkan');
+
+H2('5.4 Mengubah batas komponen BOSP');
+H3('Langkah 1: Klik Ubah di baris komponen');
+P('Di tab **Komponen BOSP**, klik **Ubah** di baris komponen yang dimaksud, misalnya *12. Pembayaran honor*.');
+GAMBAR('f09-ubah-komponen.png', 'Tombol Ubah pada komponen Pembayaran honor (batas sekarang 20%)');
+H3('Langkah 2: Isi batas baru');
+P('Isi **Batas maksimal (% dari pagu)**, misalnya `25`. Kosongkan bila komponen tidak dibatasi. Kolom *Sumber dana* dan *Kode komponen* terkunci karena keduanya adalah kunci referensi. Klik **Simpan**.');
+GAMBAR('f10-laci-komponen.png', 'Laci Ubah komponen; kode terkunci, batas maksimal diisi 25');
+H3('Langkah 3: Cek hasil dan dampaknya di sekolah');
+P('Kolom **Maks** berubah menjadi 25% dan nomor **Versi** naik. Beberapa detik kemudian panel pagu di RKAS sekolah sudah menampilkan batas baru.');
+GAMBAR('f11-komponen-baru.png', 'Batas honor menjadi 25%; versi naik');
 GAMBAR('s16-efek-sekolah.png', 'Halaman RKAS sekolah: batas honor tampil maks 25%');
-KOTAK('PENTING', 'Batas baru dipakai saat sekolah menyusun atau mengajukan RKAS, termasuk pergeseran. RKAS yang sudah disahkan tetap berlaku seperti saat disahkan.');
-KOTAK('TIPS', 'Umumkan perubahan batas ke Dinas sebelum menyimpannya, terutama di tengah tahun, supaya Verifikator siap saat sekolah mengajukan pergeseran.');
+KOTAK('PENTING', 'Batas baru dipakai saat sekolah menyusun atau mengajukan RKAS, termasuk pergeseran. RKAS yang sudah disahkan tetap berlaku seperti saat disahkan. Umumkan perubahan ke Dinas lebih dulu.');
+
+H2('5.5 Menonaktifkan referensi');
+P('Referensi nggak pernah dihapus, karena transaksi lama masih merujuknya. Kalau sudah nggak berlaku, nonaktifkan saja:');
+OL([
+  'Klik **Ubah** di baris yang dimaksud.',
+  'Hapus centang **Aktif (bisa dipakai)**.',
+  'Klik **Simpan**.',
+]);
+GAMBAR('f12-nonaktifkan.png', 'Hapus centang Aktif untuk menonaktifkan');
+P('Baris itu tampil abu-abu dengan label *Nonaktif*. Data lama tetap terbaca, tapi tidak muncul lagi di pilihan untuk transaksi baru. Untuk mengaktifkannya kembali, centang lagi **Aktif** dan simpan.');
+GAMBAR('f13-nonaktif.png', 'Kode rekening berstatus Nonaktif');
+
+H2('5.6 Aturan main formulir');
+TABEL(['Situasi', 'Yang terjadi'], [
+  ['Kolom kunci (kode, NPSN, kombinasi rekening+jenis+wilayah) saat **Ubah**', 'Terkunci. Untuk kode lain, tambahkan baris baru lalu nonaktifkan yang lama'],
+  ['Simpan tanpa mengubah apa pun', 'Muncul pesan *Tidak ada perubahan*; versi tidak naik dan tidak ada kiriman baru'],
+  ['Isian kosong atau format salah', 'Pesan muncul di kiri bawah laci; **Simpan** dinonaktifkan'],
+  ['Data merujuk referensi lain (misalnya wilayah sekolah)', 'Pilihan hanya berisi referensi yang aktif'],
+  ['Setiap simpan yang berhasil', 'Versi naik dan perubahan dikirim otomatis ke semua layanan'],
+], [4200, 5438]);
+GAMBAR('f14-tanpa-perubahan.png', 'Pesan Tidak ada perubahan; versi tetap');
 
 // ======================================================================
 // BAB 6 TERBITKAN ULANG
@@ -324,19 +389,11 @@ LI([
   'Setelah pemeliharaan sistem, untuk memastikan semua modul memakai data yang sama.',
 ]);
 H2('6.2 Langkah menerbitkan ulang');
-OL([
-  'Buka menu **Referensi**.',
-  'Klik **Terbitkan ulang ke semua layanan**.',
-  'Klik **OK** pada kotak konfirmasi.',
-]);
+OL(['Buka menu **Referensi**.', 'Klik **Terbitkan ulang ke semua layanan**.', 'Klik **OK** pada kotak konfirmasi.']);
 GAMBAR('s17-terbit-ulang.png', 'Tombol Terbitkan ulang ke semua layanan');
 P('Kotak hijau memberi tahu berapa baris referensi yang diantrekan untuk dikirim ke modul lain.');
 GAMBAR('s18-terbit-berhasil.png', 'Referensi berhasil diantrekan ke semua layanan');
 KOTAK('INGAT', 'Terbitkan ulang **nggak menaikkan versi**. Modul lain otomatis mengabaikan data yang sama atau lebih lama, jadi tombol ini aman diklik berulang kali.');
-
-H2('6.3 Bagaimana dengan perubahan referensi lainnya?');
-P('Pada versi aplikasi saat ini, perubahan yang bisa dilakukan langsung dari halaman Referensi adalah **batas komponen** dan **terbitkan ulang**. Penambahan atau perubahan referensi lain, seperti kode rekening baru, sekolah baru, wilayah, atau tarif pajak nasional, dilakukan tim teknis melalui layanan referensi berdasarkan permintaan resmi Balai.');
-P('Apa pun caranya, setiap perubahan tetap mendapat nomor versi, tetap tidak menghapus data lama, dan tetap disebarkan otomatis ke semua modul seperti pada Gambar 1.1.');
 
 // ======================================================================
 // BAB 7 PENANGANAN MASALAH
@@ -345,33 +402,35 @@ H1('Penanganan Masalah');
 KOTAK('BAB', 'arti pesan yang mungkin muncul, masalah yang paling sering dilaporkan, dan cara menyelesaikannya.');
 H2('7.1 Cara membaca pesan dari aplikasi');
 LI([
-  '**Kotak merah**: aksi ditolak. Isinya kalimat penjelasan dan **kode**.',
-  '**Kotak hijau**: aksi berhasil, misalnya referensi berhasil diantrekan.',
-  '**Tombol abu-abu**: syarat belum terpenuhi.',
+  '**Pesan di kiri bawah laci**: isian belum lengkap atau formatnya salah. Perbaiki dulu, baru **Simpan** bisa diklik.',
+  '**Kotak merah**: aksi ditolak. Isinya penjelasan, kolom yang bermasalah, dan **kode**.',
+  '**Kotak biru**: informasi, misalnya *Tidak ada perubahan*.',
+  '**Kotak hijau**: berhasil, lengkap dengan nomor versi baru.',
 ]);
 H2('7.2 Daftar pesan yang sering muncul');
 TABEL(['Pesan atau kode', 'Artinya', 'Yang perlu dilakukan'], [
+  ['*(nama kolom) wajib diisi*', 'Kolom wajib masih kosong', 'Isi kolom tersebut'],
+  ['*NPSN harus 8 digit angka* (dan pesan format lain)', 'Format isian tidak sesuai', 'Ikuti contoh di bawah kolom'],
+  ['`VALIDASI`', 'Server menolak format isian; kolom yang bermasalah disebutkan', 'Perbaiki kolom yang disebut'],
+  ['`RUJUKAN_TIDAK_DIKENAL`', 'Data merujuk referensi yang belum ada', 'Tambahkan dulu data induknya (misalnya wilayah atau jenjang)'],
+  ['`DATA_TIDAK_VALID`', 'Isian melanggar aturan data (misalnya tarif daerah untuk jenis selain SSPD)', 'Periksa kembali kombinasi isian'],
+  ['`HAPUS_DILARANG`', 'Referensi tidak boleh dihapus', 'Nonaktifkan dengan menghapus centang Aktif'],
   ['`PERAN_TIDAK_DIIZINKAN`', 'Aksi hanya untuk peran Balai SDSP', 'Pastikan peran aktif di pojok kanan atas adalah Balai SDSP'],
-  ['`MASA_BERLAKU_WAJIB`', 'Peran Auditor belum diberi tanggal berlaku', 'Isi kolom Berlaku sampai sesuai surat tugas'],
-  ['`MASA_BERLAKU_TIDAK_VALID`', 'Tanggal berlaku sudah lewat atau tidak valid', 'Isi tanggal di masa depan'],
+  ['`MASA_BERLAKU_WAJIB` / `MASA_BERLAKU_TIDAK_VALID`', 'Auditor tanpa tanggal berlaku, atau tanggalnya sudah lewat', 'Isi tanggal berlaku di masa depan'],
   ['`CAKUPAN_TIDAK_SESUAI`', 'Kode wilayah/ditjen kosong atau formatnya salah', 'Admin Dinas: kode wilayah 2/4 digit; Admin Ditjen: kode ditjen'],
   ['`PEMISAHAN_TUGAS`', 'Mencoba memberi atau mencabut peran untuk diri sendiri', 'Minta rekan admin Balai lain'],
-  ['`EMAIL_SUDAH_TERDAFTAR`', 'Email itu sudah dipakai pengguna di luar cakupan Bapak/Ibu', 'Gunakan akun yang sama melalui pengelolanya, atau email lain'],
-  ['`RUJUKAN_TIDAK_DIKENAL`', 'Referensi merujuk data yang belum ada (misalnya sekolah di wilayah yang belum terdaftar)', 'Daftarkan data induknya lebih dulu (misalnya wilayah)'],
-  ['`DATA_TIDAK_VALID`', 'Isian melanggar aturan data (misalnya tarif di luar 0–100%)', 'Periksa kembali angka atau format isian'],
-  ['`HAPUS_DILARANG`', 'Referensi tidak boleh dihapus', 'Nonaktifkan referensi tersebut'],
-], [3000, 3400, 3238]);
-
+], [3200, 3300, 3138]);
 H2('7.3 Masalah yang sering terjadi dan solusinya');
 const KASUS = [
-  ['Sekolah belum melihat batas komponen yang baru', 'Kabar perubahan belum sampai, misalnya karena gangguan jaringan di salah satu modul.', 'Tunggu beberapa saat. Bila masih, klik **Terbitkan ulang ke semua layanan** (Bab 6).'],
-  ['Salah mengetik batas komponen', 'Angka keliru saat mengisi kotak Ubah batas.', 'Klik **Ubah batas** lagi dan isi angka yang benar. Versi akan naik lagi dan modul lain mengikuti angka terbaru.'],
-  ['Kotak isian batas tertutup tanpa perubahan', 'Tombol **Cancel** terklik atau isian bukan angka.', 'Ulangi dan ketik angka saja, tanpa tanda %.'],
-  ['Dinas melapor "kode rekening tidak dikenal"', 'Kode rekening itu nonaktif atau belum ada di referensi.', 'Cek tab **Kode rekening**. Bila memang perlu ditambahkan, ajukan permintaan resmi ke tim teknis (lihat 6.3).'],
-  ['Ingin menghapus referensi yang sudah tidak berlaku', 'Referensi tidak boleh dihapus demi jejak transaksi lama.', 'Nonaktifkan referensi tersebut melalui tim teknis. Data lama tetap terbaca, tapi tidak bisa dipakai untuk transaksi baru.'],
-  ['Admin Dinas wilayah baru tidak bisa didaftarkan', 'Kode wilayah belum ada di referensi Wilayah.', 'Cek tab **Wilayah**. Daftarkan wilayahnya lebih dulu, lalu ulangi pendaftaran Admin Dinas.'],
+  ['Sekolah belum melihat perubahan referensi', 'Kabar perubahan belum sampai, misalnya karena gangguan jaringan di salah satu modul.', 'Tunggu beberapa saat. Bila masih, klik **Terbitkan ulang ke semua layanan** (Bab 6).'],
+  ['Salah mengisi referensi', 'Angka atau nama keliru saat menyimpan.', 'Klik **Ubah** dan simpan isian yang benar. Versi naik lagi dan semua modul mengikuti data terbaru.'],
+  ['Salah mengetik kode (kunci)', 'Kolom kunci tidak bisa diubah setelah disimpan.', 'Tambahkan baris baru dengan kode yang benar, lalu nonaktifkan baris yang salah.'],
+  ['Tombol Simpan abu-abu', 'Ada kolom wajib yang kosong atau format yang salah.', 'Baca pesan di kiri bawah laci dan perbaiki isiannya.'],
+  ['Pilihan wilayah/jenjang/kode rekening tidak muncul di formulir', 'Referensi induknya belum ada atau sedang nonaktif.', 'Tambahkan atau aktifkan dulu referensi induknya di tab masing-masing.'],
+  ['Dinas melapor "kode rekening tidak dikenal"', 'Kode rekening itu nonaktif atau belum ada.', 'Cek tab **Kode rekening**; tambahkan atau aktifkan kembali kodenya.'],
+  ['Admin Dinas wilayah baru tidak bisa didaftarkan', 'Kode wilayah belum ada di referensi.', 'Tambahkan wilayahnya di tab **Wilayah**, lalu ulangi pendaftaran Admin Dinas.'],
+  ['Muncul "Tidak ada perubahan" padahal merasa sudah mengubah', 'Isian yang disimpan sama persis dengan data tersimpan (misalnya hanya mengetik ulang angka yang sama).', 'Periksa kembali kolom yang ingin diubah, lalu simpan lagi.'],
   ['Auditor tiba-tiba tidak bisa masuk', 'Tanggal *berlaku sampai* sudah lewat.', 'Bila masa tugas diperpanjang, berikan peran Auditor baru dengan tanggal berlaku yang baru.'],
-  ['Tab Tarif pajak menampilkan tarif daerah yang janggal', 'Tarif daerah diatur oleh Dinas masing-masing.', 'Hubungi Admin Dinas wilayah tersebut. Dasar hukumnya tercantum di kolom Dasar hukum.'],
 ];
 KASUS.forEach(([masalah, sebab, solusi], i) => {
   H3(`Masalah ${i + 1}: ${masalah}`);
@@ -380,10 +439,11 @@ KASUS.forEach(([masalah, sebab, solusi], i) => {
 });
 H2('7.4 Kebiasaan baik');
 LI([
-  'Simpan perubahan referensi hanya berdasarkan dasar hukum atau juknis yang jelas, dan catat nomor dokumennya.',
+  'Simpan perubahan referensi hanya berdasarkan dasar hukum atau juknis yang jelas, dan isi kolom **Dasar hukum** bila tersedia.',
+  'Periksa dua kali sebelum menyimpan: referensi berlaku nasional.',
   'Umumkan perubahan penting ke Dinas sebelum disimpan.',
+  'Nonaktifkan, jangan menimpa: untuk kode yang berganti, tambahkan kode baru lalu nonaktifkan yang lama.',
   'Tinjau daftar Admin Dinas, Pemantau, dan Auditor setiap semester; cabut yang sudah tidak bertugas.',
-  'Jangan berbagi akun Balai. Setiap admin memakai akun SSO masing-masing.',
 ]);
 
 // ======================================================================
@@ -394,23 +454,23 @@ KOTAK('BAB', 'rangkuman rutinitas Balai sepanjang tahun, ke mana mencari bantuan
 P('Terima kasih sudah membaca sampai akhir! Referensi yang rapi membuat penyusunan RKAS di sekolah lebih mudah, penelaahan di Dinas lebih cepat, dan laporan di semua tingkat lebih bisa dipercaya.');
 H2('8.1 Rangkuman rutinitas Balai');
 TABEL(['Kapan', 'Yang dilakukan Balai'], [
-  ['Awal tahun anggaran', 'Sesuaikan batas komponen dengan juknis terbaru; pastikan sumber dana dan kode rekening aktif'],
+  ['Awal tahun anggaran', 'Sesuaikan batas komponen dengan juknis terbaru; pastikan sumber dana, kode rekening, dan tarif nasional aktif'],
+  ['Saat peraturan kode rekening atau pajak berubah', 'Tambahkan kode/tarif baru, lalu nonaktifkan yang lama'],
+  ['Saat ada sekolah atau wilayah baru', 'Tambahkan di tab Satuan pendidikan atau Wilayah'],
   ['Saat ada Dinas baru bergabung', 'Daftarkan Admin Dinas dengan kode wilayahnya'],
-  ['Saat peraturan kode rekening berubah', 'Ajukan perubahan kode rekening ke tim teknis, lalu pantau di tab Kode rekening'],
   ['Saat ada pemeriksaan', 'Daftarkan Auditor dengan masa berlaku sesuai surat tugas'],
   ['Setelah gangguan atau pemeliharaan', 'Terbitkan ulang referensi ke semua layanan'],
-  ['Setiap semester', 'Tinjau daftar pengguna tingkat pusat dan Admin Dinas'],
-], [3200, 6438]);
+  ['Setiap semester', 'Tinjau pengguna tingkat pusat dan referensi yang sudah tidak berlaku'],
+], [3400, 6238]);
 H2('8.2 Butuh bantuan?');
 LI([
-  'Masalah teknis aplikasi atau permintaan perubahan referensi selain batas komponen: hubungi **tim teknis ARKAS Web**.',
+  'Masalah teknis aplikasi: hubungi **tim teknis ARKAS Web**.',
   'Pertanyaan soal tarif daerah atau akun di wilayah: hubungi **Admin Dinas** wilayah terkait.',
-  'Saat melapor, sertakan menu yang dibuka, langkah yang dilakukan, dan tangkapan layar kotak merah beserta kodenya.',
+  'Saat melapor, sertakan menu dan tab yang dibuka, langkah yang dilakukan, dan tangkapan layar kotak merah beserta kodenya.',
 ]);
 H2('8.3 Catatan versi');
-P('Buku ini disusun berdasarkan ARKAS Web versi uji coba (November 2026). Halaman masuk di lingkungan uji coba masih menampilkan akun contoh, dan fitur pengubahan referensi dari halaman Referensi saat ini terbatas pada batas komponen dan terbitkan ulang.');
+P('Buku ini disusun berdasarkan ARKAS Web versi uji coba (November 2026). Halaman masuk di lingkungan uji coba masih menampilkan akun contoh. Formulir referensi mencakup tambah, ubah, dan nonaktifkan untuk delapan jenis referensi.');
 P('Selamat bertugas, dan terima kasih sudah menjaga fondasi data pendidikan tetap kokoh!');
-
 // ======================================================================
 // LAMPIRAN
 // ======================================================================
