@@ -8,3 +8,5 @@ coverage/
 .dev-keys/
 *.tsbuildinfo
 .berkas/
+.env.*
+!.env*.example

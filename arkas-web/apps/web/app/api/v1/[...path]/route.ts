@@ -7,6 +7,7 @@ import { NextRequest } from 'next/server';
  * rute layanan lain: cookie sesi ditukar ke svc-identitas menjadi JWT internal berumur pendek, lalu diteruskan sebagai Bearer.
  */
 const SVC = {
+  referensi: process.env.SVC_REFERENSI_URL ?? 'http://localhost:3103',
   identitas: process.env.SVC_IDENTITAS_URL ?? 'http://localhost:3104',
   tatausaha: process.env.SVC_PENATAUSAHAAN_URL ?? 'http://localhost:3105',
   pelaporan: process.env.SVC_PELAPORAN_URL ?? 'http://localhost:3106',
@@ -14,6 +15,9 @@ const SVC = {
 };
 function tujuan(path: string[]): keyof typeof SVC {
   if (path[0] === 'auth' || path[0] === 'me' || (path[0] === 'admin' && path[1] === 'pengguna')) return 'identitas';
+  if (path[0] === 'referensi' || path[0] === 'dinas' || (path[0] === 'admin' && path[1] === 'referensi')) return 'referensi';
+  // 11.2.4: /sekolah/{npsn}, /sekolah/{npsn}/{rekening,sumber-dana} -> svc-referensi
+  if (path[0] === 'sekolah' && (path.length === 2 || path[2] === 'rekening' || path[2] === 'sumber-dana')) return 'referensi';
   if (path[0] === 'laporan') return 'pelaporan';
   if (path[0] === 'kertas-kerja' || path[0] === 'penelaahan') return 'perencanaan';
   if (path[0] === 'sekolah' && (path[2] === 'kertas-kerja' || path[2] === 'pagu')) return 'perencanaan';

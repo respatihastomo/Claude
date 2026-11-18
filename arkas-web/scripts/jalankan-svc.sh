@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Menjalankan satu layanan dengan konfigurasi dev: scripts/jalankan-svc.sh [svc-identitas|svc-perencanaan|svc-penatausahaan|svc-pelaporan]
+# Menjalankan satu layanan dengan konfigurasi dev: scripts/jalankan-svc.sh [svc-identitas|svc-referensi|svc-perencanaan|svc-penatausahaan|svc-pelaporan]
 # Berkas env: .env / .env.example (penatausahaan) atau .env.pelaporan / .env.pelaporan.example (pelaporan); ENV_FILE untuk menimpa.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -9,6 +9,7 @@ case "$SVC" in
   svc-pelaporan) dasar=".env.pelaporan" ;;
   svc-perencanaan) dasar=".env.perencanaan" ;;
   svc-identitas) dasar=".env.identitas" ;;
+  svc-referensi) dasar=".env.referensi" ;;
   *) echo "layanan tidak dikenal: $SVC" >&2; exit 2 ;;
 esac
 set -a; source "${ENV_FILE:-$( [ -f "$dasar" ] && echo "$dasar" || echo "$dasar.example" )}"; set +a

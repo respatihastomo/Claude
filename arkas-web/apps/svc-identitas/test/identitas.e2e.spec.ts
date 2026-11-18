@@ -221,3 +221,21 @@ describe('UC-20 / SK-12 pengelolaan pengguna berjenjang', () => {
     await expect(superDb.query(`DELETE FROM auth.peran_pengguna WHERE id = $1`, [PERAN.rinaVerif])).rejects.toMatchObject({ message: 'HAPUS_DILARANG' });
   });
 });
+
+describe('ReferensiDiubah -> svc-identitas', () => {
+  const ref = (entitas: string, kunci: string, versi: number, aktif: boolean, data: object) => broker.publish('arkas.ref.referensi-diubah', {
+    specversion: '1.0', id: randomUUID(), source: 'svc-referensi', type: 'ReferensiDiubah', time: new Date().toISOString(), datacontenttype: 'application/json',
+    data: { entitas, kunci, versi, aktif, data },
+  });
+  it('sekolah baru dari referensi langsung dapat dikelola Dinas wilayahnya; wilayah/sekolah nonaktif tidak', async () => {
+    const adminDinas = (await token(await masukDev('admin@dinas3201.example'))).bearer;
+    const tambah = (npsn: string) => http.post('/api/v1/admin/pengguna').set(adminDinas)
+      .send({ email: `op${randomUUID().slice(0, 6)}@contoh.example`, nama: 'Operator Baru', peran: { peran: 'OPERATOR', npsn } });
+    expect((await tambah('20100077')).body.kode).toBe('DI_LUAR_CAKUPAN'); // belum dikenal
+    await ref('SEKOLAH', '20100077', 900, true, { npsn: '20100077', nama: 'SMP Baru', jenjangKode: 'SMP', wilayahKode: '3201', statusSekolah: 'NEGERI' });
+    expect((await tambah('20100077')).status).toBe(201);
+    await ref('SEKOLAH', '20100077', 901, false, { npsn: '20100077', nama: 'SMP Baru', jenjangKode: 'SMP', wilayahKode: '3201', statusSekolah: 'NEGERI' });
+    await ref('SEKOLAH', '20100077', 899, true, { npsn: '20100077', nama: 'SMP Baru', jenjangKode: 'SMP', wilayahKode: '3201', statusSekolah: 'NEGERI' }); // basi
+    expect((await tambah('20100077')).body.kode).toBe('DI_LUAR_CAKUPAN');
+  });
+});

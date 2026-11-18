@@ -11,6 +11,9 @@ import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { PenggunaController } from './pengguna/pengguna.controller';
 import { PenggunaService } from './pengguna/pengguna.service';
+import { ReferensiConsumer } from './events/referensi.consumer';
+import { InternalEventsController } from './events/internal-events.controller';
+import { TOPIK } from '@arkas/kontrak';
 
 @Controller('health')
 class HealthController {
@@ -28,7 +31,7 @@ function modul(cfg: Konfigurasi, broker: Broker): DynamicModule {
   @Module({}) class AppModule {}
   return {
     module: AppModule,
-    controllers: [AuthController, PenggunaController, HealthController],
+    controllers: [AuthController, PenggunaController, HealthController, ...(cfg.broker === 'http' ? [InternalEventsController] : [])],
     providers: [
       { provide: KONFIGURASI, useValue: cfg },
       { provide: BROKER, useValue: broker },
@@ -40,7 +43,7 @@ function modul(cfg: Konfigurasi, broker: Broker): DynamicModule {
       // svc-identitas memverifikasi token yang ia terbitkan sendiri dengan kunci publik pasangannya.
       { provide: VerifikatorJwt, useFactory: () => new VerifikatorJwt(penerbit.publicPem(), cfg.jwtIssuer, cfg.jwtAudience) },
       { provide: ScopeGuard, useFactory: (r: Reflector, j: VerifikatorJwt) => new ScopeGuard(r, j), inject: [Reflector, VerifikatorJwt] },
-      AuthService, PenggunaService, Penutup,
+      AuthService, PenggunaService, ReferensiConsumer, Penutup,
     ],
   };
 }
@@ -58,6 +61,8 @@ export async function buatAplikasi(cfg: Konfigurasi, opsi: { broker?: Broker; lo
   const http = app.getHttpAdapter().getInstance();
   http.disable('x-powered-by');
   http.set('trust proxy', true);
+  const ref = app.get(ReferensiConsumer);
+  await broker.subscribe(TOPIK.REFERENSI_DIUBAH, `${cfg.serviceName}.referensi`, (e) => ref.tangani(e));
   const log = new Logger('OutboxRelay');
   const relay = new OutboxRelay(app.get<Pool>(POOL_WORKER), broker, { skema: SKEMA, source: cfg.serviceName, intervalMs: cfg.outboxIntervalMs, log: (m) => log.warn(m) });
   return { app, broker, relay };

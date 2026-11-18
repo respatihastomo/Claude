@@ -23,3 +23,14 @@ INSERT INTO pagu (npsn, tahun, sumber_dana_kode, nilai)
 SELECT n, extract(year FROM now() AT TIME ZONE 'Asia/Jakarta')::smallint, 'BOSP_REG', v
 FROM (VALUES ('20100001', 19580000.00), ('20100002', 12000000.00)) AS x(n, v)
 ON CONFLICT (npsn, tahun, sumber_dana_kode) DO NOTHING;
+
+INSERT INTO ref_rekening_lokal (kode, nama) VALUES
+  ('5.1.02.01.01.0001', 'Belanja Langganan Daya dan Jasa'),
+  ('5.1.02.01.01.0024', 'Belanja Alat/Bahan untuk Kegiatan Kantor - Alat Tulis Kantor'),
+  ('5.1.02.01.01.0025', 'Belanja Alat/Bahan untuk Kegiatan Kantor - Kertas dan Cover'),
+  ('5.1.02.01.01.0052', 'Belanja Makanan dan Minuman Rapat'),
+  ('5.1.02.02.01.0003', 'Honorarium Narasumber'),
+  ('5.1.02.02.01.0013', 'Belanja Jasa Servis'),
+  ('5.1.02.02.01.0026', 'Belanja Jasa Tenaga Kebersihan'),
+  ('5.1.02.02.01.0061', 'Belanja Jasa Internet')
+ON CONFLICT (kode) DO NOTHING;

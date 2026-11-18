@@ -1,5 +1,5 @@
 import type { PoolClient } from 'pg';
-import type { AturanPajakRekening, JenisPajak } from '@arkas/aturan';
+import { AturanPajakRekening, JenisPajak, pilihTarifEfektif } from '@arkas/aturan';
 import type {
   BarisBkpPajakDto, PajakDto, BarisBkuDto, BarisRkasDto, ItemTransaksiDto, RincianPajakDto, RingkasanBukuDto, TransaksiDto,
 } from '@arkas/kontrak';
@@ -48,16 +48,17 @@ export async function barisRkasUntuk(tx: PoolClient, b: Buku, barisIds: string[]
   return new Map(r.rows.map((x) => [x.baris_id, x]));
 }
 
-export async function aturanPajak(tx: PoolClient, kodeRekening: string[]): Promise<Record<string, AturanPajakRekening[]>> {
-  const r = await tx.query<{ kode_rekening: string; jenis: JenisPajak; tarif: string; tarif_tanpa_npwp: string | null }>(
-    `SELECT kode_rekening, jenis, tarif, tarif_tanpa_npwp FROM tatausaha.ref_rekening_pajak_lokal WHERE kode_rekening = ANY($1)`,
+/** UC-32: tarif efektif per rekening untuk sekolah (penimpaan SSPD wilayah paling spesifik; baris nonaktif = tidak dipungut). */
+export async function aturanPajak(tx: PoolClient, kodeRekening: string[], npsn: string): Promise<Record<string, AturanPajakRekening[]>> {
+  const r = await tx.query<{ kode_rekening: string; jenis: JenisPajak; tarif: string; tarif_tanpa_npwp: string | null; wilayah_kode: string; aktif: boolean }>(
+    `SELECT kode_rekening, jenis, tarif, tarif_tanpa_npwp, wilayah_kode, aktif FROM tatausaha.ref_rekening_pajak_lokal WHERE kode_rekening = ANY($1)`,
     [kodeRekening],
   );
-  const hasil: Record<string, AturanPajakRekening[]> = {};
-  for (const x of r.rows) {
-    (hasil[x.kode_rekening] ??= []).push({ jenis: x.jenis, tarif: n(x.tarif), tarifTanpaNpwp: x.tarif_tanpa_npwp === null ? null : n(x.tarif_tanpa_npwp) });
-  }
-  return hasil;
+  const w = (await tx.query<{ wilayah_kode: string }>(`SELECT wilayah_kode FROM tatausaha.ref_sekolah_lokal WHERE npsn = $1`, [npsn])).rows[0]?.wilayah_kode;
+  return pilihTarifEfektif(r.rows.map((x) => ({
+    kodeRekening: x.kode_rekening, jenis: x.jenis, tarif: n(x.tarif), tarifTanpaNpwp: x.tarif_tanpa_npwp === null ? null : n(x.tarif_tanpa_npwp),
+    wilayahKode: x.wilayah_kode, aktif: x.aktif,
+  })), w);
 }
 
 /** Saldo resmi (hanya DISETUJUI) dan saldo tersedia (penerimaan DISETUJUI - pengeluaran DISETUJUI/DICATAT) per buku kas. */
@@ -194,16 +195,17 @@ export async function daftarRkas(tx: PoolClient, b: Buku): Promise<BarisRkasDto[
             coalesce((SELECT sum(i.jumlah) FROM tatausaha.item_transaksi i
                       JOIN tatausaha.transaksi t ON t.id = i.transaksi_id AND t.tahun = i.tahun
                       WHERE i.akar_baris_id = r.akar_baris_id AND i.tahun = r.tahun AND t.status <> 'DITOLAK'), 0) AS terpakai,
-            (SELECT array_agg(p.jenis ORDER BY p.jenis) FROM tatausaha.ref_rekening_pajak_lokal p WHERE p.kode_rekening = r.kode_rekening) AS pajak
+            NULL::text[] AS pajak
      FROM tatausaha.rkas_baris_sah r
      WHERE r.aktif AND r.npsn = $1 AND r.tahun = $2 AND r.sumber_dana_kode = $3
      ORDER BY r.kegiatan, r.kode_rekening, r.uraian`,
     [b.npsn, b.tahun, b.sumberDanaKode],
   );
+  const efektif = await aturanPajak(tx, [...new Set(r.rows.map((x) => x.kode_rekening))], b.npsn);
   return r.rows.map((x) => ({
     barisId: x.baris_id, kodeRekening: x.kode_rekening, kegiatan: x.kegiatan, uraian: x.uraian, satuan: x.satuan,
     hargaSatuan: n(x.harga_satuan), anggaran: n(x.total), realisasi: n(x.terpakai),
-    sisa: Math.round((n(x.total) - n(x.terpakai)) * 100) / 100, pajak: (x.pajak ?? []) as BarisRkasDto['pajak'],
+    sisa: Math.round((n(x.total) - n(x.terpakai)) * 100) / 100, pajak: (efektif[x.kode_rekening] ?? []).map((p) => p.jenis),
   }));
 }
 

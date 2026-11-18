@@ -9,6 +9,7 @@ import { BROKER, KONFIGURASI, POOL_API, POOL_WORKER, SKEMA } from './infra/token
 import { KertasKerjaController } from './perencanaan/kk.controller';
 import { KertasKerjaService } from './perencanaan/kk.service';
 import { KonsumenPerencanaan } from './events/konsumen';
+import { ReferensiConsumer } from './events/referensi.consumer';
 import { InternalEventsController } from './events/internal-events.controller';
 
 @Controller('health')
@@ -35,7 +36,7 @@ function modul(cfg: Konfigurasi, broker: Broker): DynamicModule {
       { provide: DbContextService, useFactory: (p: Pool) => new DbContextService(p), inject: [POOL_API] },
       { provide: VerifikatorJwt, useFactory: () => new VerifikatorJwt(cfg.jwtPublicKey, cfg.jwtIssuer, cfg.jwtAudience) },
       { provide: ScopeGuard, useFactory: (r: Reflector, j: VerifikatorJwt) => new ScopeGuard(r, j), inject: [Reflector, VerifikatorJwt] },
-      KertasKerjaService, KonsumenPerencanaan, Penutup,
+      KertasKerjaService, KonsumenPerencanaan, ReferensiConsumer, Penutup,
     ],
   };
 }
@@ -53,6 +54,8 @@ export async function buatAplikasi(cfg: Konfigurasi, opsi: { broker?: Broker; lo
   app.getHttpAdapter().getInstance().disable('x-powered-by');
   const k = app.get(KonsumenPerencanaan);
   await broker.subscribe(TOPIK.TRANSAKSI_DISETUJUI, `${cfg.serviceName}.transaksi-disetujui`, (e) => k.transaksiDisetujui(e));
+  const ref = app.get(ReferensiConsumer);
+  await broker.subscribe(TOPIK.REFERENSI_DIUBAH, `${cfg.serviceName}.referensi`, (e) => ref.tangani(e));
   const log = new Logger('OutboxRelay');
   const relay = new OutboxRelay(app.get<Pool>(POOL_WORKER), broker, { skema: SKEMA, source: cfg.serviceName, intervalMs: cfg.outboxIntervalMs, log: (m) => log.warn(m) });
   return { app, broker, relay };

@@ -20,6 +20,7 @@ export const TOPIK = {
   TRANSAKSI_DISETUJUI: 'arkas.tatausaha.transaksi-disetujui',
   PERIODE_DITUTUP: 'arkas.tatausaha.periode-ditutup',
   LAPORAN_DITANDATANGANI: 'arkas.pelaporan.laporan-ditandatangani',
+  REFERENSI_DIUBAH: 'arkas.ref.referensi-diubah',
   PENGGUNA_DIBUAT: 'arkas.identitas.pengguna-dibuat',
   PERAN_DIUBAH: 'arkas.identitas.peran-diubah',
 } as const;
@@ -134,3 +135,16 @@ export interface PeranDiubahData {
   penggunaId: string; peranPenggunaId: string; aksi: 'BERI' | 'CABUT'; peran: string;
   npsn: string | null; wilayahKode: string | null; direktoratKode: string | null; ditjenKode: string | null; oleh: string; at: string; alasan?: string;
 }
+
+/**
+ * svc-referensi: satu baris referensi berubah (atau diterbitkan ulang). `versi` naik monoton secara global;
+ * konsumen menyimpan versi per baris dan mengabaikan event berversi sama/lebih lama (urutan acak & duplikat aman).
+ */
+export const ReferensiDiubahData = z.object({
+  entitas: z.enum(['WILAYAH', 'JENJANG', 'SEKOLAH', 'DIREKTORAT', 'SUMBER_DANA', 'KODE_REKENING', 'KOMPONEN', 'TARIF_PAJAK']),
+  kunci: z.string(),
+  versi: z.number().int().positive(),
+  aktif: z.boolean(),
+  data: z.record(z.unknown()),
+});
+export type ReferensiDiubahData = z.infer<typeof ReferensiDiubahData>;

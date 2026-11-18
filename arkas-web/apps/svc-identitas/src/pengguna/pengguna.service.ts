@@ -86,9 +86,9 @@ export class PenggunaService {
 
   private async rujukan(tx: PoolClient): Promise<RujukanCakupan> {
     const [w, d, s] = await Promise.all([
-      tx.query<{ kode: string }>(`SELECT kode FROM auth.ref_wilayah_lokal`),
-      tx.query<{ kode: string; ditjen_kode: string }>(`SELECT kode, ditjen_kode FROM auth.ref_direktorat_lokal`),
-      tx.query<{ npsn: string; wilayah_kode: string }>(`SELECT npsn, wilayah_kode FROM auth.ref_sekolah_lokal`),
+      tx.query<{ kode: string }>(`SELECT kode FROM auth.ref_wilayah_lokal WHERE aktif`),
+      tx.query<{ kode: string; ditjen_kode: string }>(`SELECT kode, ditjen_kode FROM auth.ref_direktorat_lokal WHERE aktif`),
+      tx.query<{ npsn: string; wilayah_kode: string }>(`SELECT npsn, wilayah_kode FROM auth.ref_sekolah_lokal WHERE aktif`),
     ]);
     const wilayah = new Set(w.rows.map((x) => x.kode));
     const dir = new Map(d.rows.map((x) => [x.kode, x.ditjen_kode]));

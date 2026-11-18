@@ -12,6 +12,9 @@ const KODE_TRIGGER = new Set([
   'PERAN_SUDAH_DICABUT', 'PERAN_TIDAK_DAPAT_DIUBAH',
 ]);
 
+/** Pelanggaran FK/CHECK pada data referensi: pesan ramah tanpa membocorkan detail skema. */
+const KODE_INTEGRITAS: Record<string, string> = { '23503': 'RUJUKAN_TIDAK_DIKENAL', '23514': 'DATA_TIDAK_VALID' };
+
 interface PgError { code?: string; message?: string; detail?: string; constraint?: string }
 
 export class AksesDitolakDbError extends Error {
@@ -34,6 +37,9 @@ export function terjemahkanGalatPg(e: unknown): unknown {
   }
   if (pe.code === '23505' && pe.constraint === 'ux_peran_aktif') {
     return new AturanError('PERAN_SUDAH_ADA', 'Pengguna sudah memiliki peran ini dengan cakupan yang sama');
+  }
+  if (pe.code && KODE_INTEGRITAS[pe.code]) {
+    return new AturanError(KODE_INTEGRITAS[pe.code], pe.code === '23503' ? 'Data merujuk kode yang tidak dikenal' : 'Data melanggar aturan validasi', { constraint: pe.constraint });
   }
   if (pe.code === '42501' && /row-level security/.test(pe.message ?? '')) {
     return new AksesDitolakDbError('Ditolak kebijakan akses data (RLS)');

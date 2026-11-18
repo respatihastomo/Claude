@@ -58,7 +58,7 @@ export async function ubahStatus(tx: PoolClient, id: string, kolom: Record<strin
 }
 
 export async function komponen(tx: PoolClient, sd: string): Promise<KomponenAturan[]> {
-  const r = await tx.query(`SELECT kode, nama, maks_persen, min_persen FROM perencanaan.ref_komponen_lokal WHERE sumber_dana_kode = $1 ORDER BY kode`, [sd]);
+  const r = await tx.query(`SELECT kode, nama, maks_persen, min_persen FROM perencanaan.ref_komponen_lokal WHERE sumber_dana_kode = $1 AND aktif ORDER BY kode`, [sd]);
   return r.rows.map((x) => ({ kode: x.kode, nama: x.nama, maksPersen: x.maks_persen === null ? null : n(x.maks_persen), minPersen: x.min_persen === null ? null : n(x.min_persen) }));
 }
 
@@ -118,4 +118,8 @@ export async function catatanDanRiwayat(tx: PoolClient, kkId: string) {
     catatan: c.rows.map((x) => ({ id: x.id, barisId: x.baris_id, peran: x.peran, catatan: x.catatan, at: x.at.toISOString() })),
     riwayat: v.rows.map((x) => ({ aksi: x.aksi, peran: x.peran, catatan: x.catatan, at: x.at.toISOString() })),
   };
+}
+
+export async function rekeningAktif(tx: PoolClient, kode: string): Promise<boolean> {
+  return !!(await tx.query(`SELECT 1 FROM perencanaan.ref_rekening_lokal WHERE kode = $1 AND aktif`, [kode])).rowCount;
 }

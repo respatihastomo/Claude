@@ -1,7 +1,7 @@
 # ARKAS Web — monorepo microservices
 
 Implementasi bertahap dari *Dokumen Rancangan Teknis ARKAS Berbasis Web (Edisi Microservices)*.
-Isi saat ini — **`svc-identitas`** (Tahap 0: SSO, sesi, peran, JWT internal) dan alur Tahap 1 "BOSP Inti" lintas layanan: **`svc-perencanaan`** (RKAS disusun → diajukan → disahkan Dinas) → **`svc-penatausahaan`** (BKU, pajak, penutupan buku) → **`svc-pelaporan`** (laporan PDF & tanda tangan).
+Isi saat ini — **`svc-identitas`** (Tahap 0: SSO, sesi, peran, JWT internal), **`svc-referensi`** (Tahap 0: data induk nasional & pajak daerah, disebar lewat event `ReferensiDiubah`) dan alur Tahap 1 "BOSP Inti" lintas layanan: **`svc-perencanaan`** (RKAS disusun → diajukan → disahkan Dinas) → **`svc-penatausahaan`** (BKU, pajak, penutupan buku) → **`svc-pelaporan`** (laporan PDF & tanda tangan).
 Rincian cakupan, alur, dan keputusan:
 - [`docs/irisan-1-penatausahaan.md`](docs/irisan-1-penatausahaan.md) — BKU, belanja, persetujuan
 - [`docs/irisan-2-setor-pajak.md`](docs/irisan-2-setor-pajak.md) — setor pajak (NTPN) & BKP Pajak
@@ -9,16 +9,18 @@ Rincian cakupan, alur, dan keputusan:
 - [`docs/svc-pelaporan.md`](docs/svc-pelaporan.md) — laporan BKU bulanan PDF & tanda tangan (simulasi TTE)
 - [`docs/svc-perencanaan.md`](docs/svc-perencanaan.md) — pagu, kertas kerja RKAS, validasi juknis, penelaahan & pengesahan Dinas
 - [`docs/svc-identitas.md`](docs/svc-identitas.md) — SSO OIDC, sesi, peran aktif, JWT internal & JWKS, pengelolaan pengguna berjenjang
+- [`docs/svc-referensi.md`](docs/svc-referensi.md) — referensi nasional (Balai SDSP), pajak daerah (Dinas), proyeksi lokal di layanan lain
 
 ```
 apps/
+  svc-referensi/       NestJS: wilayah, sekolah, sumber dana, komponen, kode rekening, tarif pajak (db_ref) — :3103
   svc-identitas/       NestJS: SSO OIDC, sesi, peran aktif, JWT internal & JWKS, pengguna (db_auth) — :3104
   svc-penatausahaan/   NestJS: BKU, BKP, pajak, periode (db_tatausaha) — :3105
   svc-pelaporan/       NestJS: laporan PDF & tanda tangan (db_pelaporan) — :3106
   svc-perencanaan/     NestJS: pagu, kertas kerja RKAS, penelaahan (db_perencanaan) — :3107
   web/                 Next.js App Router + Tailwind + TanStack Query (halaman BKU & wizard belanja)
 packages/
-  aturan/              fungsi murni: hitungPajak, transisi status, pemisahan tugas (uji unit >= 90%)
+  aturan/              fungsi murni: hitungPajak, pilihTarifEfektif, transisi status, pemisahan tugas (uji unit >= 90%)
   kontrak/             skema Zod bersama + CloudEvents + topik broker
   common-ms/           DbContextService (RLS), ScopeGuard, ProblemFilter (RFC 9457), Outbox Relay, Inbox Consumer, broker Kafka/memori
 db/<layanan>/migrations/           SQL per basis data layanan (Database-per-Service)
@@ -51,11 +53,17 @@ DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scr
 DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scripts/migrate.mjs svc-identitas --seed
 ```
 ```bash
+DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scripts/migrate.mjs svc-referensi --seed
+```
+```bash
 pnpm build
 ```
-Lima terminal:
+Enam terminal:
 ```bash
 ./scripts/jalankan-svc.sh svc-identitas
+```
+```bash
+./scripts/jalankan-svc.sh svc-referensi
 ```
 ```bash
 ./scripts/jalankan-svc.sh svc-perencanaan

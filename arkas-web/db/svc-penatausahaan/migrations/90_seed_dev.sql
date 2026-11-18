@@ -8,4 +8,5 @@ INSERT INTO ref_rekening_pajak_lokal (kode_rekening, jenis, tarif, tarif_tanpa_n
   ('5.1.02.02.01.0026', 'PPH23', 0.0200, 0.0400),
   ('5.1.02.01.01.0052', 'SSPD',  0.1000, NULL),    -- Makanan dan minuman rapat (pajak restoran)
   ('5.1.02.02.01.0003', 'PPH21', 0.0500, 0.0600)   -- Honorarium narasumber
-ON CONFLICT (kode_rekening, jenis) DO UPDATE SET tarif = EXCLUDED.tarif, tarif_tanpa_npwp = EXCLUDED.tarif_tanpa_npwp, diperbarui_at = now();
+ON CONFLICT (kode_rekening, jenis, wilayah_kode) DO UPDATE SET tarif = EXCLUDED.tarif, tarif_tanpa_npwp = EXCLUDED.tarif_tanpa_npwp, diperbarui_at = now();
+INSERT INTO ref_sekolah_lokal (npsn, wilayah_kode) VALUES ('20100001', '3201'), ('20100002', '3202') ON CONFLICT (npsn) DO NOTHING;

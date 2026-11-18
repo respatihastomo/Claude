@@ -17,6 +17,7 @@ const LAYANAN = {
   'svc-pelaporan': { db: 'db_pelaporan', api: 'api_pelaporan_login', worker: 'worker_pelaporan_login' },
   'svc-perencanaan': { db: 'db_perencanaan', api: 'api_perencanaan_login', worker: 'worker_perencanaan_login' },
   'svc-identitas': { db: 'db_auth', api: 'api_auth_login', worker: 'worker_auth_login' },
+  'svc-referensi': { db: 'db_ref', api: 'api_ref_login', worker: 'worker_ref_login' },
 };
 const lay = LAYANAN[svc];
 if (!lay) { console.error(`layanan tidak dikenal: ${svc}`); process.exit(2); }

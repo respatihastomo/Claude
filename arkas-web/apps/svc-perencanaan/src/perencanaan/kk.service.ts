@@ -76,7 +76,10 @@ export class KertasKerjaService {
   simpanBaris(ctx: RequestContext, id: string, versi: number, i: BarisKertasKerjaInput, barisId?: string): Promise<DetailKertasKerjaDto> {
     return this.ubahDraf(ctx, id, versi, async (tx, kk) => {
       const komponen = (await repo.komponen(tx, kk.sumberDanaKode)).find((k) => k.kode === i.komponenKode);
-      if (!komponen) throw new AturanError('KOMPONEN_TIDAK_DIKENAL', `Komponen ${i.komponenKode} tidak dikenal untuk ${kk.sumberDanaKode}`);
+      if (!komponen) throw new AturanError('KOMPONEN_TIDAK_DIKENAL', `Komponen ${i.komponenKode} tidak dikenal atau nonaktif untuk ${kk.sumberDanaKode}`);
+      if (!(await repo.rekeningAktif(tx, i.kodeRekening))) {
+        throw new AturanError('KODE_REKENING_TIDAK_DIKENAL', `Kode rekening ${i.kodeRekening} tidak terdaftar atau nonaktif di referensi`);
+      }
       const total = keRupiah(Math.round(i.volume * keSen(i.hargaSatuan)));
       const jadwal = i.jadwal ?? jadwalMerata(total);
       if (jadwal.reduce((s, x) => s + keSen(x), 0) !== keSen(total)) {

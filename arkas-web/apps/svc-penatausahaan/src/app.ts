@@ -13,6 +13,7 @@ import { PeriodeController } from './penatausahaan/periode.controller';
 import { PeriodeService } from './penatausahaan/periode.service';
 import { PenatausahaanService } from './penatausahaan/penatausahaan.service';
 import { KertasKerjaDisahkanConsumer } from './events/kertas-kerja-disahkan.consumer';
+import { ReferensiConsumer } from './events/referensi.consumer';
 import { InternalEventsController } from './events/internal-events.controller';
 import { HealthController } from './health.controller';
 
@@ -40,6 +41,7 @@ function modulAplikasi(cfg: Konfigurasi, broker: Broker): DynamicModule {
       PenatausahaanService,
       PeriodeService,
       KertasKerjaDisahkanConsumer,
+      ReferensiConsumer,
       Penutup,
     ],
   };
@@ -62,6 +64,8 @@ export async function buatAplikasi(cfg: Konfigurasi, opsi: { broker?: Broker; lo
 
   const consumer = app.get(KertasKerjaDisahkanConsumer);
   await broker.subscribe(TOPIK.KERTAS_KERJA_DISAHKAN, `${cfg.serviceName}.kk-disahkan`, async (e) => { await consumer.tangani(e); });
+  const ref = app.get(ReferensiConsumer);
+  await broker.subscribe(TOPIK.REFERENSI_DIUBAH, `${cfg.serviceName}.referensi`, (e) => ref.tangani(e));
 
   const log = new Logger('OutboxRelay');
   const relay = new OutboxRelay(app.get<Pool>(POOL_WORKER), broker, {

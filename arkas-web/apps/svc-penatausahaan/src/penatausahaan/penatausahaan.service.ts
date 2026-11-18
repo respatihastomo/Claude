@@ -115,7 +115,7 @@ export class PenatausahaanService {
       barisId: i.barisId, uraian: i.uraian, volume: i.volume, satuan: i.satuan ?? null, hargaSatuan: r2(i.hargaSatuan),
       jumlah: keRupiah(Math.round(i.volume * keSen(i.hargaSatuan))),
     }));
-    const aturan = await repo.aturanPajak(tx, [...new Set([...baris.values()].map((b) => b.kode_rekening))]);
+    const aturan = await repo.aturanPajak(tx, [...new Set([...baris.values()].map((b) => b.kode_rekening))], buku.npsn);
     const hasil = hitungPajak({
       items: items.map((i) => ({ kodeRekening: baris.get(i.barisId)!.kode_rekening, jumlah: i.jumlah })),
       aturan, penjualPunyaNpwp: npwp,
