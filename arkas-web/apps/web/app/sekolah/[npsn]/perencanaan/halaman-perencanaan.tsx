@@ -100,7 +100,7 @@ export function HalamanPerencanaan({ npsn, tahun, me }: { npsn: string; tahun: n
             </div>
 
             {kk.catatanKembali && kk.status === 'DRAF' && <Spanduk nada="peringatan" judul="Dikembalikan Verifikator Dinas">{kk.catatanKembali}</Spanduk>}
-            {galat && <Spanduk nada="bahaya" judul={galat.detail ?? galat.title}>
+            {galat && !laci && <Spanduk nada="bahaya" judul={galat.detail ?? galat.title}>
               {(galat.rincian as { galat?: Array<{ pesan: string }> } | undefined)?.galat?.map((g, i) => <div key={i}>• {g.pesan}</div>) ?? `Kode: ${galat.kode}`}
             </Spanduk>}
 

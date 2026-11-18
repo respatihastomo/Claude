@@ -116,7 +116,7 @@ const sampul = [
   new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: BIRU, space: 1 } }, children: [] }),
   new Paragraph({ spacing: { before: 400, after: 80 }, children: [new TextRun({ text: 'Untuk:', bold: true, size: 26 })] }),
   ...['Verifikator Dinas (penelaah RKAS)', 'Admin Dinas (pengelola pengguna & pajak daerah)'].map((t) => new Paragraph({ numbering: { reference: 'poin', level: 0 }, children: [new TextRun({ text: t, size: 26 })] })),
-  new Paragraph({ spacing: { before: 2800 }, children: [new TextRun({ text: 'Edisi 1 · November 2026', size: 22, color: '666666' })] }),
+  new Paragraph({ spacing: { before: 2800 }, children: [new TextRun({ text: 'Edisi 2 · November 2026', size: 22, color: '666666' })] }),
   new Paragraph({ children: [new TextRun({ text: 'Berdasarkan aplikasi ARKAS Web versi uji coba. Gambar diambil dari aplikasi yang berjalan dengan data contoh Dinas wilayah 3201.', size: 20, color: '666666', italics: true })] }),
 ];
 
@@ -156,7 +156,15 @@ LI([
   'Contoh di buku memakai Dinas wilayah **3201** dan sekolah *SMP Negeri Contoh 1*. Data di wilayah Bapak/Ibu tentu berbeda.',
 ]);
 
-H2('1.5 Yang perlu disiapkan');
+H2('1.5 Yang baru di edisi ini');
+LI([
+  '**Balai SDSP kini mengelola referensi langsung dari aplikasi.** Sekolah baru, kode rekening baru, kode yang dinonaktifkan, dan batas komponen terbaru otomatis sampai ke Dinas dan sekolah dalam hitungan detik.',
+  '**Operator untuk sekolah baru** (4.5): begitu Balai menambahkan sekolah, Admin Dinas bisa langsung mendaftarkan Operatornya.',
+  '**Penelaahan mengikuti referensi terbaru** (3.2): kode rekening nonaktif sudah ditolak sejak sekolah menyimpan baris, dan batas komponen yang tampil adalah batas terbaru.',
+  '**Pesan baru di Penanganan Masalah**: *Sekolah ... tidak dikenal*.',
+]);
+
+H2('1.6 Yang perlu disiapkan');
 TABEL(['Peran', 'Siapkan ini sebelum mulai'], [
   ['Semua', 'Komputer/laptop dengan Chrome, Edge, atau Firefox terbaru; koneksi internet; akun SSO yang sudah diberi peran'],
   ['Verifikator Dinas', 'Juknis BOSP terbaru, daftar sekolah di wilayah, dan pedoman penelaahan internal Dinas'],
@@ -211,7 +219,9 @@ OL([
   '**Panel pagu**: dianggarkan sama dengan pagu (*sisa Rp 0*) dan persentase tiap komponen dalam batas (garis merah = batas maksimal).',
   '**Tabel baris**: komponen dan kode rekening sesuai jenis belanja, uraian jelas, volume dan harga satuan wajar.',
   '**Kolom Realisasi** (untuk pergeseran): baris yang sudah dibelanjakan nggak boleh dikurangi di bawah realisasinya. Aplikasi menjaga ini otomatis.',
+  '**Referensi terbaru**: batas komponen di panel pagu selalu batas terbaru dari Balai, dan kode rekening yang sudah dinonaktifkan nggak mungkin masuk ke baris baru, karena aplikasi menolaknya saat sekolah menyimpan.',
 ]);
+KOTAK('INGAT', 'Kalau Balai baru saja mengubah batas komponen, RKAS yang sudah disahkan tetap berlaku. Batas baru dipakai untuk RKAS dan pergeseran yang diajukan setelahnya, jadi kotak pemeriksaan di layar Bapak/Ibu sudah memakai aturan terbaru.');
 GAMBAR('v03-rkas-diajukan.png', 'RKAS versi 2 berstatus Diajukan ke Dinas');
 
 H2('3.3 Membandingkan dengan versi sebelumnya');
@@ -301,7 +311,15 @@ OL([
 ]);
 GAMBAR('d05-tambah-operator.png', 'Laci Tambah pengguna untuk Operator Sekolah; isi NPSN');
 
-H2('4.5 Mencabut peran');
+H2('4.5 Operator untuk sekolah baru');
+P('Sekolah baru ditambahkan oleh Balai SDSP ke referensi nasional. Begitu tersimpan, sekolah itu langsung dikenali di wilayah Bapak/Ibu, dan Operatornya bisa didaftarkan dengan cara yang sama seperti 4.4.');
+GAMBAR('q01-operator-sekolah-baru.png', 'Mendaftarkan Operator untuk sekolah baru (NPSN 20100003)');
+GAMBAR('q02-operator-baru.png', 'Operator SD Negeri Contoh 3 sudah terdaftar');
+P('Kalau NPSN belum ada di referensi nasional, aplikasi menolaknya dengan pesan *Sekolah ... tidak dikenal*.');
+GAMBAR('q03-npsn-belum-ada.png', 'NPSN yang belum terdaftar di referensi ditolak');
+KOTAK('TIPS', 'Mintalah Balai SDSP menambahkan sekolah baru lebih dulu (cukup sebutkan NPSN, nama, jenjang, wilayah, dan status), baru daftarkan Operatornya.');
+
+H2('4.6 Mencabut peran');
 P('Kalau pegawai mutasi, pensiun, atau tugasnya berakhir, segera cabut perannya. Klik **Cabut** di samping peran yang dimaksud.');
 GAMBAR('d06-cabut.png', 'Tombol Cabut di samping peran Operator Sekolah');
 P('Tulis alasan pencabutan (wajib) di kotak yang muncul, lalu klik **OK**. Peran yang dicabut tampil dicoret dan langsung nggak bisa dipakai lagi.');
@@ -387,6 +405,7 @@ TABEL(['Pesan atau kode', 'Artinya', 'Yang perlu dilakukan'], [
   ['`EMAIL_SUDAH_TERDAFTAR`', 'Email itu sudah dipakai pengguna di luar cakupan Bapak/Ibu', 'Minta pengelola wilayah lain menambahkan perannya, atau pakai email lain'],
   ['`PERAN_SUDAH_DICABUT`', 'Peran itu sudah dicabut sebelumnya', 'Tidak perlu dicabut lagi; tambahkan peran baru bila perlu'],
   ['`KODE_REKENING_TIDAK_DIKENAL`', 'Kode rekening tidak aktif di referensi nasional', 'Hubungi pengelola referensi nasional (Balai SDSP)'],
+  ['*Sekolah (NPSN) tidak dikenal*', 'NPSN belum ada di referensi nasional', 'Minta Balai SDSP menambahkan sekolahnya, lalu ulangi (lihat 4.5)'],
   ['`PERAN_TIDAK_DIIZINKAN`', 'Halaman atau aksi bukan untuk peran yang sedang aktif', 'Ganti peran di pojok kanan atas'],
 ], [3100, 3300, 3238]);
 
@@ -396,6 +415,8 @@ const KASUS = [
   ['Tombol Sahkan nggak bisa diklik', 'Pemeriksaan juknis belum hijau (masih ada sisa pagu atau komponen melebihi batas).', 'Kembalikan RKAS dengan alasan yang jelas agar sekolah memperbaikinya.'],
   ['Salah mengesahkan RKAS', 'Pengesahan bersifat final.', 'Minta sekolah membuat pergeseran/perubahan baru, lalu telaah versi barunya.'],
   ['Pegawai baru nggak bisa masuk', 'Email yang didaftarkan berbeda dengan email SSO, atau perannya belum ditambahkan.', 'Cek ejaan email di **Kelola pengguna**. Email harus persis sama dengan akun SSO.'],
+  ['Operator untuk sekolah baru nggak bisa didaftarkan', 'Sekolah belum ditambahkan ke referensi nasional.', 'Minta Balai SDSP menambahkan sekolahnya lewat formulir referensi, lalu daftarkan Operatornya (lihat 4.5).'],
+  ['Sekolah melapor kode rekening ditolak', 'Kode itu dinonaktifkan Balai SDSP.', 'Arahkan sekolah memakai kode pengganti yang aktif; bila belum ada, minta Balai menambahkannya.'],
   ['Operator baru nggak melihat sekolahnya', 'NPSN yang diisi salah.', 'Cabut peran yang salah, lalu tambahkan lagi dengan NPSN yang benar.'],
   ['Tombol Simpan di laci pajak daerah abu-abu', 'Dasar hukum belum diisi (minimal 3 karakter), atau tarif di luar 0–100%.', 'Lengkapi dasar hukum dan pastikan tarif berupa angka, misalnya 7.5.'],
   ['Sekolah masih dipotong tarif lama', 'Belanja itu dicatat sebelum tarif diubah, atau perubahan belum sampai karena gangguan jaringan.', 'Belanja lama memang tetap. Untuk belanja baru, tunggu beberapa saat lalu minta sekolah mencoba lagi; bila masih, hubungi tim teknis.'],
@@ -432,11 +453,11 @@ TABEL(['Kapan', 'Verifikator Dinas', 'Admin Dinas'], [
 H2('7.2 Butuh bantuan?');
 LI([
   'Masalah akun dan peran di wilayah: hubungi **Admin Dinas** wilayah Bapak/Ibu.',
-  'Masalah referensi nasional (kode rekening, komponen, tarif nasional): hubungi **Balai SDSP** selaku pengelola referensi nasional.',
+  'Masalah referensi nasional (sekolah baru, kode rekening, komponen, tarif nasional): hubungi **Balai SDSP**. Balai kini bisa menambah, mengubah, dan menonaktifkan referensi langsung dari aplikasi.',
   'Masalah teknis aplikasi: hubungi tim teknis ARKAS Web. Sertakan wilayah, peran yang aktif, langkah yang dilakukan, dan tangkapan layar kotak merah beserta kodenya.',
 ]);
 H2('7.3 Catatan versi');
-P('Buku ini disusun berdasarkan ARKAS Web versi uji coba (November 2026). Halaman masuk di lingkungan uji coba masih menampilkan akun contoh, dan tampilan bisa sedikit berbeda setelah aplikasi diperbarui.');
+P('Buku ini (Edisi 2) disusun berdasarkan ARKAS Web versi uji coba (November 2026). Edisi ini menambahkan dampak formulir referensi Balai SDSP dan pendaftaran Operator untuk sekolah baru. Halaman masuk di lingkungan uji coba masih menampilkan akun contoh, dan tampilan bisa sedikit berbeda setelah aplikasi diperbarui.');
 P('Selamat bertugas, dan semoga penelaahan serta pengelolaan di wilayah Bapak/Ibu makin lancar!');
 
 // ======================================================================

@@ -107,7 +107,7 @@ const sampul = [
   new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: BIRU, space: 1 } }, children: [] }),
   new Paragraph({ spacing: { before: 400, after: 80 }, children: [new TextRun({ text: 'Untuk:', bold: true, size: 26 })] }),
   ...['Operator Sekolah', 'Kepala Sekolah', 'Bendahara', 'Komite Sekolah'].map((t) => new Paragraph({ numbering: { reference: 'poin', level: 0 }, children: [new TextRun({ text: t, size: 26 })] })),
-  new Paragraph({ spacing: { before: 2600 }, children: [new TextRun({ text: 'Edisi 1 · November 2026', size: 22, color: '666666' })] }),
+  new Paragraph({ spacing: { before: 2600 }, children: [new TextRun({ text: 'Edisi 2 · November 2026', size: 22, color: '666666' })] }),
   new Paragraph({ children: [new TextRun({ text: 'Berdasarkan aplikasi ARKAS Web versi uji coba. Gambar diambil dari aplikasi yang berjalan dengan data contoh.', size: 20, color: '666666', italics: true })] }),
 ];
 
@@ -158,7 +158,15 @@ LI([
   'Gambar diambil dari data contoh *SMP Negeri Contoh 1*. Angka dan nama di sekolahmu tentu akan berbeda.',
 ]);
 
-H2('1.5 Yang perlu disiapkan');
+H2('1.5 Yang baru di edisi ini');
+LI([
+  '**Pergeseran RKAS langkah demi langkah** (3.5): membuat versi baru, mengurangi baris, menambah baris, sampai siap diajukan lagi.',
+  '**Referensi bisa berubah sewaktu-waktu** (3.6): Balai SDSP kini bisa menambah kode rekening, menonaktifkan kode lama, dan mengubah batas komponen langsung dari aplikasi. Perubahannya otomatis sampai ke sekolahmu.',
+  '**Kotak transaksi ditolak dan tombol Catat ulang** untuk Bendahara (5.5).',
+  '**Pesan baru di Penanganan Masalah**: `PAGU_TERLAMPAUI` dan `KODE_REKENING_TIDAK_DIKENAL`.',
+]);
+
+H2('1.6 Yang perlu disiapkan');
 TABEL(['Peran', 'Siapkan ini sebelum mulai'], [
   ['Semua', 'Komputer/laptop dengan Chrome, Edge, atau Firefox versi terbaru; koneksi internet; akun SSO yang sudah didaftarkan'],
   ['Operator', 'Data pagu BOSP sekolah dan rencana kegiatan setahun (komponen, kode rekening, volume, harga)'],
@@ -263,9 +271,42 @@ GAMBAR('o11-laci-ubah.png', 'Laci Ubah baris: uraian diperbaiki sesuai catatan D
 H2('3.4 RKAS disahkan');
 P('Kalau Dinas sudah setuju, status versi berubah jadi **Disahkan**. Bagian **Riwayat** mencatat kapan RKAS diajukan, dikembalikan, dan disahkan. Mulai saat ini Bendahara bisa mencatat transaksi.');
 GAMBAR('o12-disahkan.png', 'RKAS berstatus Disahkan beserta riwayatnya');
-KOTAK('PENTING', 'RKAS yang sudah disahkan nggak bisa diubah langsung. Pakai tombol **Buat pergeseran/perubahan** untuk membuat versi baru. Versi lama tetap tersimpan, dan total baris nggak boleh di bawah uang yang sudah dibelanjakan.');
+KOTAK('PENTING', 'RKAS yang sudah disahkan nggak bisa diubah langsung. Pakai tombol **Buat pergeseran/perubahan** untuk membuat versi baru (lihat 3.5). Versi lama tetap tersimpan, dan total baris nggak boleh di bawah uang yang sudah dibelanjakan.');
 
-H2('3.5 Mendaftarkan pengguna sekolah');
+H2('3.5 Membuat pergeseran RKAS');
+P('Di tengah tahun, kebutuhan sekolah bisa berubah. Contohnya, sekolah perlu mencetak rapor, dan dananya diambil dari jasa kebersihan. Perubahan seperti ini dilakukan lewat **pergeseran**.');
+H3('Langkah 1: Klik Buat pergeseran/perubahan');
+P('Buka **Penganggaran (RKAS)**. Pada versi yang sudah disahkan, klik **Buat pergeseran/perubahan**.');
+GAMBAR('p01-buat-pergeseran.png', 'Tombol Buat pergeseran/perubahan pada RKAS yang sudah disahkan');
+H3('Langkah 2: Versi baru siap diubah');
+P('Aplikasi membuat versi baru berstatus **Draf**, isinya salinan versi terakhir. Versi lama tetap berstatus *Disahkan* dan tetap dipakai Bendahara sampai versi baru disahkan.');
+GAMBAR('p02-versi-draf.png', 'Versi 3 berstatus Draf; versi 2 tetap Disahkan');
+H3('Langkah 3: Kurangi baris lain dulu');
+P('Total RKAS nggak boleh melebihi pagu, jadi **kurangi dulu** baris yang dananya mau digeser. Klik **Ubah** di baris itu, ganti volumenya (di contoh ini jasa kebersihan dari 5 menjadi 4 bulan), lalu **Simpan baris**.');
+GAMBAR('p04-kurangi-baris.png', 'Mengurangi volume jasa kebersihan dari 5 menjadi 4 bulan');
+P('Sekarang muncul sisa pagu yang bisa dipakai untuk baris baru.');
+GAMBAR('p05-sisa-pagu.png', 'Muncul sisa pagu Rp 1.110.000 setelah baris dikurangi');
+H3('Langkah 4: Tambah baris baru');
+P('Klik **+ Tambah baris** dan isi seperti biasa. Di contoh ini dipakai kode rekening baru *5.1.02.01.01.0029 Belanja Bahan Cetak* yang baru saja ditambahkan Balai SDSP.');
+GAMBAR('p06-tambah-baris-baru.png', 'Baris baru memakai kode rekening baru; total pas senilai pengurangan');
+H3('Langkah 5: Pastikan hijau, lalu minta diajukan');
+P('Kalau kotak hijau **Memenuhi aturan juknis** muncul lagi, kabari Kepala Sekolah untuk mengajukan versi baru ke Dinas. Prosesnya sama seperti RKAS awal (3.3 dan 3.4).');
+GAMBAR('p07-pergeseran-siap.png', 'Pergeseran siap diajukan: baris baru tersimpan, kotak hijau muncul');
+KOTAK('PENTING', 'Baris yang sudah dibelanjakan (ada angka di kolom *Realisasi*) nggak bisa dihapus, dan totalnya nggak boleh dikurangi di bawah realisasinya.');
+
+H2('3.6 Kalau referensi nasional berubah');
+P('Daftar komponen, kode rekening, dan batasnya dikelola Balai SDSP. Setiap perubahan dari Balai otomatis sampai ke sekolahmu dalam hitungan detik. Ini yang perlu kamu tahu:');
+LI([
+  '**Kode rekening baru** langsung bisa dipakai saat menyusun RKAS atau pergeseran.',
+  '**Kode rekening yang dinonaktifkan** nggak bisa dipakai untuk baris baru. Aplikasi akan menolaknya dengan pesan *tidak terdaftar atau nonaktif di referensi*.',
+  '**Batas komponen** (misalnya honor maksimal 20%) bisa berubah sesuai juknis baru. Batas terbaru langsung tampil di panel pagu.',
+  'RKAS yang sudah disahkan tetap berlaku. Aturan baru dipakai saat kamu menyusun atau mengajukan versi berikutnya.',
+]);
+GAMBAR('p03-kode-nonaktif.png', 'Kode rekening yang dinonaktifkan Balai ditolak saat menyimpan baris');
+GAMBAR('p08-batas-berubah.png', 'Batas komponen terbaru dari Balai langsung tampil di panel pagu');
+KOTAK('TIPS', 'Kalau kode rekening yang biasa dipakai tiba-tiba ditolak, tanyakan ke Dinas kode penggantinya. Biasanya Balai sudah menyediakan kode baru.');
+
+H2('3.7 Mendaftarkan pengguna sekolah');
 H3('Langkah 1: Buka Kelola pengguna');
 P('Klik menu **Kelola pengguna**, lalu **+ Tambah pengguna**. Sebagai Operator, kamu bisa memberi tugas Bendahara, Kepala Sekolah, atau Komite Sekolah.');
 GAMBAR('o13-pengguna.png', 'Halaman Kelola pengguna dan tombol + Tambah pengguna');
@@ -443,7 +484,7 @@ GAMBAR('b21-laporan.png', 'Tab Laporan untuk Bendahara');
 H1('Tutorial Komite Sekolah');
 P('Sebagai Komite, Bapak/Ibu adalah **mata dan telinga** warga sekolah. Semua catatan keuangan bisa dilihat, tapi nggak ada yang bisa diubah, jadi santai saja: nggak ada tombol yang bisa bikin salah.');
 H2('6.1 Minta didaftarkan Operator');
-P('Komite masuk memakai akun SSO juga. Minta Operator mendaftarkan email SSO Bapak/Ibu dengan peran **Komite Sekolah** (lihat 3.5), lalu masuk seperti biasa.');
+P('Komite masuk memakai akun SSO juga. Minta Operator mendaftarkan email SSO Bapak/Ibu dengan peran **Komite Sekolah** (lihat 3.7), lalu masuk seperti biasa.');
 H2('6.2 Memantau ringkasan dan Buku Kas Umum');
 P('Begitu masuk, halaman **Penatausahaan** tampil: ringkasan saldo, realisasi terhadap pagu, status bulan berjalan, dan Buku Kas Umum berisi transaksi yang sudah disetujui.');
 GAMBAR('m01-beranda.png', 'Halaman Penatausahaan untuk Komite');
@@ -479,6 +520,8 @@ TABEL(['Pesan atau kode', 'Artinya', 'Yang perlu dilakukan'], [
   ['`MELEBIHI_ANGGARAN`', 'Belanja melebihi sisa anggaran baris RKAS', 'Kurangi nilai, atau minta Operator membuat pergeseran RKAS'],
   ['`PEMISAHAN_TUGAS`', 'Orang yang mencatat mencoba menyetujui sendiri', 'Persetujuan harus oleh Kepala Sekolah'],
   ['`PERIODE_TERTUTUP`', 'Bulan itu sudah diajukan atau ditutup', 'Catat di bulan berjalan, atau minta Kepala Sekolah mengembalikan pengajuan tutup buku'],
+  ['`PAGU_TERLAMPAUI`', 'Total RKAS akan melebihi pagu', 'Kurangi baris lain dulu, baru tambah atau besarkan baris (lihat 3.5)'],
+  ['`KODE_REKENING_TIDAK_DIKENAL`', 'Kode rekening belum ada atau sudah dinonaktifkan Balai', 'Pakai kode rekening yang aktif; tanyakan kode pengganti ke Dinas'],
   ['`PERIODE_SEBELUMNYA_BELUM_DITUTUP`', 'Bulan sebelumnya belum ditutup', 'Tutup bulan sebelumnya lebih dulu'],
   ['`NTPN_TIDAK_VALID` / `NTPN_SUDAH_DIPAKAI`', 'NTPN bukan 16 karakter, atau sudah dipakai', 'Salin ulang NTPN dari bukti setor'],
   ['*Akun Anda belum memiliki peran aktif*', 'Akun SSO belum didaftarkan', 'Minta Operator atau Admin Dinas mendaftarkan emailmu'],
@@ -490,6 +533,8 @@ const KASUS = [
   ['Tombol yang dicari nggak ada', 'Kamu sedang aktif sebagai tugas lain (misalnya Operator, padahal mau mencatat sebagai Bendahara).', 'Ganti tugas di kotak pojok kanan atas (lihat 2.3).'],
   ['Tombol pencatatan belum muncul', 'RKAS belum disahkan Dinas, sehingga buku kas belum dibuka.', 'Cek status RKAS di menu **Penganggaran (RKAS)**. Kalau masih *Draf*, minta Kepala Sekolah mengajukan.'],
   ['Tarik tunai gagal disimpan', 'Saldo bank belum cukup karena penerimaan belum disetujui.', 'Minta Kepala Sekolah menyetujui penerimaan dulu, lalu ulangi tarik tunai.'],
+  ['Baris RKAS baru ditolak: total melebihi pagu', 'Total semua baris akan lebih besar dari pagu.', 'Saat pergeseran, kurangi dulu baris yang dananya digeser, baru tambah baris baru (lihat 3.5).'],
+  ['Kode rekening yang biasa dipakai ditolak', 'Kode itu dinonaktifkan Balai SDSP.', 'Pilih kode rekening lain yang aktif, atau tanyakan kode penggantinya ke Dinas (lihat 3.6).'],
   ['Baris belanja jadi merah', 'Nilai belanja melebihi sisa anggaran baris RKAS.', 'Kurangi volume/harga, pilih baris RKAS lain yang sesuai, atau minta Operator membuat pergeseran.'],
   ['Transaksi salah, padahal sudah disetujui', 'Transaksi yang disetujui sengaja dikunci demi jejak audit.', 'Catat transaksi koreksi dengan uraian yang menjelaskan kesalahannya. Jangan berharap bisa menghapus.'],
   ['Catatan saya hilang dari Buku Kas Umum', 'Transaksi itu ditolak Kepala Sekolah.', 'Lihat kotak merah **transaksi ditolak** di atas tabel, baca alasannya, perbaiki, lalu klik **Catat ulang** (lihat 5.5).'],
@@ -533,7 +578,7 @@ LI([
   'Saat melapor masalah, sertakan nama sekolah (NPSN), tugas yang aktif, langkah yang dilakukan, dan tangkapan layar kotak merah beserta kodenya.',
 ]);
 H2('8.3 Catatan versi');
-P('Buku ini disusun berdasarkan ARKAS Web versi uji coba (November 2026). Beberapa hal masih bersifat sementara: tanda tangan laporan masih simulasi (belum TTE BSrE), dan halaman masuk di lingkungan uji coba menampilkan akun contoh. Tampilan di sekolahmu bisa sedikit berbeda setelah aplikasi diperbarui.');
+P('Buku ini (Edisi 2) disusun berdasarkan ARKAS Web versi uji coba (November 2026). Edisi ini menambahkan pergeseran RKAS dan dampak perubahan referensi dari Balai SDSP. Beberapa hal masih bersifat sementara: tanda tangan laporan masih simulasi (belum TTE BSrE), dan halaman masuk di lingkungan uji coba menampilkan akun contoh. Tampilan di sekolahmu bisa sedikit berbeda setelah aplikasi diperbarui.');
 P('Terima kasih sudah membaca. Selamat bekerja, dan semoga pengelolaan dana sekolah makin rapi, transparan, dan tenang!');
 
 // ======================================================================
