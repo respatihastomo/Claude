@@ -80,7 +80,7 @@ function KOTAK(jenis, teks) {
     borders: { left: { style: BorderStyle.SINGLE, size: 24, color: garis }, top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } },
     children: [new Paragraph({ spacing: { after: 0, line: 290 }, children: [new TextRun({ text: `${label}: `, bold: true, color: garis }), ...runs(teks)] })],
   });
-  tambah(new Table({ width: { size: 9638, type: WidthType.DXA }, columnWidths: [9638], rows: [new TableRow({ children: [sel] })] }), new Paragraph({ spacing: { after: 120 }, children: [] }));
+  tambah(new Table({ width: { size: 9638, type: WidthType.DXA }, columnWidths: [9638], rows: [new TableRow({ cantSplit: true, children: [sel] })] }), new Paragraph({ spacing: { after: 120 }, children: [] }));
 }
 
 function TABEL(kepala, baris, lebar) {
@@ -93,7 +93,7 @@ function TABEL(kepala, baris, lebar) {
     children: [new Paragraph({ spacing: { after: 0, line: 270 }, children: runs(t, head ? { bold: true } : {}) })],
   });
   tambah(new Table({ width: { size: total, type: WidthType.DXA }, columnWidths: lebar,
-    rows: [new TableRow({ tableHeader: true, children: kepala.map((t, i) => sel(t, i, true)) }), ...baris.map((r) => new TableRow({ children: r.map((t, i) => sel(t, i, false)) }))] }),
+    rows: [new TableRow({ tableHeader: true, cantSplit: true, children: kepala.map((t, i) => sel(t, i, true)) }), ...baris.map((r) => new TableRow({ cantSplit: true, children: r.map((t, i) => sel(t, i, false)) }))] }),
   new Paragraph({ spacing: { after: 160 }, children: [] }));
 }
 
