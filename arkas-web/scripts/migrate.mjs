@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+// Menjalankan migrasi SQL satu layanan: node scripts/migrate.mjs svc-penatausahaan [--seed] [--fresh]
+// DATABASE_ADMIN_URL : koneksi superuser/DBA (default postgres://postgres@localhost:5432/postgres)
+// DB_NAME            : nama basis data layanan (default db_tatausaha)
+// API_DB_PASSWORD / WORKER_DB_PASSWORD : kata sandi role login layanan
+import fs from 'node:fs';
+import path from 'node:path';
+import pg from 'pg';
+
+const svc = process.argv[2];
+if (!svc) { console.error('pakai: migrate.mjs <svc-nama> [--seed] [--fresh]'); process.exit(2); }
+const seed = process.argv.includes('--seed');
+const fresh = process.argv.includes('--fresh');
+const adminUrl = process.env.DATABASE_ADMIN_URL ?? 'postgres://postgres@localhost:5432/postgres';
+const dbName = process.env.DB_NAME ?? 'db_tatausaha';
+if (!/^[a-z_][a-z0-9_]*$/.test(dbName)) throw new Error('DB_NAME tidak valid');
+const dir = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'db', svc, 'migrations');
+
+const admin = new pg.Client({ connectionString: adminUrl });
+await admin.connect();
+if (fresh) {
+  await admin.query(`DROP DATABASE IF EXISTS ${dbName} WITH (FORCE)`);
+}
+const ada = await admin.query('SELECT 1 FROM pg_database WHERE datname = $1', [dbName]);
+if (ada.rowCount === 0) {
+  await admin.query(`CREATE DATABASE ${dbName}`);
+  console.log(`basis data ${dbName} dibuat`);
+}
+await admin.end();
+
+const url = new URL(adminUrl);
+url.pathname = '/' + dbName;
+const db = new pg.Client({ connectionString: url.toString() });
+await db.connect();
+const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort().filter((f) => seed || !f.startsWith('9'));
+for (const f of files) {
+  process.stdout.write(`menjalankan ${f} ... `);
+  await db.query(fs.readFileSync(path.join(dir, f), 'utf8'));
+  console.log('ok');
+}
+const sandiApi = process.env.API_DB_PASSWORD ?? 'api_dev';
+const sandiWorker = process.env.WORKER_DB_PASSWORD ?? 'worker_dev';
+await db.query(`ALTER ROLE api_tatausaha_login PASSWORD ${pg.Client.prototype.escapeLiteral(sandiApi)}`);
+await db.query(`ALTER ROLE worker_tatausaha_login PASSWORD ${pg.Client.prototype.escapeLiteral(sandiWorker)}`);
+await db.query(`GRANT CONNECT ON DATABASE ${dbName} TO api_tatausaha_login, worker_tatausaha_login`);
+await db.end();
+console.log('migrasi selesai');
