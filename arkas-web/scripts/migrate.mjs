@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Menjalankan migrasi SQL satu layanan: node scripts/migrate.mjs svc-penatausahaan [--seed] [--fresh]
 // DATABASE_ADMIN_URL : koneksi superuser/DBA (default postgres://postgres@localhost:5432/postgres)
-// DB_NAME            : nama basis data layanan (default db_tatausaha)
+// DB_NAME            : nama basis data layanan (bawaan per layanan, lihat LAYANAN)
 // API_DB_PASSWORD / WORKER_DB_PASSWORD : kata sandi role login layanan
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,7 +12,13 @@ if (!svc) { console.error('pakai: migrate.mjs <svc-nama> [--seed] [--fresh]'); p
 const seed = process.argv.includes('--seed');
 const fresh = process.argv.includes('--fresh');
 const adminUrl = process.env.DATABASE_ADMIN_URL ?? 'postgres://postgres@localhost:5432/postgres';
-const dbName = process.env.DB_NAME ?? 'db_tatausaha';
+const LAYANAN = {
+  'svc-penatausahaan': { db: 'db_tatausaha', api: 'api_tatausaha_login', worker: 'worker_tatausaha_login' },
+  'svc-pelaporan': { db: 'db_pelaporan', api: 'api_pelaporan_login', worker: 'worker_pelaporan_login' },
+};
+const lay = LAYANAN[svc];
+if (!lay) { console.error(`layanan tidak dikenal: ${svc}`); process.exit(2); }
+const dbName = process.env.DB_NAME ?? lay.db;
 if (!/^[a-z_][a-z0-9_]*$/.test(dbName)) throw new Error('DB_NAME tidak valid');
 const dir = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'db', svc, 'migrations');
 
@@ -40,8 +46,9 @@ for (const f of files) {
 }
 const sandiApi = process.env.API_DB_PASSWORD ?? 'api_dev';
 const sandiWorker = process.env.WORKER_DB_PASSWORD ?? 'worker_dev';
-await db.query(`ALTER ROLE api_tatausaha_login PASSWORD ${pg.Client.prototype.escapeLiteral(sandiApi)}`);
-await db.query(`ALTER ROLE worker_tatausaha_login PASSWORD ${pg.Client.prototype.escapeLiteral(sandiWorker)}`);
-await db.query(`GRANT CONNECT ON DATABASE ${dbName} TO api_tatausaha_login, worker_tatausaha_login`);
+const lit = (v) => pg.Client.prototype.escapeLiteral(v);
+await db.query(`ALTER ROLE ${lay.api} PASSWORD ${lit(sandiApi)}`);
+await db.query(`ALTER ROLE ${lay.worker} PASSWORD ${lit(sandiWorker)}`);
+await db.query(`GRANT CONNECT ON DATABASE ${dbName} TO ${lay.api}, ${lay.worker}`);
 await db.end();
 console.log('migrasi selesai');

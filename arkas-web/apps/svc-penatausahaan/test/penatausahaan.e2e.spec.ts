@@ -10,6 +10,7 @@ import request from 'supertest';
 import { exportSPKI, generateKeyPair, SignJWT, KeyLike } from 'jose';
 import { Client } from 'pg';
 import { MemoryBroker } from '@arkas/common-ms';
+import { SANDI } from './bantu';
 import { buatAplikasi, Aplikasi } from '../dist/app';
 import { hariIniJakarta } from '../dist/infra/waktu';
 
@@ -74,14 +75,14 @@ async function rkas() {
 
 beforeAll(async () => {
   execFileSync('node', [path.resolve(__dirname, '../../../scripts/migrate.mjs'), 'svc-penatausahaan', '--seed', '--fresh'], {
-    env: { ...process.env, DATABASE_ADMIN_URL: ADMIN, DB_NAME: DB, API_DB_PASSWORD: 'api_uji', WORKER_DB_PASSWORD: 'worker_uji' },
+    env: { ...process.env, DATABASE_ADMIN_URL: ADMIN, DB_NAME: DB, API_DB_PASSWORD: SANDI.api, WORKER_DB_PASSWORD: SANDI.worker },
     stdio: 'pipe',
   });
   const { publicKey, privateKey } = await generateKeyPair('RS256');
   kunciPrivat = privateKey;
   broker = new MemoryBroker();
   A = await buatAplikasi({
-    port: 0, databaseUrl: dbUrl('api_tatausaha_login', 'api_uji'), databaseWorkerUrl: dbUrl('worker_tatausaha_login', 'worker_uji'),
+    port: 0, databaseUrl: dbUrl('api_tatausaha_login', SANDI.api), databaseWorkerUrl: dbUrl('worker_tatausaha_login', SANDI.worker),
     broker: 'memory', brokerBrokers: [], jwtPublicKey: await exportSPKI(publicKey), jwtIssuer: 'arkas-identitas', jwtAudience: 'arkas-api',
     devEvents: true, internalEventsToken: TOKEN_INTERNAL, outboxIntervalMs: 100000, serviceName: 'svc-penatausahaan',
   }, { broker, logger: false });
@@ -271,7 +272,7 @@ describe('alur SK-03: RKAS disahkan -> belanja -> persetujuan -> TransaksiDisetu
   });
 
   it('trigger cek_item_rkas tetap menolak meski aplikasi dilewati (lapis terakhir)', async () => {
-    const c = new Client({ connectionString: dbUrl('api_tatausaha_login', 'api_uji') });
+    const c = new Client({ connectionString: dbUrl('api_tatausaha_login', SANDI.api) });
     await c.connect();
     try {
       await c.query('BEGIN');
@@ -296,7 +297,7 @@ describe('alur SK-03: RKAS disahkan -> belanja -> persetujuan -> TransaksiDisetu
   it('RLS: Kepala Sekolah sekolah lain tidak melihat transaksi (404), RLS menolak insert lintas sekolah', async () => {
     const r = await http.get(`/api/v1/transaksi/${idBelanja}`).set(await auth('KEPSEK', KEPSEK_LAIN, NPSN_LAIN));
     expect(r.status).toBe(404);
-    const c = new Client({ connectionString: dbUrl('api_tatausaha_login', 'api_uji') });
+    const c = new Client({ connectionString: dbUrl('api_tatausaha_login', SANDI.api) });
     await c.connect();
     try {
       await c.query('BEGIN');

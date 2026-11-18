@@ -4,7 +4,7 @@
   "packageManager": "pnpm@10.28.0",
   "scripts": {
     "build": "turbo run build",
-    "test": "turbo run test",
+    "test": "turbo run test --concurrency=1",
     "typecheck": "turbo run typecheck",
     "db:migrate": "node scripts/migrate.mjs svc-penatausahaan",
     "dev:token": "node scripts/dev-token.mjs",

@@ -18,6 +18,7 @@ export const TOPIK = {
   KERTAS_KERJA_DISAHKAN: 'arkas.perencanaan.kk-disahkan',
   TRANSAKSI_DISETUJUI: 'arkas.tatausaha.transaksi-disetujui',
   PERIODE_DITUTUP: 'arkas.tatausaha.periode-ditutup',
+  LAPORAN_DITANDATANGANI: 'arkas.pelaporan.laporan-ditandatangani',
 } as const;
 
 export const CloudEventSchema = z.object({
@@ -72,7 +73,12 @@ export interface TransaksiDisetujuiData {
   totalPajak: number;
   disetujuiOleh: string;
   disetujuiAt: string;
-  items: Array<{ barisId: string; kodeRekening: string; jumlah: number }>;
+  /** tambahan aditif (irisan 4) untuk laporan BKU di svc-pelaporan */
+  uraian?: string;
+  noBukti?: string | null;
+  caraBayar?: 'TUNAI' | 'NON_TUNAI' | null;
+  namaToko?: string | null;
+  items: Array<{ barisId: string; kodeRekening: string; jumlah: number; uraian?: string }>;
   pajak: Array<{ jenis: string; nilai: number }>;
 }
 
@@ -95,4 +101,20 @@ export interface PeriodeDitutupData {
   rekonsiliasi: { saldoRekeningKoran: number; selisihBank: number; penjelasanBank: string | null; kasFisik: number; selisihKas: number; penjelasanKas: string | null };
   /** bulan yang dibuka otomatis; null setelah Desember */
   periodeBerikutBulan: number | null;
+}
+
+/** Diterbitkan svc-pelaporan setelah laporan bulanan ditandatangani; dikonsumsi svc-integrasi & svc-pemantauan. */
+export interface LaporanDitandatanganiData {
+  laporanId: string;
+  jenis: 'BKU_BULANAN';
+  npsn: string;
+  tahun: number;
+  sumberDanaKode: string;
+  bulan: number;
+  periodeId: string;
+  ditandatanganiOleh: string;
+  ditandatanganiAt: string;
+  sha256: string;
+  /** SIMULASI_DEV = bukan TTE yang sah; BSRE = TTE tersertifikasi */
+  penyediaTte: 'SIMULASI_DEV' | 'BSRE';
 }

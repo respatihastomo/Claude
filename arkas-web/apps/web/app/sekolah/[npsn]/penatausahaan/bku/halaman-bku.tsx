@@ -8,15 +8,16 @@ import { Kartu, Spanduk, Tombol, cx } from '@/components/ui';
 import { WizardBelanja } from '@/components/wizard-belanja';
 import { PanelPajak } from '@/components/panel-pajak';
 import { PanelPenutupan } from '@/components/panel-penutupan';
+import { PanelLaporan } from '@/components/panel-laporan';
 import { GalatApi } from '@/lib/api';
 import { Buku, useBku, usePutuskan, useRingkasan } from '@/lib/hooks';
 
-const TAB = [{ id: undefined, label: 'Buku Kas Umum' }, { id: 'TUNAI', label: 'BKP Tunai' }, { id: 'BANK', label: 'BKP Bank' }, { id: 'PAJAK', label: 'BKP Pajak' }, { id: 'TUTUP', label: 'Penutupan Buku Kas' }] as const;
+const TAB = [{ id: undefined, label: 'Buku Kas Umum' }, { id: 'TUNAI', label: 'BKP Tunai' }, { id: 'BANK', label: 'BKP Bank' }, { id: 'PAJAK', label: 'BKP Pajak' }, { id: 'TUTUP', label: 'Penutupan Buku Kas' }, { id: 'LAPORAN', label: 'Laporan' }] as const;
 
 export function HalamanBku({ npsn, tahun, peran, namaPengguna }: { npsn: string; tahun: number; peran: 'BENDAHARA' | 'KEPSEK'; namaPengguna: string }) {
   const router = useRouter();
   const buku: Buku = { npsn, tahun, sumberDanaKode: 'BOSP_REG' };
-  const [tab, setTab] = useState<'TUNAI' | 'BANK' | 'PAJAK' | 'TUTUP' | undefined>();
+  const [tab, setTab] = useState<'TUNAI' | 'BANK' | 'PAJAK' | 'TUTUP' | 'LAPORAN' | undefined>();
   const [wizard, setWizard] = useState(false);
   const [mutasi, setMutasi] = useState<{ jenis: JenisMutasi; nilai?: number } | null>(null);
   const [sibuk, setSibuk] = useState<string>();
@@ -87,7 +88,8 @@ export function HalamanBku({ npsn, tahun, peran, namaPengguna }: { npsn: string;
               <span className="text-sm font-medium text-warning">{ringkasan.data.menungguPersetujuan} transaksi menunggu persetujuan Anda</span>
             )}
           </div>
-          {tab === 'TUTUP' ? <PanelPenutupan buku={buku} peran={peran} />
+          {tab === 'LAPORAN' ? <PanelLaporan buku={buku} peran={peran} />
+            : tab === 'TUTUP' ? <PanelPenutupan buku={buku} peran={peran} />
             : tab === 'PAJAK' ? <PanelPajak buku={buku} peran={peran} ringkasan={ringkasan.data} />
             : bku.isLoading ? <p className="p-8 text-center text-sm text-muted">Memuat…</p>
             : <TabelBku baris={bku.data ?? []} bolehPutuskan={peran === 'KEPSEK'} onPutuskan={onPutuskan} sibuk={sibuk} />}

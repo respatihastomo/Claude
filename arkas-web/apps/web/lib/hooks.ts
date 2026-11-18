@@ -76,3 +76,25 @@ export function useAksiPeriode(b: Buku) {
     onSuccess: () => qc.invalidateQueries({ queryKey: kunciBuku(b) }),
   });
 }
+
+// ---------- svc-pelaporan ----------
+export interface LaporanDto {
+  id: string; jenis: 'BKU_BULANAN'; periodeId: string; bulan: number; status: 'MENUNGGU' | 'SIAP' | 'GAGAL' | 'DITANDATANGANI';
+  percobaan: number; galatTerakhir: string | null; sha256: string | null; ukuran: number | null; siapAt: string | null;
+  ditandatanganiOleh: string | null; ditandatanganiAt: string | null; penyediaTte: 'SIMULASI_DEV' | 'BSRE' | null; sha256Tertanda: string | null; versi: number;
+}
+export function useLaporan(b: Buku) {
+  return useQuery({
+    queryKey: [...kunciBuku(b), 'laporan'],
+    queryFn: async () => (await api<{ data: LaporanDto[] }>(`/laporan?npsn=${b.npsn}&${qs(b)}`)).data.data,
+    // laporan dibuat asinkron oleh pekerja svc-pelaporan: muat ulang selagi ada yang menunggu
+    refetchInterval: (q) => (q.state.data?.some((l) => l.status === 'MENUNGGU') ? 2000 : false),
+  });
+}
+export function useTandatangani(b: Buku) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (l: LaporanDto) => (await api<LaporanDto>(`/laporan/${l.id}/tandatangani`, { method: 'POST', headers: { 'If-Match': `W/"${l.versi}"` } })).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: kunciBuku(b) }),
+  });
+}

@@ -14,3 +14,5 @@ export * from './events/kafka-broker';
 export * from './events/inbox-consumer';
 export * from './events/outbox';
 export * from './events/outbox-relay';
+export * from './events/http-broker';
+export * from './events/terima-internal';

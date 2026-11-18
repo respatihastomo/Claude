@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
-# Menjalankan svc-penatausahaan dengan konfigurasi dev (.env di root bila ada, else .env.example).
+# Menjalankan satu layanan dengan konfigurasi dev: scripts/jalankan-svc.sh [svc-penatausahaan|svc-pelaporan]
+# Berkas env: .env / .env.example (penatausahaan) atau .env.pelaporan / .env.pelaporan.example (pelaporan); ENV_FILE untuk menimpa.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-set -a; source "${ENV_FILE:-$( [ -f .env ] && echo .env || echo .env.example )}"; set +a
-cd apps/svc-penatausahaan
+SVC="${1:-svc-penatausahaan}"
+case "$SVC" in
+  svc-penatausahaan) dasar=".env" ;;
+  svc-pelaporan) dasar=".env.pelaporan" ;;
+  *) echo "layanan tidak dikenal: $SVC" >&2; exit 2 ;;
+esac
+set -a; source "${ENV_FILE:-$( [ -f "$dasar" ] && echo "$dasar" || echo "$dasar.example" )}"; set +a
+cd "apps/$SVC"
 exec node dist/main.js

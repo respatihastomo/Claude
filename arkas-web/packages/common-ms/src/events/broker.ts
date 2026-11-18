@@ -8,6 +8,11 @@ export interface Broker {
   subscribe(topik: string, grup: string, penangan: PenanganEvent): Promise<void>;
   start(): Promise<void>;
   stop(): Promise<void>;
+  /**
+   * Menyerahkan event yang DITERIMA dari luar proses (endpoint internal) ke pelanggan lokal.
+   * Galat penangan dilempar agar pengirim mencoba ulang. Tidak ada di adapter yang menerima sendiri dari broker (Kafka).
+   */
+  serahkanLokal?(topik: string, event: CloudEvent): Promise<void>;
 }
 
 /**
@@ -38,4 +43,8 @@ export class MemoryBroker implements Broker {
 
   async start(): Promise<void> {}
   async stop(): Promise<void> {}
+
+  async serahkanLokal(topik: string, event: CloudEvent): Promise<void> {
+    for (const { penangan } of this.pelanggan.get(topik) ?? []) await penangan(event);
+  }
 }

@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { INestApplication, Logger, Module, OnApplicationShutdown, Inject, DynamicModule } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { Pool } from 'pg';
-import { Broker, DbContextService, KafkaBroker, MemoryBroker, OutboxRelay, ProblemFilter, ScopeGuard, VerifikatorJwt } from '@arkas/common-ms';
+import { Broker, DbContextService, HttpBroker, KafkaBroker, MemoryBroker, OutboxRelay, ProblemFilter, ScopeGuard, VerifikatorJwt } from '@arkas/common-ms';
 import { TOPIK } from '@arkas/kontrak';
 import type { Konfigurasi } from './config';
 import { BROKER, KONFIGURASI, POOL_API, POOL_WORKER, SKEMA } from './infra/tokens';
@@ -28,7 +28,7 @@ function modulAplikasi(cfg: Konfigurasi, broker: Broker): DynamicModule {
   class AppModule {}
   return {
     module: AppModule,
-    controllers: [BkuController, TransaksiController, PajakController, PeriodeController, HealthController, ...(cfg.devEvents ? [InternalEventsController] : [])],
+    controllers: [BkuController, TransaksiController, PajakController, PeriodeController, HealthController, ...(cfg.devEvents || cfg.broker === 'http' ? [InternalEventsController] : [])],
     providers: [
       { provide: KONFIGURASI, useValue: cfg },
       { provide: BROKER, useValue: broker },
@@ -49,7 +49,10 @@ export interface Aplikasi { app: INestApplication; broker: Broker; relay: Outbox
 
 /** Merakit aplikasi (dipakai main.ts dan uji integrasi). */
 export async function buatAplikasi(cfg: Konfigurasi, opsi: { broker?: Broker; logger?: false } = {}): Promise<Aplikasi> {
-  const broker = opsi.broker ?? (cfg.broker === 'kafka' ? new KafkaBroker(cfg.brokerBrokers, cfg.serviceName) : new MemoryBroker());
+  const broker = opsi.broker ?? (
+    cfg.broker === 'kafka' ? new KafkaBroker(cfg.brokerBrokers, cfg.serviceName)
+      : cfg.broker === 'http' ? new HttpBroker(HttpBroker.uraiTargets(cfg.brokerHttpTargets ?? ''), cfg.internalEventsToken!)
+        : new MemoryBroker());
   const app = await NestFactory.create(modulAplikasi(cfg, broker), { logger: opsi.logger === false ? false : ['log', 'warn', 'error'] });
   app.useGlobalFilters(new ProblemFilter());
   app.enableShutdownHooks();

@@ -3,6 +3,10 @@
   "tasks": {
     "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".next/**", "!.next/cache/**"] },
     "typecheck": { "dependsOn": ["^build"] },
-    "test": { "dependsOn": ["^build"], "env": ["DATABASE_URL_*", "PG*"] }
+    "test": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": ["DATABASE_ADMIN_URL", "API_DB_PASSWORD", "WORKER_DB_PASSWORD", "PLAYWRIGHT_BROWSERS_PATH", "NODE_PATH", "UJI_LOG"]
+    }
   }
 }

@@ -2,7 +2,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Client } from 'pg';
-import { Harness, HARI_INI, SD, siapkan, TAHUN } from './bantu';
+import { Harness, HARI_INI, SANDI, SD, siapkan, TAHUN } from './bantu';
 
 let h: Harness;
 const B = { atk: randomUUID(), servis: randomUUID() };
@@ -148,7 +148,7 @@ describe('UC-14 setor pajak', () => {
   });
 
   it('trigger cek_setor_pajak menolak perubahan langsung lewat SQL', async () => {
-    const c = new Client({ connectionString: h.dbUrl('api_tatausaha_login', 'api_uji') });
+    const c = new Client({ connectionString: h.dbUrl('api_tatausaha_login', SANDI.api) });
     await c.connect();
     try {
       const pajak = await h.superDb.query(`SELECT id FROM tatausaha.pajak WHERE status = 'DIPUNGUT' AND transaksi_id = $1`, [id.menunggu]);

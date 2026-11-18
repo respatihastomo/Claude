@@ -157,7 +157,8 @@ export class PenatausahaanService {
           transaksiId: baru.id, npsn: baru.npsn, tahun: baru.tahun, sumberDanaKode: baru.sumberDanaKode, jenis: baru.jenis,
           tanggal: baru.tanggal, nilaiBruto: baru.nilaiBruto, totalPajak: baru.totalPajak, ntpn: baru.ntpn,
           disetujuiOleh: ctx.penggunaId, disetujuiAt: baru.diputuskanAt!,
-          items: baru.items.map((i) => ({ barisId: i.barisId, kodeRekening: i.kodeRekening, jumlah: i.jumlah })),
+          uraian: baru.uraian, noBukti: baru.noBukti, caraBayar: baru.caraBayar, namaToko: baru.namaToko,
+          items: baru.items.map((i) => ({ barisId: i.barisId, kodeRekening: i.kodeRekening, jumlah: i.jumlah, uraian: i.uraian })),
           pajak: baru.pajak.map((p) => ({ jenis: p.jenis, nilai: p.nilai })),
         };
         await tulisOutbox(tx, SKEMA, {

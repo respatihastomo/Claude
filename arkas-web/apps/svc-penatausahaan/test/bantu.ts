@@ -9,6 +9,9 @@ import { MemoryBroker } from '@arkas/common-ms';
 import { Aplikasi, buatAplikasi } from '../dist/app';
 import { hariIniJakarta } from '../dist/infra/waktu';
 
+/** Role login PostgreSQL berlaku untuk SELURUH klaster: uji wajib memakai kata sandi yang sama dengan dev
+ *  (atau API_DB_PASSWORD/WORKER_DB_PASSWORD) agar migrasi uji tidak mengubah kredensial layanan yang sedang berjalan. */
+export const SANDI = { api: process.env.API_DB_PASSWORD ?? 'api_dev', worker: process.env.WORKER_DB_PASSWORD ?? 'worker_dev' };
 export const ADMIN = process.env.DATABASE_ADMIN_URL ?? 'postgres://postgres:postgres@localhost:5432/postgres';
 export const HARI_INI = hariIniJakarta();
 export const TAHUN = Number(HARI_INI.slice(0, 4));
@@ -31,14 +34,14 @@ export interface Harness {
 
 export async function siapkan(db: string, npsn = '20100001'): Promise<Harness> {
   execFileSync('node', [path.resolve(__dirname, '../../../scripts/migrate.mjs'), 'svc-penatausahaan', '--seed', '--fresh'], {
-    env: { ...process.env, DATABASE_ADMIN_URL: ADMIN, DB_NAME: db, API_DB_PASSWORD: 'api_uji', WORKER_DB_PASSWORD: 'worker_uji' }, stdio: 'pipe',
+    env: { ...process.env, DATABASE_ADMIN_URL: ADMIN, DB_NAME: db, API_DB_PASSWORD: SANDI.api, WORKER_DB_PASSWORD: SANDI.worker }, stdio: 'pipe',
   });
   const dbUrl = (user: string, pass: string) => { const u = new URL(ADMIN); u.username = user; u.password = pass; u.pathname = '/' + db; return u.toString(); };
   const { publicKey, privateKey } = await generateKeyPair('RS256');
   const kunci: KeyLike = privateKey;
   const broker = new MemoryBroker();
   const A = await buatAplikasi({
-    port: 0, databaseUrl: dbUrl('api_tatausaha_login', 'api_uji'), databaseWorkerUrl: dbUrl('worker_tatausaha_login', 'worker_uji'),
+    port: 0, databaseUrl: dbUrl('api_tatausaha_login', SANDI.api), databaseWorkerUrl: dbUrl('worker_tatausaha_login', SANDI.worker),
     broker: 'memory', brokerBrokers: [], jwtPublicKey: await exportSPKI(publicKey), jwtIssuer: 'arkas-identitas', jwtAudience: 'arkas-api',
     devEvents: true, internalEventsToken: TOKEN_INTERNAL, outboxIntervalMs: 100000, serviceName: 'svc-penatausahaan',
     tutupSebelumAkhirBulan: true,

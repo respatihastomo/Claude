@@ -2,7 +2,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Client } from 'pg';
-import { Harness, HARI_INI, siapkan } from './bantu';
+import { Harness, HARI_INI, SANDI, siapkan } from './bantu';
 
 let h: Harness;
 const B = { atk: randomUUID() };
@@ -131,7 +131,7 @@ describe('UC-15 penutupan buku kas', () => {
     // siapkan periode lain (bulan sebelumnya tahun yang sama, bila ada) agar urutan diuji pada periode berikut
     if (BULAN === 12) return;
     const berikut = (await h.superDb.query(`SELECT id FROM tatausaha.periode WHERE bulan = $1`, [BULAN + 1])).rows[0].id as string;
-    const c = new Client({ connectionString: h.dbUrl('api_tatausaha_login', 'api_uji') });
+    const c = new Client({ connectionString: h.dbUrl('api_tatausaha_login', SANDI.api) });
     await c.connect();
     try {
       await c.query('BEGIN');
