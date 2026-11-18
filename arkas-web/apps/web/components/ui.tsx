@@ -36,9 +36,10 @@ const WARNA_STATUS: Record<string, string> = {
   DISETUJUI: 'bg-success/10 text-success ring-success/30',
   DITOLAK: 'bg-danger/10 text-danger ring-danger/30',
   BUKA: 'bg-success/10 text-success ring-success/30',
+  DIAJUKAN: 'bg-warning/10 text-warning ring-warning/30',
   DITUTUP: 'bg-canvas text-muted ring-line',
 };
-const LABEL_STATUS: Record<string, string> = { DICATAT: 'Menunggu persetujuan', DISETUJUI: 'Disetujui', DITOLAK: 'Ditolak', BUKA: 'Periode buka', DITUTUP: 'Periode ditutup' };
+const LABEL_STATUS: Record<string, string> = { DICATAT: 'Menunggu persetujuan', DISETUJUI: 'Disetujui', DITOLAK: 'Ditolak', BUKA: 'Periode buka', DIAJUKAN: 'Menunggu penutupan', DITUTUP: 'Periode ditutup' };
 export function LencanaStatus({ status }: { status: string }) {
   return (
     <span className={cx('inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset', WARNA_STATUS[status] ?? 'bg-canvas text-muted ring-line')}>

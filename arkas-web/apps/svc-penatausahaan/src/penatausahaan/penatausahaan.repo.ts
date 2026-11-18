@@ -20,7 +20,7 @@ export async function kunciBuku(tx: PoolClient, b: Buku): Promise<void> {
 }
 
 export async function cariPeriode(tx: PoolClient, b: Buku, bulan: number) {
-  const r = await tx.query<{ id: string; status: 'BUKA' | 'DITUTUP' }>(
+  const r = await tx.query<{ id: string; status: 'BUKA' | 'DIAJUKAN' | 'DITUTUP' }>(
     `SELECT id, status FROM tatausaha.periode WHERE npsn = $1 AND tahun = $2 AND sumber_dana_kode = $3 AND bulan = $4`,
     [b.npsn, b.tahun, b.sumberDanaKode, bulan],
   );
@@ -219,9 +219,9 @@ export async function ringkasan(tx: PoolClient, b: Buku, bulanIni: number): Prom
          WHERE p.npsn = $1 AND p.tahun = $2 AND p.sumber_dana_kode = $3 AND t.status = 'DISETUJUI' AND p.status = 'DIPUNGUT') AS terutang`,
     [b.npsn, b.tahun, b.sumberDanaKode],
   );
-  const per = await tx.query<{ bulan: number; status: 'BUKA' | 'DITUTUP' }>(
+  const per = await tx.query<{ bulan: number; status: 'BUKA' | 'DIAJUKAN' | 'DITUTUP' }>(
     `SELECT bulan, status FROM tatausaha.periode WHERE npsn = $1 AND tahun = $2 AND sumber_dana_kode = $3
-     ORDER BY (bulan = $4) DESC, (status = 'BUKA') DESC, bulan DESC LIMIT 1`,
+     ORDER BY (status <> 'DITUTUP') DESC, (bulan = $4) DESC, bulan LIMIT 1`,
     [b.npsn, b.tahun, b.sumberDanaKode, bulanIni],
   );
   const a = agg.rows[0];

@@ -13,6 +13,8 @@ const Env = z.object({
   JWT_AUDIENCE: z.string().default('arkas-api'),
   DEV_EVENTS_ENABLED: z.enum(['true', 'false']).default('false'),
   INTERNAL_EVENTS_TOKEN: z.string().min(16).optional(),
+  // HANYA dev/demo: izinkan menutup buku sebelum akhir bulan
+  TUTUP_SEBELUM_AKHIR_BULAN: z.enum(['true', 'false']).default('false'),
   OUTBOX_INTERVAL_MS: z.coerce.number().int().default(500),
   OTEL_SERVICE_NAME: z.string().default('svc-penatausahaan'),
 });
@@ -30,6 +32,7 @@ export interface Konfigurasi {
   internalEventsToken?: string;
   outboxIntervalMs: number;
   serviceName: string;
+  tutupSebelumAkhirBulan?: boolean;
 }
 
 export function muatKonfigurasi(env: NodeJS.ProcessEnv = process.env): Konfigurasi {
@@ -42,6 +45,6 @@ export function muatKonfigurasi(env: NodeJS.ProcessEnv = process.env): Konfigura
     port: e.PORT, databaseUrl: e.DATABASE_URL, databaseWorkerUrl: e.DATABASE_WORKER_URL, broker: e.BROKER,
     brokerBrokers: e.BROKER_BROKERS.split(',').map((s) => s.trim()), jwtPublicKey: pem, jwtIssuer: e.JWT_ISSUER,
     jwtAudience: e.JWT_AUDIENCE, devEvents, internalEventsToken: e.INTERNAL_EVENTS_TOKEN,
-    outboxIntervalMs: e.OUTBOX_INTERVAL_MS, serviceName: e.OTEL_SERVICE_NAME,
+    outboxIntervalMs: e.OUTBOX_INTERVAL_MS, serviceName: e.OTEL_SERVICE_NAME, tutupSebelumAkhirBulan: e.TUTUP_SEBELUM_AKHIR_BULAN === 'true',
   };
 }

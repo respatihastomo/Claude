@@ -48,7 +48,7 @@ export class PenatausahaanService {
 
       const periode = await repo.cariPeriode(tx, buku, bulanDari(input.tanggal));
       if (!periode) throw new AturanError('PERIODE_BELUM_DIBUKA', `Periode bulan ${bulanDari(input.tanggal)} belum dibuka (RKAS belum disahkan?)`);
-      if (periode.status !== 'BUKA') throw new AturanError('PERIODE_TERTUTUP', 'Periode buku kas sudah ditutup');
+      if (periode.status !== 'BUKA') throw new AturanError('PERIODE_TERTUTUP', periode.status === 'DIAJUKAN' ? 'Periode sedang diajukan untuk ditutup' : 'Periode buku kas sudah ditutup');
 
       const saldo = await repo.saldo(tx, buku);
       const dasar = {
@@ -185,7 +185,7 @@ export class PenatausahaanService {
 
       const periode = await repo.cariPeriode(tx, buku, bulanDari(input.tanggalSetor));
       if (!periode) throw new AturanError('PERIODE_BELUM_DIBUKA', `Periode bulan ${bulanDari(input.tanggalSetor)} belum dibuka`);
-      if (periode.status !== 'BUKA') throw new AturanError('PERIODE_TERTUTUP', 'Periode buku kas sudah ditutup');
+      if (periode.status !== 'BUKA') throw new AturanError('PERIODE_TERTUTUP', periode.status === 'DIAJUKAN' ? 'Periode sedang diajukan untuk ditutup' : 'Periode buku kas sudah ditutup');
 
       const pajak = await repo.kunciPajak(tx, buku, input.pajakIds);
       const { jenis, nilai } = validasiSetorPajak(

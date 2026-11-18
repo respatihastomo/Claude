@@ -1,7 +1,7 @@
 'use client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { BarisBkuDto, BarisRkasDto, BuatTransaksiInput, RingkasanBukuDto, TransaksiDto } from '@arkas/kontrak';
-import type { BarisBkpPajakDto, PajakDto, SetorPajakInput } from '@arkas/kontrak';
+import type { AjukanTutupInput, BarisBkpPajakDto, DetailPeriodeDto, PajakDto, PeriodeDto, SetorPajakInput } from '@arkas/kontrak';
 import { api, kunciIdempoten } from './api';
 
 export interface Buku { npsn: string; tahun: number; sumberDanaKode: string }
@@ -56,6 +56,23 @@ export function useSetorPajak(b: Buku) {
   return useMutation({
     mutationFn: async ({ input, kunci }: { input: SetorPajakInput; kunci: string }) =>
       (await api<TransaksiDto>(`/sekolah/${b.npsn}/pajak/setor`, { method: 'POST', json: input, headers: { 'Idempotency-Key': kunci } })).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: kunciBuku(b) }),
+  });
+}
+
+// ---------- Irisan 3: penutupan buku kas ----------
+export function usePeriode(b: Buku) {
+  return useQuery({ queryKey: [...kunciBuku(b), 'periode'], queryFn: async () => (await api<{ data: PeriodeDto[] }>(`/sekolah/${b.npsn}/periode?${qs(b)}`)).data.data });
+}
+export function useDetailPeriode(b: Buku, id?: string) {
+  return useQuery({ queryKey: [...kunciBuku(b), 'periode', id], enabled: !!id, queryFn: async () => api<DetailPeriodeDto>(`/periode/${id}`) });
+}
+/** Aksi periode memakai ETag terkini sebagai If-Match. */
+export function useAksiPeriode(b: Buku) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, aksi, etag, body }: { id: string; aksi: 'ajukan-tutup' | 'setujui' | 'kembalikan'; etag: string; body?: AjukanTutupInput | { alasan: string } }) =>
+      (await api<DetailPeriodeDto>(`/periode/${id}/${aksi}`, { method: 'POST', json: body ?? {}, headers: { 'If-Match': etag } })).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: kunciBuku(b) }),
   });
 }

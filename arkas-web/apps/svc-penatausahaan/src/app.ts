@@ -9,6 +9,8 @@ import { BROKER, KONFIGURASI, POOL_API, POOL_WORKER, SKEMA } from './infra/token
 import { BkuController } from './penatausahaan/bku.controller';
 import { TransaksiController } from './penatausahaan/transaksi.controller';
 import { PajakController } from './penatausahaan/pajak.controller';
+import { PeriodeController } from './penatausahaan/periode.controller';
+import { PeriodeService } from './penatausahaan/periode.service';
 import { PenatausahaanService } from './penatausahaan/penatausahaan.service';
 import { KertasKerjaDisahkanConsumer } from './events/kertas-kerja-disahkan.consumer';
 import { InternalEventsController } from './events/internal-events.controller';
@@ -26,7 +28,7 @@ function modulAplikasi(cfg: Konfigurasi, broker: Broker): DynamicModule {
   class AppModule {}
   return {
     module: AppModule,
-    controllers: [BkuController, TransaksiController, PajakController, HealthController, ...(cfg.devEvents ? [InternalEventsController] : [])],
+    controllers: [BkuController, TransaksiController, PajakController, PeriodeController, HealthController, ...(cfg.devEvents ? [InternalEventsController] : [])],
     providers: [
       { provide: KONFIGURASI, useValue: cfg },
       { provide: BROKER, useValue: broker },
@@ -36,6 +38,7 @@ function modulAplikasi(cfg: Konfigurasi, broker: Broker): DynamicModule {
       { provide: VerifikatorJwt, useFactory: () => new VerifikatorJwt(cfg.jwtPublicKey, cfg.jwtIssuer, cfg.jwtAudience) },
       { provide: ScopeGuard, useFactory: (r: Reflector, j: VerifikatorJwt) => new ScopeGuard(r, j), inject: [Reflector, VerifikatorJwt] },
       PenatausahaanService,
+      PeriodeService,
       KertasKerjaDisahkanConsumer,
       Penutup,
     ],

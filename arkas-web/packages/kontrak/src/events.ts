@@ -75,3 +75,24 @@ export interface TransaksiDisetujuiData {
   items: Array<{ barisId: string; kodeRekening: string; jumlah: number }>;
   pajak: Array<{ jenis: string; nilai: number }>;
 }
+
+/** Diterbitkan svc-penatausahaan saat Kepala Sekolah menutup buku kas bulanan; dikonsumsi svc-pelaporan (laporan bulanan). */
+export interface PeriodeDitutupData {
+  periodeId: string;
+  npsn: string;
+  tahun: number;
+  sumberDanaKode: string;
+  bulan: number;
+  diajukanOleh: string;
+  ditutupOleh: string;
+  ditutupAt: string;
+  ringkasan: {
+    tunai: { saldoAwal: number; penerimaan: number; pengeluaran: number; saldoAkhir: number };
+    bank: { saldoAwal: number; penerimaan: number; pengeluaran: number; saldoAkhir: number };
+    pajak: { saldoAwal: number; dipungut: number; disetor: number; saldoAkhir: number };
+    jumlahTransaksi: number;
+  };
+  rekonsiliasi: { saldoRekeningKoran: number; selisihBank: number; penjelasanBank: string | null; kasFisik: number; selisihKas: number; penjelasanKas: string | null };
+  /** bulan yang dibuka otomatis; null setelah Desember */
+  periodeBerikutBulan: number | null;
+}

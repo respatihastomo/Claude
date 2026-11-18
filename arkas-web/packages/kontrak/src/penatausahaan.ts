@@ -84,7 +84,7 @@ export interface BarisBkuDto {
 }
 export interface RingkasanBukuDto {
   npsn: string; tahun: number; sumberDanaKode: string;
-  periodeBerjalan: { bulan: number; status: 'BUKA' | 'DITUTUP' } | null;
+  periodeBerjalan: { bulan: number; status: 'BUKA' | 'DIAJUKAN' | 'DITUTUP' } | null;
   saldo: { tunai: number; bank: number; total: number };
   saldoTersedia: { tunai: number; bank: number };
   pagu: number; realisasi: number; menungguPersetujuan: number;
@@ -123,4 +123,39 @@ export interface PajakDto {
 export interface BarisBkpPajakDto {
   transaksiId: string; tanggal: string; noBukti: string | null; uraian: string; jenis: z.infer<typeof JenisPajak>;
   ntpn: string | null; penerimaan: number; pengeluaran: number; status: StatusTransaksi; saldo: number | null;
+}
+
+// ---------- Irisan 3: penutupan buku kas (UC-15) ----------
+
+export const StatusPeriode = z.enum(['BUKA', 'DIAJUKAN', 'DITUTUP']);
+export type StatusPeriode = z.infer<typeof StatusPeriode>;
+
+/** POST /api/v1/periode/{id}/ajukan-tutup — wajib If-Match (ETag periode). */
+export const AjukanTutupInput = z.object({
+  saldoRekeningKoran: z.coerce.number().min(0).max(9_999_999_999_999),
+  penjelasanBank: z.string().trim().max(1000).optional(),
+  kasFisik: z.coerce.number().min(0).max(9_999_999_999_999),
+  penjelasanKas: z.string().trim().max(1000).optional(),
+});
+export type AjukanTutupInput = z.infer<typeof AjukanTutupInput>;
+
+export interface MutasiBukuBulan { saldoAwal: number; penerimaan: number; pengeluaran: number; saldoAkhir: number }
+/** Ringkasan BKU satu bulan — snapshot saat diajukan; dipakai berita acara & dikirim di PeriodeDitutup. */
+export interface RingkasanBulanDto {
+  tunai: MutasiBukuBulan; bank: MutasiBukuBulan; pajak: { saldoAwal: number; dipungut: number; disetor: number; saldoAkhir: number };
+  jumlahTransaksi: number;
+}
+export interface RekonsiliasiDto {
+  saldoBukuBank: number; saldoRekeningKoran: number; selisihBank: number; penjelasanBank: string | null;
+  saldoBukuTunai: number; kasFisik: number; selisihKas: number; penjelasanKas: string | null; dibuatOleh: string; diperbaruiAt: string;
+}
+export interface PeriodeDto {
+  id: string; npsn: string; tahun: number; sumberDanaKode: string; bulan: number; status: StatusPeriode; versi: number;
+  diajukanOleh: string | null; diajukanAt: string | null; ditutupOleh: string | null; ditutupAt: string | null; alasanKembali: string | null;
+}
+export interface DetailPeriodeDto extends PeriodeDto {
+  akhirBulan: string;
+  ringkasan: RingkasanBulanDto;
+  kesiapan: { siap: boolean; syarat: Array<{ kode: string; ok: boolean; pesan: string }>; peringatan: Array<{ kode: string; ok: boolean; pesan: string }> };
+  rekonsiliasi: RekonsiliasiDto | null;
 }

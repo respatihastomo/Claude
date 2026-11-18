@@ -41,6 +41,7 @@ export async function siapkan(db: string, npsn = '20100001'): Promise<Harness> {
     port: 0, databaseUrl: dbUrl('api_tatausaha_login', 'api_uji'), databaseWorkerUrl: dbUrl('worker_tatausaha_login', 'worker_uji'),
     broker: 'memory', brokerBrokers: [], jwtPublicKey: await exportSPKI(publicKey), jwtIssuer: 'arkas-identitas', jwtAudience: 'arkas-api',
     devEvents: true, internalEventsToken: TOKEN_INTERNAL, outboxIntervalMs: 100000, serviceName: 'svc-penatausahaan',
+    tutupSebelumAkhirBulan: true,
   }, { broker, logger: process.env.UJI_LOG ? undefined : false });
   await A.app.init();
   const http = request(A.app.getHttpServer());

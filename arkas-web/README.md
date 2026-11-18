@@ -1,10 +1,11 @@
 # ARKAS Web — monorepo microservices
 
 Implementasi bertahap dari *Dokumen Rancangan Teknis ARKAS Berbasis Web (Edisi Microservices)*.
-Isi saat ini: **irisan vertikal 1–2 `svc-penatausahaan`** — RKAS disahkan → catat penerimaan/tarik tunai/belanja → persetujuan Kepala Sekolah → event `TransaksiDisetujui`.
+Isi saat ini: **irisan vertikal 1–3 `svc-penatausahaan`** — RKAS disahkan → catat penerimaan/tarik tunai/belanja → persetujuan Kepala Sekolah → event `TransaksiDisetujui`.
 Rincian cakupan, alur, dan keputusan:
 - [`docs/irisan-1-penatausahaan.md`](docs/irisan-1-penatausahaan.md) — BKU, belanja, persetujuan
 - [`docs/irisan-2-setor-pajak.md`](docs/irisan-2-setor-pajak.md) — setor pajak (NTPN) & BKP Pajak
+- [`docs/irisan-3-penutupan-buku-kas.md`](docs/irisan-3-penutupan-buku-kas.md) — penutupan buku kas bulanan, rekonsiliasi, berita acara
 
 ```
 apps/
