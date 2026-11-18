@@ -6,20 +6,21 @@ import { Ringkasan } from '@/components/ringkasan';
 import { TabelBku } from '@/components/tabel-bku';
 import { Kartu, Spanduk, Tombol, cx } from '@/components/ui';
 import { WizardBelanja } from '@/components/wizard-belanja';
+import { PanelPajak } from '@/components/panel-pajak';
 import { GalatApi } from '@/lib/api';
 import { Buku, useBku, usePutuskan, useRingkasan } from '@/lib/hooks';
 
-const TAB = [{ id: undefined, label: 'Buku Kas Umum' }, { id: 'TUNAI', label: 'BKP Tunai' }, { id: 'BANK', label: 'BKP Bank' }] as const;
+const TAB = [{ id: undefined, label: 'Buku Kas Umum' }, { id: 'TUNAI', label: 'BKP Tunai' }, { id: 'BANK', label: 'BKP Bank' }, { id: 'PAJAK', label: 'BKP Pajak' }] as const;
 
 export function HalamanBku({ npsn, tahun, peran, namaPengguna }: { npsn: string; tahun: number; peran: 'BENDAHARA' | 'KEPSEK'; namaPengguna: string }) {
   const router = useRouter();
   const buku: Buku = { npsn, tahun, sumberDanaKode: 'BOSP_REG' };
-  const [tab, setTab] = useState<'TUNAI' | 'BANK' | undefined>();
+  const [tab, setTab] = useState<'TUNAI' | 'BANK' | 'PAJAK' | undefined>();
   const [wizard, setWizard] = useState(false);
   const [mutasi, setMutasi] = useState<{ jenis: JenisMutasi; nilai?: number } | null>(null);
   const [sibuk, setSibuk] = useState<string>();
   const ringkasan = useRingkasan(buku);
-  const bku = useBku(buku, tab);
+  const bku = useBku(buku, tab === 'PAJAK' ? undefined : tab);
   const putuskan = usePutuskan(buku);
   const galat = [ringkasan.error, bku.error, putuskan.error].find((e) => e instanceof GalatApi) as GalatApi | undefined;
 
@@ -85,7 +86,8 @@ export function HalamanBku({ npsn, tahun, peran, namaPengguna }: { npsn: string;
               <span className="text-sm font-medium text-warning">{ringkasan.data.menungguPersetujuan} transaksi menunggu persetujuan Anda</span>
             )}
           </div>
-          {bku.isLoading ? <p className="p-8 text-center text-sm text-muted">Memuat…</p>
+          {tab === 'PAJAK' ? <PanelPajak buku={buku} peran={peran} ringkasan={ringkasan.data} />
+            : bku.isLoading ? <p className="p-8 text-center text-sm text-muted">Memuat…</p>
             : <TabelBku baris={bku.data ?? []} bolehPutuskan={peran === 'KEPSEK'} onPutuskan={onPutuskan} sibuk={sibuk} />}
         </Kartu>
       </main>

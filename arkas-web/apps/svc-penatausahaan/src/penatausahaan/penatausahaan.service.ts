@@ -1,9 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { createHash } from 'node:crypto';
-import { AturanError, cekPemisahanTugas, hitungPajak, HasilPajak, keRupiah, keSen, transisiTransaksi } from '@arkas/aturan';
+import { AturanError, cekPemisahanTugas, hitungPajak, HasilPajak, keRupiah, keSen, transisiTransaksi, validasiSetorPajak } from '@arkas/aturan';
 import { DbContextService, GalatHttp, RequestContext, tulisOutbox } from '@arkas/common-ms';
 import {
-  BarisBkuDto, BarisRkasDto, BuatTransaksiInput, FilterBuku, RingkasanBukuDto, SimulasiPajakInput, TOPIK,
+  BarisBkpPajakDto, BarisBkuDto, BarisRkasDto, BuatTransaksiInput, FilterBuku, FilterPajak, PajakDto, RingkasanBukuDto,
+  SetorPajakInput, SimulasiPajakInput, TOPIK,
   TransaksiDisetujuiData, TransaksiDto,
 } from '@arkas/kontrak';
 import { SKEMA } from '../infra/tokens';
@@ -21,6 +22,7 @@ function hashKanonik(v: unknown): string {
 }
 
 const r2 = (x: number) => keRupiah(keSen(x));
+const NAMA_PAJAK: Record<string, string> = { PPN: 'PPN', PPH21: 'PPh 21', PPH23: 'PPh 23', SSPD: 'pajak daerah' };
 
 @Injectable()
 export class PenatausahaanService {
@@ -146,12 +148,14 @@ export class PenatausahaanService {
       const ke = transisiTransaksi(t.status, aksi);
       cekPemisahanTugas(t.dibuatOleh, ctx.penggunaId);
       await repo.putuskan(tx, id, ke as 'DISETUJUI' | 'DITOLAK', ctx.penggunaId, alasan);
+      // Setoran pajak ditolak (mis. NTPN salah): pajak kembali terutang dan dapat disetor ulang.
+      if (ke === 'DITOLAK' && t.jenis === 'SETOR_PAJAK') await repo.lepaskanPajak(tx, id);
       const baru = (await repo.ambilTransaksi(tx, id))!;
 
       if (ke === 'DISETUJUI') {
         const data: TransaksiDisetujuiData = {
           transaksiId: baru.id, npsn: baru.npsn, tahun: baru.tahun, sumberDanaKode: baru.sumberDanaKode, jenis: baru.jenis,
-          tanggal: baru.tanggal, nilaiBruto: baru.nilaiBruto, totalPajak: baru.totalPajak,
+          tanggal: baru.tanggal, nilaiBruto: baru.nilaiBruto, totalPajak: baru.totalPajak, ntpn: baru.ntpn,
           disetujuiOleh: ctx.penggunaId, disetujuiAt: baru.diputuskanAt!,
           items: baru.items.map((i) => ({ barisId: i.barisId, kodeRekening: i.kodeRekening, jumlah: i.jumlah })),
           pajak: baru.pajak.map((p) => ({ jenis: p.jenis, nilai: p.nilai })),
@@ -162,6 +166,53 @@ export class PenatausahaanService {
       }
       return baru;
     });
+  }
+
+  // ---------- UC-14: setor pajak ----------
+  async setorPajak(ctx: RequestContext, npsn: string, input: SetorPajakInput, idempotencyKey: string): Promise<HasilCatat> {
+    const buku: repo.Buku = { npsn, tahun: input.tahun, sumberDanaKode: input.sumberDanaKode };
+    const hash = hashKanonik({ setorPajak: input });
+    if (Number(input.tanggalSetor.slice(0, 4)) !== input.tahun) throw new AturanError('TANGGAL_DI_LUAR_TAHUN', 'Tanggal setor harus di tahun anggaran buku');
+    if (input.tanggalSetor > hariIniJakarta()) throw new AturanError('TANGGAL_DI_MASA_DEPAN', 'Tanggal setor tidak boleh melewati hari ini');
+
+    return this.db.run(ctx, async (tx) => {
+      await repo.kunciBuku(tx, buku);
+      const lama = await repo.cariIdempoten(tx, buku, idempotencyKey);
+      if (lama) {
+        if (lama.idempotency_hash !== hash) throw new AturanError('IDEMPOTENCY_KEY_DIPAKAI_ULANG', 'Idempotency-Key sudah dipakai untuk permintaan dengan isi berbeda');
+        return { transaksi: (await repo.ambilTransaksi(tx, lama.id))!, replay: true };
+      }
+
+      const periode = await repo.cariPeriode(tx, buku, bulanDari(input.tanggalSetor));
+      if (!periode) throw new AturanError('PERIODE_BELUM_DIBUKA', `Periode bulan ${bulanDari(input.tanggalSetor)} belum dibuka`);
+      if (periode.status !== 'BUKA') throw new AturanError('PERIODE_TERTUTUP', 'Periode buku kas sudah ditutup');
+
+      const pajak = await repo.kunciPajak(tx, buku, input.pajakIds);
+      const { jenis, nilai } = validasiSetorPajak(
+        pajak.map((p) => ({ id: p.id, jenis: p.jenis, nilai: p.nilai, status: p.status, statusBelanja: p.statusBelanja, tanggalBelanja: p.tanggalBelanja })),
+        input.pajakIds, input.tanggalSetor,
+      );
+      const saldo = await repo.saldo(tx, buku);
+      const bukuKas = input.caraBayar === 'TUNAI' ? 'TUNAI' : 'BANK';
+      this.cekSaldo(bukuKas, bukuKas === 'TUNAI' ? saldo.tersedia.tunai : saldo.tersedia.bank, nilai);
+
+      const id = await repo.simpanTransaksi(tx, {
+        buku, periodeId: periode.id, jenis: 'SETOR_PAJAK', tanggal: input.tanggalSetor, caraBayar: input.caraBayar,
+        noBukti: input.ntpn, uraian: `Setor ${NAMA_PAJAK[jenis]} (${input.pajakIds.length} bukti pungut)`, namaToko: null,
+        penjualPunyaNpwp: null, nilaiBruto: nilai, totalPajak: 0, dibuatOleh: ctx.penggunaId,
+        idempotencyKey, idempotencyHash: hash, ntpn: input.ntpn,
+      });
+      await repo.tautkanPajak(tx, input.pajakIds, id, input.ntpn, input.tanggalSetor);
+      return { transaksi: (await repo.ambilTransaksi(tx, id))!, replay: false };
+    });
+  }
+
+  pajak(ctx: RequestContext, npsn: string, f: FilterPajak): Promise<PajakDto[]> {
+    return this.db.run(ctx, (tx) => repo.daftarPajak(tx, { npsn, tahun: f.tahun, sumberDanaKode: f.sumberDanaKode }, f.status));
+  }
+
+  bkpPajak(ctx: RequestContext, npsn: string, f: FilterBuku): Promise<BarisBkpPajakDto[]> {
+    return this.db.run(ctx, (tx) => repo.daftarBkpPajak(tx, { npsn, tahun: f.tahun, sumberDanaKode: f.sumberDanaKode }, f.bulan));
   }
 
   // ---------- Bacaan ----------

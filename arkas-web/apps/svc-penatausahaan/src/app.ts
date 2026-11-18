@@ -8,6 +8,7 @@ import type { Konfigurasi } from './config';
 import { BROKER, KONFIGURASI, POOL_API, POOL_WORKER, SKEMA } from './infra/tokens';
 import { BkuController } from './penatausahaan/bku.controller';
 import { TransaksiController } from './penatausahaan/transaksi.controller';
+import { PajakController } from './penatausahaan/pajak.controller';
 import { PenatausahaanService } from './penatausahaan/penatausahaan.service';
 import { KertasKerjaDisahkanConsumer } from './events/kertas-kerja-disahkan.consumer';
 import { InternalEventsController } from './events/internal-events.controller';
@@ -25,7 +26,7 @@ function modulAplikasi(cfg: Konfigurasi, broker: Broker): DynamicModule {
   class AppModule {}
   return {
     module: AppModule,
-    controllers: [BkuController, TransaksiController, HealthController, ...(cfg.devEvents ? [InternalEventsController] : [])],
+    controllers: [BkuController, TransaksiController, PajakController, HealthController, ...(cfg.devEvents ? [InternalEventsController] : [])],
     providers: [
       { provide: KONFIGURASI, useValue: cfg },
       { provide: BROKER, useValue: broker },

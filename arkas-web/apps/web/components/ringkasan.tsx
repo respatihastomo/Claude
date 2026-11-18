@@ -30,6 +30,7 @@ export function Ringkasan({ r }: { r?: RingkasanBukuDto }) {
           {r?.periodeBerjalan && <LencanaStatus status={r.periodeBerjalan.status} />}
           {!!r?.menungguPersetujuan && <span className="text-xs font-medium text-warning">{r.menungguPersetujuan} menunggu persetujuan</span>}
         </div>
+        <p className="angka mt-1 text-xs text-muted">{r ? (r.pajakTerutang > 0 ? `Pajak belum disetor ${rupiah(r.pajakTerutang)}` : 'Semua pajak sudah disetor') : ''}</p>
       </Kartu>
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { BarisBkuDto, BarisRkasDto, BuatTransaksiInput, RingkasanBukuDto, TransaksiDto } from '@arkas/kontrak';
+import type { BarisBkpPajakDto, PajakDto, SetorPajakInput } from '@arkas/kontrak';
 import { api, kunciIdempoten } from './api';
 
 export interface Buku { npsn: string; tahun: number; sumberDanaKode: string }
@@ -41,3 +42,20 @@ export function usePutuskan(b: Buku) {
 }
 
 export { kunciIdempoten };
+
+// ---------- Irisan 2: setor pajak ----------
+
+export function usePajak(b: Buku) {
+  return useQuery({ queryKey: [...kunciBuku(b), 'pajak'], queryFn: async () => (await api<{ data: PajakDto[] }>(`/sekolah/${b.npsn}/pajak?${qs(b)}`)).data.data });
+}
+export function useBkpPajak(b: Buku) {
+  return useQuery({ queryKey: [...kunciBuku(b), 'bkp-pajak'], queryFn: async () => (await api<{ data: BarisBkpPajakDto[] }>(`/sekolah/${b.npsn}/bkp/pajak?${qs(b)}`)).data.data });
+}
+export function useSetorPajak(b: Buku) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ input, kunci }: { input: SetorPajakInput; kunci: string }) =>
+      (await api<TransaksiDto>(`/sekolah/${b.npsn}/pajak/setor`, { method: 'POST', json: input, headers: { 'Idempotency-Key': kunci } })).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: kunciBuku(b) }),
+  });
+}

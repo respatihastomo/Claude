@@ -1,7 +1,7 @@
 import type { PoolClient } from 'pg';
 import type { AturanPajakRekening, JenisPajak } from '@arkas/aturan';
 import type {
-  BarisBkuDto, BarisRkasDto, ItemTransaksiDto, RincianPajakDto, RingkasanBukuDto, TransaksiDto,
+  BarisBkpPajakDto, PajakDto, BarisBkuDto, BarisRkasDto, ItemTransaksiDto, RincianPajakDto, RingkasanBukuDto, TransaksiDto,
 } from '@arkas/kontrak';
 
 /** Repository SQL db_tatausaha. Semua fungsi menerima `tx` dari DbContextService sehingga RLS berlaku. */
@@ -80,16 +80,16 @@ export async function saldo(tx: PoolClient, b: Buku) {
 export interface TransaksiBaru {
   buku: Buku; periodeId: string; jenis: string; tanggal: string; caraBayar: string | null; noBukti: string | null;
   uraian: string; namaToko: string | null; penjualPunyaNpwp: boolean | null; nilaiBruto: number; totalPajak: number;
-  dibuatOleh: string; idempotencyKey: string; idempotencyHash: string;
+  dibuatOleh: string; idempotencyKey: string; idempotencyHash: string; ntpn?: string | null;
 }
 
 export async function simpanTransaksi(tx: PoolClient, t: TransaksiBaru): Promise<string> {
   const r = await tx.query<{ id: string }>(
     `INSERT INTO tatausaha.transaksi (tahun, npsn, sumber_dana_kode, periode_id, jenis, tanggal, cara_bayar, no_bukti, uraian,
-       nama_toko, penjual_punya_npwp, nilai_bruto, total_pajak, dibuat_oleh, idempotency_key, idempotency_hash)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id`,
+       nama_toko, penjual_punya_npwp, nilai_bruto, total_pajak, dibuat_oleh, idempotency_key, idempotency_hash, ntpn)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING id`,
     [t.buku.tahun, t.buku.npsn, t.buku.sumberDanaKode, t.periodeId, t.jenis, t.tanggal, t.caraBayar, t.noBukti, t.uraian,
-      t.namaToko, t.penjualPunyaNpwp, t.nilaiBruto, t.totalPajak, t.dibuatOleh, t.idempotencyKey, t.idempotencyHash],
+      t.namaToko, t.penjualPunyaNpwp, t.nilaiBruto, t.totalPajak, t.dibuatOleh, t.idempotencyKey, t.idempotencyHash, t.ntpn ?? null],
   );
   return r.rows[0].id;
 }
@@ -118,7 +118,7 @@ interface BarisTransaksi {
   cara_bayar: TransaksiDto['caraBayar']; no_bukti: string | null; uraian: string; nama_toko: string | null;
   penjual_punya_npwp: boolean | null; nilai_bruto: string; total_pajak: string; status: TransaksiDto['status'];
   dibuat_oleh: string; dibuat_at: Date; diputuskan_oleh: string | null; diputuskan_at: Date | null;
-  alasan_tolak: string | null; row_version: number;
+  alasan_tolak: string | null; row_version: number; ntpn: string | null;
 }
 
 export async function ambilTransaksi(tx: PoolClient, id: string, kunci = false): Promise<TransaksiDto | undefined> {
@@ -134,7 +134,8 @@ export async function ambilTransaksi(tx: PoolClient, id: string, kunci = false):
     [t.id, t.tahun],
   );
   const pajak = await tx.query<{ jenis: RincianPajakDto['jenis']; tarif: string; dpp: string; nilai: string; status: 'DIPUNGUT' | 'DISETOR' }>(
-    `SELECT jenis, tarif, dpp, nilai, status FROM tatausaha.pajak WHERE transaksi_id = $1 AND tahun = $2 ORDER BY jenis, tarif`,
+    // belanja: pajak yang dipungutnya; setor pajak: pajak yang ditautkan ke setoran ini
+    `SELECT jenis, tarif, dpp, nilai, status FROM tatausaha.pajak WHERE (transaksi_id = $1 OR setor_transaksi_id = $1) AND tahun = $2 ORDER BY jenis, tarif, id`,
     [t.id, t.tahun],
   );
   const bruto = n(t.nilai_bruto);
@@ -142,7 +143,7 @@ export async function ambilTransaksi(tx: PoolClient, id: string, kunci = false):
   return {
     id: t.id, npsn: t.npsn, tahun: t.tahun, sumberDanaKode: t.sumber_dana_kode, jenis: t.jenis, tanggal: tgl(t.tanggal),
     caraBayar: t.cara_bayar, noBukti: t.no_bukti, uraian: t.uraian, namaToko: t.nama_toko, penjualPunyaNpwp: t.penjual_punya_npwp,
-    nilaiBruto: bruto, totalPajak: pj, nilaiNetto: Math.round((bruto - pj) * 100) / 100, status: t.status,
+    nilaiBruto: bruto, totalPajak: pj, nilaiNetto: Math.round((bruto - pj) * 100) / 100, status: t.status, ntpn: t.ntpn,
     dibuatOleh: t.dibuat_oleh, dibuatAt: t.dibuat_at.toISOString(), diputuskanOleh: t.diputuskan_oleh,
     diputuskanAt: t.diputuskan_at?.toISOString() ?? null, alasanTolak: t.alasan_tolak, versi: t.row_version,
     items: items.rows.map<ItemTransaksiDto>((i) => ({
@@ -208,12 +209,14 @@ export async function daftarRkas(tx: PoolClient, b: Buku): Promise<BarisRkasDto[
 
 export async function ringkasan(tx: PoolClient, b: Buku, bulanIni: number): Promise<RingkasanBukuDto> {
   const s = await saldo(tx, b);
-  const agg = await tx.query<{ pagu: string; realisasi: string; menunggu: string }>(
+  const agg = await tx.query<{ pagu: string; realisasi: string; menunggu: string; terutang: string }>(
     `SELECT
        (SELECT coalesce(sum(total), 0) FROM tatausaha.rkas_baris_sah WHERE aktif AND npsn = $1 AND tahun = $2 AND sumber_dana_kode = $3) AS pagu,
        (SELECT coalesce(sum(i.jumlah), 0) FROM tatausaha.item_transaksi i JOIN tatausaha.transaksi t ON t.id = i.transaksi_id AND t.tahun = i.tahun
          WHERE t.npsn = $1 AND t.tahun = $2 AND t.sumber_dana_kode = $3 AND t.status = 'DISETUJUI') AS realisasi,
-       (SELECT count(*) FROM tatausaha.transaksi WHERE npsn = $1 AND tahun = $2 AND sumber_dana_kode = $3 AND status = 'DICATAT') AS menunggu`,
+       (SELECT count(*) FROM tatausaha.transaksi WHERE npsn = $1 AND tahun = $2 AND sumber_dana_kode = $3 AND status = 'DICATAT') AS menunggu,
+       (SELECT coalesce(sum(p.nilai), 0) FROM tatausaha.pajak p JOIN tatausaha.transaksi t ON t.id = p.transaksi_id AND t.tahun = p.tahun
+         WHERE p.npsn = $1 AND p.tahun = $2 AND p.sumber_dana_kode = $3 AND t.status = 'DISETUJUI' AND p.status = 'DIPUNGUT') AS terutang`,
     [b.npsn, b.tahun, b.sumberDanaKode],
   );
   const per = await tx.query<{ bulan: number; status: 'BUKA' | 'DITUTUP' }>(
@@ -225,6 +228,97 @@ export async function ringkasan(tx: PoolClient, b: Buku, bulanIni: number): Prom
   return {
     npsn: b.npsn, tahun: b.tahun, sumberDanaKode: b.sumberDanaKode, periodeBerjalan: per.rows[0] ?? null,
     saldo: { tunai: s.resmi.tunai, bank: s.resmi.bank, total: Math.round((s.resmi.tunai + s.resmi.bank) * 100) / 100 },
-    saldoTersedia: s.tersedia, pagu: n(a.pagu), realisasi: n(a.realisasi), menungguPersetujuan: n(a.menunggu),
+    saldoTersedia: s.tersedia, pagu: n(a.pagu), realisasi: n(a.realisasi), menungguPersetujuan: n(a.menunggu), pajakTerutang: n(a.terutang),
   };
+}
+
+// ---------- Irisan 2: setor pajak ----------
+
+interface BarisPajak {
+  id: string; jenis: PajakDto['jenis']; tarif: string; dpp: string; nilai: string; status: 'DIPUNGUT' | 'DISETOR';
+  transaksi_id: string; tanggal_belanja: Date; no_bukti: string | null; nama_toko: string | null; uraian_belanja: string;
+  cara_bayar: string | null; status_belanja: PajakDto['statusBelanja']; ntpn: string | null; tanggal_setor: Date | null;
+  setor_transaksi_id: string | null; status_setor: PajakDto['statusSetor'];
+}
+
+const SQL_PAJAK = `
+  SELECT p.id, p.jenis, p.tarif, p.dpp, p.nilai, p.status, p.transaksi_id, b.tanggal AS tanggal_belanja, b.no_bukti, b.nama_toko,
+         b.uraian AS uraian_belanja, b.cara_bayar, b.status AS status_belanja, p.ntpn, p.tanggal_setor, p.setor_transaksi_id,
+         s.status AS status_setor
+  FROM tatausaha.pajak p
+  JOIN tatausaha.transaksi b ON b.id = p.transaksi_id AND b.tahun = p.tahun
+  LEFT JOIN tatausaha.transaksi s ON s.id = p.setor_transaksi_id AND s.tahun = p.tahun`;
+
+const kePajakDto = (x: BarisPajak): PajakDto => ({
+  id: x.id, jenis: x.jenis, tarif: n(x.tarif), dpp: n(x.dpp), nilai: n(x.nilai), status: x.status, transaksiId: x.transaksi_id,
+  tanggalBelanja: tgl(x.tanggal_belanja), noBukti: x.no_bukti, namaToko: x.nama_toko, uraianBelanja: x.uraian_belanja,
+  bukuPungut: x.cara_bayar === 'TUNAI' ? 'TUNAI' : 'BANK', statusBelanja: x.status_belanja, ntpn: x.ntpn,
+  tanggalSetor: x.tanggal_setor ? tgl(x.tanggal_setor) : null, setorTransaksiId: x.setor_transaksi_id, statusSetor: x.status_setor,
+});
+
+/** Daftar pajak buku (belanja DITOLAK tidak ditampilkan karena pajaknya tidak pernah dipungut). */
+export async function daftarPajak(tx: PoolClient, b: Buku, status?: 'DIPUNGUT' | 'DISETOR'): Promise<PajakDto[]> {
+  const r = await tx.query<BarisPajak>(
+    `${SQL_PAJAK} WHERE p.npsn = $1 AND p.tahun = $2 AND p.sumber_dana_kode = $3 AND b.status <> 'DITOLAK' AND ($4::text IS NULL OR p.status = $4)
+     ORDER BY b.tanggal, b.dibuat_at, p.jenis, p.id`,
+    [b.npsn, b.tahun, b.sumberDanaKode, status ?? null],
+  );
+  return r.rows.map(kePajakDto);
+}
+
+/** Mengunci baris pajak yang akan disetor (FOR UPDATE) agar tidak disetor ganda oleh permintaan bersamaan. */
+export async function kunciPajak(tx: PoolClient, b: Buku, ids: string[]): Promise<PajakDto[]> {
+  const r = await tx.query<BarisPajak>(
+    `${SQL_PAJAK} WHERE p.id = ANY($4::uuid[]) AND p.npsn = $1 AND p.tahun = $2 AND p.sumber_dana_kode = $3 FOR UPDATE OF p`,
+    [b.npsn, b.tahun, b.sumberDanaKode, ids],
+  );
+  return r.rows.map(kePajakDto);
+}
+
+export async function tautkanPajak(tx: PoolClient, ids: string[], setorId: string, ntpn: string, tanggal: string): Promise<void> {
+  await tx.query(
+    `UPDATE tatausaha.pajak SET status = 'DISETOR', setor_transaksi_id = $2, ntpn = $3, tanggal_setor = $4 WHERE id = ANY($1::uuid[])`,
+    [ids, setorId, ntpn, tanggal],
+  );
+}
+
+/** Dipanggil saat setoran DITOLAK: pajak kembali terutang. */
+export async function lepaskanPajak(tx: PoolClient, setorId: string): Promise<void> {
+  await tx.query(
+    `UPDATE tatausaha.pajak SET status = 'DIPUNGUT', setor_transaksi_id = NULL, ntpn = NULL, tanggal_setor = NULL WHERE setor_transaksi_id = $1`,
+    [setorId],
+  );
+}
+
+/** Buku Kas Pembantu Pajak dengan saldo pajak berjalan (pungut dari belanja disetujui, setor dari setoran disetujui). */
+export async function daftarBkpPajak(tx: PoolClient, b: Buku, bulan?: number): Promise<BarisBkpPajakDto[]> {
+  const r = await tx.query<{
+    transaksi_id: string; tanggal: Date; no_bukti: string | null; uraian: string; jenis: BarisBkpPajakDto['jenis']; ntpn: string | null;
+    penerimaan: string; pengeluaran: string; status: BarisBkpPajakDto['status']; saldo: string | null;
+  }>(
+    `WITH m AS (
+       SELECT b.id AS transaksi_id, b.tanggal, b.dibuat_at, b.no_bukti, 'Pungut ' || p.jenis || ' — ' || b.uraian AS uraian, p.jenis,
+              NULL::char(16) AS ntpn, p.nilai AS penerimaan, 0::numeric AS pengeluaran, b.status, 1 AS urut
+       FROM tatausaha.pajak p JOIN tatausaha.transaksi b ON b.id = p.transaksi_id AND b.tahun = p.tahun
+       WHERE p.npsn = $1 AND p.tahun = $2 AND p.sumber_dana_kode = $3 AND b.status <> 'DITOLAK' AND p.nilai > 0
+       UNION ALL
+       SELECT s.id, s.tanggal, s.dibuat_at, s.no_bukti, s.uraian, (SELECT min(p.jenis) FROM tatausaha.pajak p WHERE p.setor_transaksi_id = s.id),
+              s.ntpn, 0, s.nilai_bruto, s.status, 2
+       FROM tatausaha.transaksi s
+       WHERE s.npsn = $1 AND s.tahun = $2 AND s.sumber_dana_kode = $3 AND s.jenis = 'SETOR_PAJAK' AND s.status <> 'DITOLAK'
+     ), j AS (
+       SELECT *, CASE WHEN status = 'DISETUJUI'
+                   THEN sum(CASE WHEN status = 'DISETUJUI' THEN penerimaan - pengeluaran ELSE 0 END)
+                        OVER (ORDER BY tanggal, dibuat_at, transaksi_id, urut, jenis ROWS UNBOUNDED PRECEDING) END AS saldo
+       FROM m
+     )
+     SELECT transaksi_id, tanggal, no_bukti, uraian, jenis, ntpn, penerimaan, pengeluaran, status, saldo
+     FROM j WHERE ($4::int IS NULL OR extract(month FROM tanggal) = $4)
+     ORDER BY tanggal, dibuat_at, transaksi_id, urut, jenis`,
+    [b.npsn, b.tahun, b.sumberDanaKode, bulan ?? null],
+  );
+  return r.rows.map((x) => ({
+    transaksiId: x.transaksi_id, tanggal: tgl(x.tanggal), noBukti: x.no_bukti, uraian: x.uraian, jenis: x.jenis, ntpn: x.ntpn,
+    penerimaan: n(x.penerimaan), pengeluaran: n(x.pengeluaran), status: x.status, saldo: x.saldo === null ? null : n(x.saldo),
+  }));
 }

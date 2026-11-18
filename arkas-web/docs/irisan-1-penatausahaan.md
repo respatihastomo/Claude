@@ -15,7 +15,7 @@ Sumber rencana: *Konversi ARKAS Menjadi Arsitektur Microservices* (Google Drive)
 | RLS per NPSN, kredensial terpisah API vs pekerja, trigger integritas, partisi per tahun, larangan hapus | 7.6, 7.7, 13.4 |
 | Halaman web BKU + laci wizard belanja + persetujuan | 10.2–10.5 |
 
-**Belum termasuk (irisan berikutnya):** setor pajak/NTPN & BKP Pajak (UC-14), penutupan buku & rekonsiliasi + `PeriodeDitutup` (UC-15), transaksi Mitra SIPLah & koreksi pembalik (UC-12), `PenyaluranDicatat`, unggah bukti ke S3 (tabel `bukti`), konsumen `ReferensiDiubah` (tarif pajak masih seed dev), cakupan Dinas/Direktorat di RLS, OpenTelemetry, Helm/Kong.
+**Belum termasuk (irisan berikutnya):** ~~setor pajak/NTPN & BKP Pajak (UC-14)~~ (selesai di irisan 2), penutupan buku & rekonsiliasi + `PeriodeDitutup` (UC-15), transaksi Mitra SIPLah & koreksi pembalik (UC-12), `PenyaluranDicatat`, unggah bukti ke S3 (tabel `bukti`), konsumen `ReferensiDiubah` (tarif pajak masih seed dev), cakupan Dinas/Direktorat di RLS, OpenTelemetry, Helm/Kong.
 
 ## Alur
 

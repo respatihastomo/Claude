@@ -64,8 +64,10 @@ export interface TransaksiDisetujuiData {
   npsn: string;
   tahun: number;
   sumberDanaKode: string;
-  jenis: 'PENERIMAAN' | 'TARIK_TUNAI' | 'SETOR_TUNAI' | 'BELANJA';
+  jenis: 'PENERIMAAN' | 'TARIK_TUNAI' | 'SETOR_TUNAI' | 'BELANJA' | 'SETOR_PAJAK';
   tanggal: string;
+  /** hanya untuk SETOR_PAJAK */
+  ntpn?: string | null;
   nilaiBruto: number;
   totalPajak: number;
   disetujuiOleh: string;
