@@ -9,6 +9,7 @@ const KODE_TRIGGER = new Set([
   'PERIODE_SEBELUMNYA_BELUM_DITUTUP', 'REKONSILIASI_BELUM_ADA', 'PEMISAHAN_TUGAS',
   'KERTAS_KERJA_TERKUNCI', 'PAGU_TERLAMPAUI', 'TRANSISI_TIDAK_SAH', 'KERTAS_KERJA_FINAL', 'KERTAS_KERJA_TIDAK_DAPAT_DIUBAH',
   'LAPORAN_FINAL', 'LAPORAN_BELUM_SIAP', 'LAPORAN_TIDAK_DAPAT_DIUBAH',
+  'PERAN_SUDAH_DICABUT', 'PERAN_TIDAK_DAPAT_DIUBAH',
 ]);
 
 interface PgError { code?: string; message?: string; detail?: string; constraint?: string }
@@ -30,6 +31,9 @@ export function terjemahkanGalatPg(e: unknown): unknown {
   // `detail` tidak tersedia bagi role tanpa hak SELECT pada kolom kunci, jadi dicocokkan dari nama indeks.
   if (pe.code === '23505' && (pe.constraint === 'ux_transaksi_ntpn' || /^transaksi_\d{4}_ntpn_tahun_idx$/.test(pe.constraint ?? ''))) {
     return new AturanError('NTPN_SUDAH_DIPAKAI', 'NTPN ini sudah dipakai untuk setoran lain');
+  }
+  if (pe.code === '23505' && pe.constraint === 'ux_peran_aktif') {
+    return new AturanError('PERAN_SUDAH_ADA', 'Pengguna sudah memiliki peran ini dengan cakupan yang sama');
   }
   if (pe.code === '42501' && /row-level security/.test(pe.message ?? '')) {
     return new AksesDitolakDbError('Ditolak kebijakan akses data (RLS)');

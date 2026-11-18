@@ -7,6 +7,7 @@ export interface RequestContext {
   npsn?: string;
   wilayahKode?: string;
   direktoratIds: string[];
+  ditjenKode?: string;
   ip: string;
   requestId: string;
   traceparent?: string;

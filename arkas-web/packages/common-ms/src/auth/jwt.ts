@@ -10,6 +10,9 @@ export const KlaimInternal = z.object({
   npsn: z.string().regex(/^\d{8}$/).optional(),
   wilayah: z.string().optional(),
   direktorat: z.array(z.string()).default([]),
+  ditjen: z.string().optional(),
+  /** id sesi svc-identitas */
+  sid: z.string().optional(),
 });
 export type KlaimInternal = z.infer<typeof KlaimInternal>;
 

@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { BarisKertasKerjaDto } from '@arkas/kontrak';
 import { ComplianceBar } from '@/components/compliance-bar';
-import { Kepala, PeranUi } from '@/components/kepala';
+import type { MeDto } from '@arkas/kontrak';
+import { Kepala } from '@/components/kepala';
 import { LaciBaris } from '@/components/laci-baris';
 import { Kartu, Spanduk, Tombol, cx } from '@/components/ui';
 import { GalatApi } from '@/lib/api';
@@ -17,7 +18,8 @@ const STATUS: Record<string, [string, string]> = {
 };
 
 /** UC-03..UC-09 — penyusunan, pengajuan, penelaahan, dan pengesahan kertas kerja (RKAS). */
-export function HalamanPerencanaan({ npsn, tahun, peran, namaPengguna }: { npsn: string; tahun: number; peran: PeranUi; namaPengguna: string }) {
+export function HalamanPerencanaan({ npsn, tahun, me }: { npsn: string; tahun: number; me: MeDto }) {
+  const peran = me.peranAktif!.peran;
   const buku: Buku = { npsn, tahun, sumberDanaKode: 'BOSP_REG' };
   const daftar = useDaftarKk(buku);
   const [dipilih, setDipilih] = useState<string>();
@@ -28,7 +30,7 @@ export function HalamanPerencanaan({ npsn, tahun, peran, namaPengguna }: { npsn:
   const aksi = useAksiKk();
   const [laci, setLaci] = useState<{ awal?: BarisKertasKerjaDto } | null>(null);
   const galat = aksi.error instanceof GalatApi ? aksi.error.problem : (daftar.error instanceof GalatApi ? daftar.error.problem : undefined);
-  const penyusun = peran === 'BENDAHARA';
+  const penyusun = peran === 'BENDAHARA' || peran === 'OPERATOR';
   const bisaUbah = penyusun && kk?.status === 'DRAF';
   const adaTerbuka = daftar.data?.some((k) => k.status === 'DRAF' || k.status === 'DIAJUKAN');
 
@@ -42,7 +44,7 @@ export function HalamanPerencanaan({ npsn, tahun, peran, namaPengguna }: { npsn:
 
   return (
     <div className="min-h-screen">
-      <Kepala npsn={npsn} judul={`Kertas Kerja (RKAS) — BOSP Reguler ${tahun}`} peran={peran} namaPengguna={namaPengguna} />
+      <Kepala npsn={npsn} judul={`Kertas Kerja (RKAS) — BOSP Reguler ${tahun}`} me={me} />
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6">
         {peran === 'VERIFIKATOR_DINAS' && (
           <Kartu className="p-4">

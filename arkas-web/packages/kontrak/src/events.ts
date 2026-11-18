@@ -20,6 +20,8 @@ export const TOPIK = {
   TRANSAKSI_DISETUJUI: 'arkas.tatausaha.transaksi-disetujui',
   PERIODE_DITUTUP: 'arkas.tatausaha.periode-ditutup',
   LAPORAN_DITANDATANGANI: 'arkas.pelaporan.laporan-ditandatangani',
+  PENGGUNA_DIBUAT: 'arkas.identitas.pengguna-dibuat',
+  PERAN_DIUBAH: 'arkas.identitas.peran-diubah',
 } as const;
 
 export const CloudEventSchema = z.object({
@@ -123,4 +125,12 @@ export interface LaporanDitandatanganiData {
 /** Diterbitkan svc-perencanaan saat sekolah mengajukan kertas kerja; dikonsumsi svc-integrasi (notifikasi Verifikator Dinas). */
 export interface KertasKerjaDiajukanData {
   kertasKerjaId: string; npsn: string; tahun: number; sumberDanaKode: string; versi: number; totalAnggaran: number; diajukanOleh: string; diajukanAt: string;
+}
+
+/** svc-identitas (3.4): pengguna baru terdaftar. Tanpa data pribadi selain yang diperlukan pelanggan (svc-audit). */
+export interface PenggunaDibuatData { penggunaId: string; dibuatOleh: string; at: string }
+/** svc-identitas: peran diberikan atau dicabut. */
+export interface PeranDiubahData {
+  penggunaId: string; peranPenggunaId: string; aksi: 'BERI' | 'CABUT'; peran: string;
+  npsn: string | null; wilayahKode: string | null; direktoratKode: string | null; ditjenKode: string | null; oleh: string; at: string; alasan?: string;
 }

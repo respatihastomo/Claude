@@ -1,5 +1,9 @@
 import { redirect } from 'next/navigation';
+import { berandaPeran, wajibPeran } from '@/lib/sesi-server';
 
-export default function Beranda() {
-  redirect(`/sekolah/${process.env.DEV_NPSN ?? '20100001'}/penatausahaan/bku`);
+export const dynamic = 'force-dynamic';
+
+export default async function Beranda() {
+  const me = await wajibPeran('/');
+  redirect(berandaPeran(me.peranAktif));
 }

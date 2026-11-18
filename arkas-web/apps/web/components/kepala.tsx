@@ -1,21 +1,29 @@
 'use client';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import type { MeDto } from '@arkas/kontrak';
+import { cakupanTeks, LABEL_PERAN } from '@/lib/peran';
 import { cx } from './ui';
 
-export type PeranUi = 'BENDAHARA' | 'KEPSEK' | 'VERIFIKATOR_DINAS';
+export type PeranUi = string;
 
-/** Kepala halaman bersama: identitas sekolah, navigasi Penganggaran/Penatausahaan, dan pemilih peran (dev, pengganti SSO). */
-export function Kepala({ npsn, judul, peran, namaPengguna }: { npsn: string; judul: string; peran: PeranUi; namaPengguna: string }) {
-  const router = useRouter();
+/** Kepala halaman: modul sesuai peran aktif, pemilih peran aktif (UC-01, svc-identitas), dan keluar. */
+export function Kepala({ judul, me, npsn }: { judul: string; me: MeDto; npsn?: string }) {
   const path = usePathname();
-  async function gantiPeran(p: string) {
-    await fetch('/api/dev/peran', { method: 'POST', body: JSON.stringify({ peran: p }) });
-    router.refresh();
+  const aktif = me.peranAktif;
+  async function gantiPeran(id: string) {
+    const r = await fetch('/api/v1/me/peran-aktif', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ peranPenggunaId: id }) });
+    if (r.ok) window.location.assign('/');
+  }
+  async function keluar() {
+    await fetch('/api/v1/auth/keluar', { method: 'POST' });
+    window.location.assign('/masuk');
   }
   const menu = [
-    { href: `/sekolah/${npsn}/perencanaan`, label: 'Penganggaran (RKAS)' },
-    { href: `/sekolah/${npsn}/penatausahaan/bku`, label: 'Penatausahaan' },
+    ...(npsn ? [{ href: `/sekolah/${npsn}/perencanaan`, label: 'Penganggaran (RKAS)' }] : []),
+    ...(npsn && aktif?.npsn ? [{ href: `/sekolah/${npsn}/penatausahaan/bku`, label: 'Penatausahaan' }] : []),
+    ...(aktif && ['VERIFIKATOR_DINAS', 'TIM_KERJA'].includes(aktif.peran) ? [{ href: '/penelaahan', label: 'Penelaahan' }] : []),
+    ...(aktif && ['SUPER_ADMIN', 'ADMIN_DITJEN', 'ADMIN_DIREKTORAT', 'ADMIN_DINAS', 'OPERATOR'].includes(aktif.peran) ? [{ href: '/admin/pengguna', label: 'Kelola pengguna' }] : []),
   ];
   return (
     <header className="border-b border-line bg-surface">
@@ -23,16 +31,15 @@ export function Kepala({ npsn, judul, peran, namaPengguna }: { npsn: string; jud
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-primary">ARKAS Web</p>
           <h1 className="font-display text-lg font-bold">{judul}</h1>
-          <p className="angka text-xs text-muted">NPSN {npsn}</p>
+          {aktif && <p className="text-xs text-muted">{cakupanTeks(aktif)}</p>}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="text-xs text-muted" htmlFor="peran">Peran aktif (dev)</label>
-          <select id="peran" value={peran} onChange={(e) => gantiPeran(e.target.value)} className="h-9 rounded-ctl border border-line bg-surface px-2 text-sm">
-            <option value="BENDAHARA">Bendahara</option>
-            <option value="KEPSEK">Kepala Sekolah</option>
-            <option value="VERIFIKATOR_DINAS">Verifikator Dinas</option>
+          <span className="hidden text-sm text-muted md:inline">{me.nama}</span>
+          <label className="sr-only" htmlFor="peran">Peran aktif</label>
+          <select id="peran" value={aktif?.id ?? ''} onChange={(e) => gantiPeran(e.target.value)} className="h-9 max-w-[16rem] rounded-ctl border border-line bg-surface px-2 text-sm">
+            {me.peran.map((p) => <option key={p.id} value={p.id}>{LABEL_PERAN[p.peran] ?? p.peran} · {cakupanTeks(p)}</option>)}
           </select>
-          <span className="hidden text-sm text-muted md:inline">{namaPengguna}</span>
+          <button onClick={keluar} className="h-9 rounded-ctl px-3 text-sm text-muted hover:bg-canvas hover:text-ink">Keluar</button>
         </div>
       </div>
       <nav className="mx-auto flex max-w-7xl gap-1 px-4 sm:px-6" aria-label="Modul">

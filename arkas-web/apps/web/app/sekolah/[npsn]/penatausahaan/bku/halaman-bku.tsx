@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { DialogMutasi, JenisMutasi } from '@/components/dialog-mutasi';
-import { Kepala, PeranUi } from '@/components/kepala';
+import type { MeDto } from '@arkas/kontrak';
+import { Kepala } from '@/components/kepala';
 import { Ringkasan } from '@/components/ringkasan';
 import { TabelBku } from '@/components/tabel-bku';
 import { Kartu, Spanduk, Tombol, cx } from '@/components/ui';
@@ -14,19 +15,12 @@ import { Buku, useBku, usePutuskan, useRingkasan } from '@/lib/hooks';
 
 const TAB = [{ id: undefined, label: 'Buku Kas Umum' }, { id: 'TUNAI', label: 'BKP Tunai' }, { id: 'BANK', label: 'BKP Bank' }, { id: 'PAJAK', label: 'BKP Pajak' }, { id: 'TUTUP', label: 'Penutupan Buku Kas' }, { id: 'LAPORAN', label: 'Laporan' }] as const;
 
-export function HalamanBku({ npsn, tahun, peran: peranUi, namaPengguna }: { npsn: string; tahun: number; peran: PeranUi; namaPengguna: string }) {
-  if (peranUi === 'VERIFIKATOR_DINAS') {
-    return (
-      <div className="min-h-screen">
-        <Kepala npsn={npsn} judul="Penatausahaan" peran={peranUi} namaPengguna={namaPengguna} />
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6"><Spanduk nada="info" judul="Penatausahaan dikelola sekolah">Verifikator Dinas menelaah dan mengesahkan RKAS di menu Penganggaran.</Spanduk></main>
-      </div>
-    );
-  }
-  return <IsiBku npsn={npsn} tahun={tahun} peran={peranUi} namaPengguna={namaPengguna} />;
+export function HalamanBku({ npsn, tahun, me }: { npsn: string; tahun: number; me: MeDto }) {
+  return <IsiBku npsn={npsn} tahun={tahun} me={me} />;
 }
 
-function IsiBku({ npsn, tahun, peran, namaPengguna }: { npsn: string; tahun: number; peran: 'BENDAHARA' | 'KEPSEK'; namaPengguna: string }) {
+function IsiBku({ npsn, tahun, me }: { npsn: string; tahun: number; me: MeDto }) {
+  const peran = me.peranAktif!.peran;
   const buku: Buku = { npsn, tahun, sumberDanaKode: 'BOSP_REG' };
   const [tab, setTab] = useState<'TUNAI' | 'BANK' | 'PAJAK' | 'TUTUP' | 'LAPORAN' | undefined>();
   const [wizard, setWizard] = useState(false);
@@ -47,7 +41,7 @@ function IsiBku({ npsn, tahun, peran, namaPengguna }: { npsn: string; tahun: num
 
   return (
     <div className="min-h-screen">
-      <Kepala npsn={npsn} judul={`Buku Kas Umum — BOSP Reguler ${tahun}`} peran={peran} namaPengguna={namaPengguna} />
+      <Kepala npsn={npsn} judul={`Buku Kas Umum — BOSP Reguler ${tahun}`} me={me} />
 
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6">
         {ringkasan.data && !ringkasan.data.periodeBerjalan && (
@@ -78,9 +72,9 @@ function IsiBku({ npsn, tahun, peran, namaPengguna }: { npsn: string; tahun: num
               <span className="text-sm font-medium text-warning">{ringkasan.data.menungguPersetujuan} transaksi menunggu persetujuan Anda</span>
             )}
           </div>
-          {tab === 'LAPORAN' ? <PanelLaporan buku={buku} peran={peran} />
-            : tab === 'TUTUP' ? <PanelPenutupan buku={buku} peran={peran} />
-            : tab === 'PAJAK' ? <PanelPajak buku={buku} peran={peran} ringkasan={ringkasan.data} />
+          {tab === 'LAPORAN' ? <PanelLaporan buku={buku} peran={peran as 'BENDAHARA' | 'KEPSEK'} />
+            : tab === 'TUTUP' ? <PanelPenutupan buku={buku} peran={peran as 'BENDAHARA' | 'KEPSEK'} />
+            : tab === 'PAJAK' ? <PanelPajak buku={buku} peran={peran as 'BENDAHARA' | 'KEPSEK'} ringkasan={ringkasan.data} />
             : bku.isLoading ? <p className="p-8 text-center text-sm text-muted">Memuat…</p>
             : <TabelBku baris={bku.data ?? []} bolehPutuskan={peran === 'KEPSEK'} onPutuskan={onPutuskan} sibuk={sibuk} />}
         </Kartu>

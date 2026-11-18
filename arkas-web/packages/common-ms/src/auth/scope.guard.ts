@@ -48,6 +48,7 @@ export class ScopeGuard implements CanActivate {
       npsn: klaim.npsn,
       wilayahKode: klaim.wilayah,
       direktoratIds: klaim.direktorat,
+      ditjenKode: klaim.ditjen,
       ip: req.ip ?? '0.0.0.0',
       requestId: typeof rid === 'string' && /^[0-9a-f-]{36}$/i.test(rid) ? rid : randomUUID(),
       traceparent: typeof req.headers.traceparent === 'string' ? req.headers.traceparent : undefined,

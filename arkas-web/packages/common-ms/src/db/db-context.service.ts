@@ -21,8 +21,9 @@ export class DbContextService {
         `SELECT set_config('app.pengguna_id', $1, true), set_config('app.peran', $2, true),
                 set_config('app.npsn', $3, true), set_config('app.wilayah', $4, true),
                 set_config('app.direktorat', $5, true), set_config('app.ip', $6, true),
-                set_config('app.alasan', $7, true), set_config('app.request_id', $8, true)`,
-        [ctx.penggunaId, ctx.peran, ctx.npsn ?? '', ctx.wilayahKode ?? '', ctx.direktoratIds.join(','), ctx.ip, ctx.alasan ?? '', ctx.requestId],
+                set_config('app.alasan', $7, true), set_config('app.request_id', $8, true),
+                set_config('app.ditjen', $9, true)`,
+        [ctx.penggunaId, ctx.peran, ctx.npsn ?? '', ctx.wilayahKode ?? '', ctx.direktoratIds.join(','), ctx.ip, ctx.alasan ?? '', ctx.requestId, ctx.ditjenKode ?? ''],
       );
       const hasil = await work(client);
       await client.query('COMMIT');
