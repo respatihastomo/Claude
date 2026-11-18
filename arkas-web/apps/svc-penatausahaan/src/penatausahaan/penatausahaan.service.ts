@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { AturanError, cekPemisahanTugas, hitungPajak, HasilPajak, keRupiah, keSen, transisiTransaksi, validasiSetorPajak } from '@arkas/aturan';
 import { DbContextService, GalatHttp, RequestContext, tulisOutbox } from '@arkas/common-ms';
 import {
-  BarisBkpPajakDto, BarisBkuDto, BarisRkasDto, BuatTransaksiInput, FilterBuku, FilterPajak, PajakDto, RingkasanBukuDto,
+  BarisBkpPajakDto, BarisBkuDto, BarisRkasDto, BuatTransaksiInput, FilterBuku, FilterPajak, PajakDto, RingkasanBukuDto, TransaksiDitolakDto,
   SetorPajakInput, SimulasiPajakInput, TOPIK,
   TransaksiDisetujuiData, TransaksiDto,
 } from '@arkas/kontrak';
@@ -223,6 +223,10 @@ export class PenatausahaanService {
 
   bku(ctx: RequestContext, npsn: string, f: FilterBuku & { buku?: 'TUNAI' | 'BANK' }): Promise<BarisBkuDto[]> {
     return this.db.run(ctx, (tx) => repo.daftarBku(tx, { npsn, tahun: f.tahun, sumberDanaKode: f.sumberDanaKode }, f.bulan, f.buku));
+  }
+
+  ditolak(ctx: RequestContext, npsn: string, f: FilterBuku): Promise<TransaksiDitolakDto[]> {
+    return this.db.run(ctx, (tx) => repo.daftarDitolak(tx, { npsn, tahun: f.tahun, sumberDanaKode: f.sumberDanaKode }));
   }
 
   rkas(ctx: RequestContext, npsn: string, f: FilterBuku): Promise<BarisRkasDto[]> {

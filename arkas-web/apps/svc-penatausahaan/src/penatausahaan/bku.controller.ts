@@ -25,6 +25,12 @@ export class BkuController {
     return this.svc.ringkasan(ctx, npsn, f);
   }
 
+  /** Transaksi yang ditolak Kepala Sekolah pada periode yang masih buka, beserta alasannya. */
+  @Get('ditolak')
+  async ditolak(@Ctx() ctx: RequestContext, @Param('npsn', new ZodPipe(Npsn)) npsn: string, @Query(new ZodPipe(FilterBuku)) f: FilterBuku) {
+    return { data: await this.svc.ditolak(ctx, npsn, f) };
+  }
+
   /** Baris RKAS yang disahkan (proyeksi lokal) dengan realisasi & sisa — sumber AccountCodePicker Langkah 2. */
   @Get('rkas')
   async rkas(@Ctx() ctx: RequestContext, @Param('npsn', new ZodPipe(Npsn)) npsn: string, @Query(new ZodPipe(FilterBuku)) f: FilterBuku) {

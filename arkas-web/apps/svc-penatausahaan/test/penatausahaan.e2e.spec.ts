@@ -328,6 +328,12 @@ describe('alur SK-03: RKAS disahkan -> belanja -> persetujuan -> TransaksiDisetu
     expect(t.status).toBe(200);
     expect(t.body).toMatchObject({ status: 'DITOLAK', alasanTolak: 'Nota belum lengkap' });
     expect((await rkas()).find((b) => b.barisId === BARIS.servis)!.sisa).toBe(1_000_000);
+    // Bendahara melihat penolakan beserta alasannya (tidak masuk BKU)
+    const d = await http.get(`/api/v1/sekolah/${NPSN}/bku/ditolak`).query({ tahun: TAHUN, sumberDanaKode: SD }).set(await auth('BENDAHARA', BENDAHARA, NPSN));
+    expect(d.status).toBe(200);
+    expect(d.body.data).toContainEqual(expect.objectContaining({ id: r.body.id, jenis: 'BELANJA', noBukti: 'INV-88', nilaiBruto: 500_000, alasanTolak: 'Nota belum lengkap' }));
+    const bku = await http.get(`/api/v1/sekolah/${NPSN}/bku`).query({ tahun: TAHUN, sumberDanaKode: SD }).set(await auth('BENDAHARA', BENDAHARA, NPSN));
+    expect(bku.body.data.some((x: { transaksiId: string }) => x.transaksiId === r.body.id)).toBe(false);
   });
 
   it('konkurensi: dua belanja bersamaan pada baris yang sama tidak bisa melampaui anggaran', async () => {

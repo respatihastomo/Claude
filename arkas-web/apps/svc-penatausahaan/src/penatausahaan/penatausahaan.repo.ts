@@ -1,7 +1,7 @@
 import type { PoolClient } from 'pg';
 import { AturanPajakRekening, JenisPajak, pilihTarifEfektif } from '@arkas/aturan';
 import type {
-  BarisBkpPajakDto, PajakDto, BarisBkuDto, BarisRkasDto, ItemTransaksiDto, RincianPajakDto, RingkasanBukuDto, TransaksiDto,
+  BarisBkpPajakDto, PajakDto, BarisBkuDto, BarisRkasDto, ItemTransaksiDto, RincianPajakDto, RingkasanBukuDto, TransaksiDitolakDto, TransaksiDto,
 } from '@arkas/kontrak';
 
 /** Repository SQL db_tatausaha. Semua fungsi menerima `tx` dari DbContextService sehingga RLS berlaku. */
@@ -162,6 +162,22 @@ export async function putuskan(
     `UPDATE tatausaha.transaksi SET status = $2, diputuskan_oleh = $3, diputuskan_at = now(), alasan_tolak = $4 WHERE id = $1`,
     [id, status, oleh, alasan],
   );
+}
+
+/** Transaksi DITOLAK pada periode yang masih BUKA (yang sudah ditutup tidak bisa ditindaklanjuti lagi), terbaru dulu. */
+export async function daftarDitolak(tx: PoolClient, b: Buku): Promise<TransaksiDitolakDto[]> {
+  const r = await tx.query<{ id: string; jenis: TransaksiDitolakDto['jenis']; tanggal: Date; no_bukti: string | null; uraian: string;
+    nama_toko: string | null; nilai_bruto: string; alasan_tolak: string | null; diputuskan_at: Date | null }>(
+    `SELECT t.id, t.jenis, t.tanggal, t.no_bukti, t.uraian, t.nama_toko, t.nilai_bruto, t.alasan_tolak, t.diputuskan_at
+     FROM tatausaha.transaksi t JOIN tatausaha.periode p ON p.id = t.periode_id
+     WHERE t.npsn = $1 AND t.tahun = $2 AND t.sumber_dana_kode = $3 AND t.status = 'DITOLAK' AND p.status = 'BUKA'
+     ORDER BY t.diputuskan_at DESC NULLS LAST, t.id LIMIT 50`,
+    [b.npsn, b.tahun, b.sumberDanaKode],
+  );
+  return r.rows.map((x) => ({
+    id: x.id, jenis: x.jenis, tanggal: tgl(x.tanggal), noBukti: x.no_bukti, uraian: x.uraian, namaToko: x.nama_toko,
+    nilaiBruto: n(x.nilai_bruto), alasanTolak: x.alasan_tolak, diputuskanAt: x.diputuskan_at?.toISOString() ?? null,
+  }));
 }
 
 /** BKU dengan saldo berjalan (hanya baris DISETUJUI yang menggerakkan saldo); filter bulan diterapkan setelah saldo dihitung. */

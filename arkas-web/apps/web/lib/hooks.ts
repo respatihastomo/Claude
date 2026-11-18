@@ -1,6 +1,6 @@
 'use client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { BarisBkuDto, BarisRkasDto, BuatTransaksiInput, RingkasanBukuDto, TransaksiDto } from '@arkas/kontrak';
+import type { BarisBkuDto, BarisRkasDto, BuatTransaksiInput, RingkasanBukuDto, TransaksiDitolakDto, TransaksiDto } from '@arkas/kontrak';
 import type { AjukanTutupInput, BarisBkpPajakDto, DetailPeriodeDto, PajakDto, PeriodeDto, SetorPajakInput } from '@arkas/kontrak';
 import type { BarisKertasKerjaInput, DetailKertasKerjaDto, KertasKerjaDto, KomponenDto } from '@arkas/kontrak';
 import { api, kunciIdempoten } from './api';
@@ -16,6 +16,9 @@ export function useRingkasan(b: Buku) {
 }
 export function useBku(b: Buku, buku?: 'TUNAI' | 'BANK') {
   return useQuery({ queryKey: [...kunciBuku(b), 'bku', buku ?? 'SEMUA'], queryFn: async () => (await api<{ data: BarisBkuDto[] }>(`/sekolah/${b.npsn}/bku?${qs(b, { buku })}`)).data.data });
+}
+export function useDitolak(b: Buku, aktif = true) {
+  return useQuery({ queryKey: [...kunciBuku(b), 'ditolak'], enabled: aktif, queryFn: async () => (await api<{ data: TransaksiDitolakDto[] }>(`/sekolah/${b.npsn}/bku/ditolak?${qs(b)}`)).data.data });
 }
 export function useRkas(b: Buku, aktif = true) {
   return useQuery({ queryKey: [...kunciBuku(b), 'rkas'], enabled: aktif, queryFn: async () => (await api<{ data: BarisRkasDto[] }>(`/sekolah/${b.npsn}/bku/rkas?${qs(b)}`)).data.data });

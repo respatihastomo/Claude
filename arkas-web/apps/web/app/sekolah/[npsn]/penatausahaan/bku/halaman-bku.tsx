@@ -10,8 +10,9 @@ import { WizardBelanja } from '@/components/wizard-belanja';
 import { PanelPajak } from '@/components/panel-pajak';
 import { PanelPenutupan } from '@/components/panel-penutupan';
 import { PanelLaporan } from '@/components/panel-laporan';
+import { PanelDitolak } from '@/components/panel-ditolak';
 import { GalatApi } from '@/lib/api';
-import { Buku, useBku, usePutuskan, useRingkasan } from '@/lib/hooks';
+import { Buku, useBku, useDitolak, usePutuskan, useRingkasan } from '@/lib/hooks';
 
 const TAB = [{ id: undefined, label: 'Buku Kas Umum' }, { id: 'TUNAI', label: 'BKP Tunai' }, { id: 'BANK', label: 'BKP Bank' }, { id: 'PAJAK', label: 'BKP Pajak' }, { id: 'TUTUP', label: 'Penutupan Buku Kas' }, { id: 'LAPORAN', label: 'Laporan' }] as const;
 
@@ -29,6 +30,7 @@ function IsiBku({ npsn, tahun, me }: { npsn: string; tahun: number; me: MeDto })
   const ringkasan = useRingkasan(buku);
   const bku = useBku(buku, tab === 'TUNAI' || tab === 'BANK' ? tab : undefined);
   const putuskan = usePutuskan(buku);
+  const ditolak = useDitolak(buku, peran === 'BENDAHARA' || peran === 'KEPSEK');
   const galat = [ringkasan.error, bku.error, putuskan.error].find((e) => e instanceof GalatApi) as GalatApi | undefined;
 
   function onPutuskan(id: string, aksi: 'setujui' | 'tolak') {
@@ -50,6 +52,14 @@ function IsiBku({ npsn, tahun, me }: { npsn: string; tahun: number; me: MeDto })
         {galat && <Spanduk nada="bahaya" judul={galat.problem.detail ?? galat.problem.title}>Kode: {galat.problem.kode}</Spanduk>}
 
         <Ringkasan r={ringkasan.data} />
+
+        {(peran === 'BENDAHARA' || peran === 'KEPSEK') && (
+          <PanelDitolak data={ditolak.data ?? []} untukBendahara={peran === 'BENDAHARA'} onCatatUlang={peran === 'BENDAHARA' && ringkasan.data?.periodeBerjalan?.status === 'BUKA' ? (t) => {
+            if (t.jenis === 'BELANJA') setWizard(true);
+            else if (t.jenis === 'SETOR_PAJAK') setTab('PAJAK');
+            else setMutasi({ jenis: t.jenis, nilai: t.nilaiBruto });
+          } : undefined} />
+        )}
 
         <Kartu>
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">

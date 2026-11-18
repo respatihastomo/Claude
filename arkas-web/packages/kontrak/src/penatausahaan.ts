@@ -78,6 +78,11 @@ export interface TransaksiDto {
   dibuatOleh: string; dibuatAt: string; diputuskanOleh: string | null; diputuskanAt: string | null; alasanTolak: string | null;
   versi: number; items: ItemTransaksiDto[]; pajak: RincianPajakDto[];
 }
+/** Transaksi yang ditolak Kepala Sekolah pada periode yang masih buka — untuk ditindaklanjuti Bendahara. */
+export interface TransaksiDitolakDto {
+  id: string; jenis: JenisTransaksi; tanggal: string; noBukti: string | null; uraian: string; namaToko: string | null;
+  nilaiBruto: number; alasanTolak: string | null; diputuskanAt: string | null;
+}
 export interface BarisBkuDto {
   transaksiId: string; tanggal: string; noBukti: string | null; uraian: string; buku: 'TUNAI' | 'BANK';
   kodeRekening: string | null; penerimaan: number; pengeluaran: number; status: StatusTransaksi; saldo: number | null;
