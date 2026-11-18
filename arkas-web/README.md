@@ -101,5 +101,22 @@ pnpm test
 ```
 Uji integrasi membuat ulang basis data `db_tatausaha_uji` di PostgreSQL sungguhan pada setiap run.
 
+### Uji UI menyeluruh (web)
+
+Menguji halaman sungguhan lewat peramban (Playwright) terhadap tumpukan yang sedang berjalan: enam proses dari bagian *Menjalankan*, ditambah data demo yang bulan berjalannya masih terbuka.
+```bash
+DEMO_TANPA_TUTUP=1 node scripts/isi-demo.mjs 20100001
+```
+```bash
+pnpm --filter @arkas/web e2e
+```
+Cakupan (`apps/web/e2e/`):
+- Admin Dinas menetapkan, membebaskan, lalu memulihkan pajak daerah lewat UI, dan tarif baru terbukti berlaku di simulasi pajak Bendahara (lintas layanan lewat event).
+- Admin Dinas ditolak membuka referensi nasional dan mengatur wilayah lain.
+- Balai mengubah batas komponen dan menerbitkan ulang referensi.
+- Kepala Sekolah menolak transaksi; Bendahara melihat alasannya, dan **Catat ulang** membuka formulir terisi.
+
+Uji memulihkan data yang diubahnya (di blok `finally`), jadi aman dijalankan berulang. Alamat web dapat diganti dengan `WEB_URL`.
+
 ## Kafka / Redpanda
 `BROKER=kafka` dan `BROKER_BROKERS=localhost:19092` setelah `docker compose up -d redpanda`. Adapter Kafka sudah dikompilasi tetapi **belum diuji terhadap broker sungguhan** (lihat dokumen irisan).

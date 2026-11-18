@@ -72,4 +72,13 @@ DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scr
 ```bash
 pnpm --filter @arkas/svc-referensi test
 ```
-Seed dev menerbitkan 36 event saat layanan pertama kali berjalan, sehingga proyeksi di layanan lain langsung terisi. Uji: 9 e2e svc-referensi, + konsumen (identitas 1, perencanaan 4, penatausahaan 5), + 6 unit `pilihTarifEfektif`.
+Seed dev menerbitkan 36 event saat layanan pertama kali berjalan, sehingga proyeksi di layanan lain langsung terisi. Uji: 9 e2e svc-referensi, + konsumen (identitas 1, perencanaan 4, penatausahaan 5), + 6 unit `pilihTarifEfektif`, + 3 uji UI menyeluruh di `apps/web/e2e/referensi.e2e.ts` (halaman `/dinas/pajak-daerah` dan `/admin/referensi`; lihat README, *Uji UI menyeluruh*).
+
+## Halaman web
+
+| Halaman | Peran | Isi |
+|---|---|---|
+| `/dinas/pajak-daerah` | ADMIN_DINAS | Tarif SSPD nasional vs wilayah, tarif yang berlaku di sekolah, laci **Atur** (tarif atau *tidak dipungut*, dasar hukum wajib) |
+| `/admin/referensi` | SUPER_ADMIN | Tab per entitas (komponen, tarif pajak, kode rekening, sekolah, wilayah, direktorat, sumber dana), **Ubah batas** komponen, **Terbitkan ulang ke semua layanan** |
+
+Menu muncul otomatis di kepala halaman sesuai peran aktif. Peran lain yang membuka alamat itu mendapat 404.
