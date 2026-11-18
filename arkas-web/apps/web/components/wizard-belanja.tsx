@@ -202,7 +202,7 @@ export function WizardBelanja({ buku, terbuka, ringkasan, onTutup, onTarikTunai 
             ))}
             <div className="flex justify-between border-t border-line bg-canvas px-4 py-3 text-sm font-semibold"><span>Dibayar ke penyedia</span><span className="angka">{rupiah(netto)}</span></div>
           </div>
-          <p className="text-xs text-muted">Pajak yang dipungut dicatat di BKU sebagai penerimaan pajak dan wajib disetor (BKP Pajak, irisan berikutnya). Unggah foto nota menyusul pada irisan berikutnya.</p>
+          <p className="text-xs text-muted">Pajak yang dipungut dicatat di BKU sebagai penerimaan pajak dan wajib disetor lewat tab BKP Pajak.</p>
         </div>
       )}
 

@@ -1,4 +1,6 @@
-import { keRupiah, keSen } from './uang';
+import { keRupiah, keSen, type Sen } from './uang';
+
+const rp = (sen: Sen) => `Rp ${keRupiah(sen).toLocaleString('id-ID')}`;
 
 /**
  * Kode 6 — validasiKertasKerja (packages/aturan/src/validasi-kertas-kerja.ts).
@@ -60,13 +62,13 @@ export function validasiKertasKerja(i: { pagu: number; baris: BarisValidasi[]; k
       galat.push({ kode: 'JADWAL_KAS_TIDAK_SESUAI', pesan: `Jumlah jadwal kas "${b.uraian}" harus sama dengan totalnya`, barisId: b.id });
     }
     if (b.realisasi !== undefined && t < keSen(b.realisasi)) {
-      galat.push({ kode: 'DI_BAWAH_REALISASI', pesan: `"${b.uraian}" tidak boleh dikurangi di bawah realisasinya (${keRupiah(keSen(b.realisasi))})`, barisId: b.id });
+      galat.push({ kode: 'DI_BAWAH_REALISASI', pesan: `"${b.uraian}" tidak boleh dikurangi di bawah realisasinya (${rp(keSen(b.realisasi))})`, barisId: b.id });
     }
   }
 
   const pagu = keSen(i.pagu);
-  if (total > pagu) galat.push({ kode: 'PAGU_TERLAMPAUI', pesan: `Total anggaran melebihi pagu sebesar ${keRupiah(total - pagu)}` });
-  if (total < pagu) galat.push({ kode: 'SISA_PAGU', pesan: `Masih ada pagu yang belum dianggarkan: ${keRupiah(pagu - total)}` });
+  if (total > pagu) galat.push({ kode: 'PAGU_TERLAMPAUI', pesan: `Total anggaran melebihi pagu sebesar ${rp(total - pagu)}` });
+  if (total < pagu) galat.push({ kode: 'SISA_PAGU', pesan: `Masih ada pagu yang belum dianggarkan: ${rp(pagu - total)}` });
 
   const komponen: RingkasKomponen[] = i.komponen.map((k) => {
     const t = totalPerKomponen.get(k.kode) ?? 0;

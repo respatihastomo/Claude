@@ -3,6 +3,7 @@
 //   svc-perencanaan: aktifkan kertas kerja -> 6 baris -> ajukan (Kepala Sekolah) -> sahkan (Verifikator Dinas)
 //   svc-penatausahaan: (RKAS tiba lewat event) penerimaan, tarik tunai, 3 belanja (PPN, PPh 23), setor PPN, semua disetujui,
 //                      lalu penutupan buku bulan berjalan diajukan & disetujui -> svc-pelaporan membuat laporan.
+// DEMO_TANPA_TUTUP=1: berhenti sebelum penutupan buku (untuk memperagakan penutupan lewat UI).
 // Butuh ketiga layanan berjalan dengan BROKER=http dan TUTUP_SEBELUM_AKHIR_BULAN=true. Pakai: node scripts/isi-demo.mjs [npsn]
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -61,6 +62,7 @@ const ppn = (await panggil('GET', `/sekolah/${npsn}/pajak?tahun=${tahun}&sumberD
 const setor = (await panggil('POST', `/sekolah/${npsn}/pajak/setor`, B, { ...buku, pajakIds: ppn.map((p) => p.id), ntpn: '0A1B2C3D4E5F6A7B', tanggalSetor: hari, caraBayar: 'NON_TUNAI' }, { 'idempotency-key': randomUUID() })).isi;
 await setujui(setor.id);
 
+if (process.env.DEMO_TANPA_TUTUP === '1') { console.log('demo terisi tanpa penutupan buku (DEMO_TANPA_TUTUP=1)'); process.exit(0); }
 const periode = (await panggil('GET', `/sekolah/${npsn}/periode?tahun=${tahun}&sumberDanaKode=BOSP_REG`, B)).isi.data.find((p) => p.status === 'BUKA');
 const d = await panggil('GET', `/periode/${periode.id}`, B);
 const r = d.isi.ringkasan;
