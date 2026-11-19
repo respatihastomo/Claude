@@ -28,7 +28,7 @@ describe('UI transaksi SIPLah (svc-integrasi -> svc-penatausahaan)', () => {
     // baris belanja (+ baris pajaknya) muncul di BKU dengan nomor bukti = transactionId
     const baris = b.getByRole('row', { name: new RegExp(transactionId!) });
     await expect.poll(() => baris.count(), { timeout: 10_000 }).toBeGreaterThan(0);
-    expect(await item.count()).toBe(0);
+    await expect.poll(() => item.count(), { timeout: 10_000 }).toBe(0);
 
     const k = await masuk('kepsek');
     await buka(k, BKU);

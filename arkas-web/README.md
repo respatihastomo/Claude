@@ -1,7 +1,7 @@
 # ARKAS Web — monorepo microservices
 
 Implementasi bertahap dari *Dokumen Rancangan Teknis ARKAS Berbasis Web (Edisi Microservices)*.
-Isi saat ini — **`svc-identitas`** (Tahap 0: SSO, sesi, peran, JWT internal), **`svc-referensi`** (Tahap 0: data induk nasional & pajak daerah, disebar lewat event `ReferensiDiubah`) dan alur Tahap 1 "BOSP Inti" lintas layanan: **`svc-perencanaan`** (RKAS disusun → diajukan → disahkan Dinas) → **`svc-penatausahaan`** (BKU, pajak, penutupan buku) → **`svc-pelaporan`** (laporan PDF & tanda tangan), **`svc-integrasi`** (API Mitra SIPLah dua sisi, pembukaan sumber dana di Mitra, transaksi Mitra ke BKU), serta **`svc-audit`** (jejak audit berantai hash SHA-256 dari semua layanan).
+Isi saat ini — **`svc-identitas`** (Tahap 0: SSO, sesi, peran, JWT internal), **`svc-referensi`** (Tahap 0: data induk nasional & pajak daerah, disebar lewat event `ReferensiDiubah`) dan alur Tahap 1 "BOSP Inti" lintas layanan: **`svc-perencanaan`** (RKAS disusun → diajukan → disahkan Dinas) → **`svc-penatausahaan`** (BKU, pajak, penutupan buku) → **`svc-pelaporan`** (laporan PDF & tanda tangan), **`svc-pemantauan`** (HPP & dasbor serapan/kepatuhan), **`svc-integrasi`** (API Mitra SIPLah dua sisi, pembukaan sumber dana di Mitra, transaksi Mitra ke BKU), serta **`svc-audit`** (jejak audit berantai hash SHA-256 dari semua layanan).
 Rincian cakupan, alur, dan keputusan:
 - [`docs/irisan-1-penatausahaan.md`](docs/irisan-1-penatausahaan.md) — BKU, belanja, persetujuan
 - [`docs/irisan-2-setor-pajak.md`](docs/irisan-2-setor-pajak.md) — setor pajak (NTPN) & BKP Pajak
@@ -11,6 +11,7 @@ Rincian cakupan, alur, dan keputusan:
 - [`docs/svc-identitas.md`](docs/svc-identitas.md) — SSO OIDC, sesi, peran aktif, JWT internal & JWKS, pengelolaan pengguna berjenjang
 - [`docs/svc-referensi.md`](docs/svc-referensi.md) — referensi nasional (Balai SDSP), pajak daerah (Dinas), proyeksi lokal di layanan lain
 - [`docs/svc-integrasi.md`](docs/svc-integrasi.md) — Mitra SIPLah: OAuth2 + IP + HMAC, pembukaan sumber dana, transaksi Mitra → BKU (UC-12, UC-34–39)
+- [`docs/svc-pemantauan.md`](docs/svc-pemantauan.md) — HPP (rencana vs belanja Mitra), dasbor serapan & kepatuhan berjenjang (UC-30, UC-33)
 - [`docs/svc-audit.md`](docs/svc-audit.md) — jejak audit append-only berantai hash, verifikasi & deteksi perusakan (UC-31)
 
 ```
@@ -21,6 +22,7 @@ apps/
   svc-pelaporan/       NestJS: laporan PDF & tanda tangan (db_pelaporan) — :3106
   svc-perencanaan/     NestJS: pagu, kertas kerja RKAS, penelaahan (db_perencanaan) — :3107
   svc-integrasi/       NestJS: API Mitra SIPLah /mitra/v1, pembukaan sumber dana, transaksi Mitra (db_integrasi) — :3109
+  svc-pemantauan/      NestJS: HPP, serapan & kepatuhan, dasbor berjenjang (db_pemantauan) — :3110
   svc-audit/           NestJS: jejak audit berantai hash SHA-256, verifikasi rantai (db_audit) — :3108
   web/                 Next.js App Router + Tailwind + TanStack Query (halaman BKU & wizard belanja)
 packages/
@@ -67,9 +69,12 @@ DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scr
 DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scripts/migrate.mjs svc-integrasi --seed
 ```
 ```bash
+DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scripts/migrate.mjs svc-pemantauan
+```
+```bash
 pnpm build
 ```
-Delapan terminal (ditambah Mitra tiruan):
+Sembilan terminal (ditambah Mitra tiruan):
 ```bash
 ./scripts/jalankan-svc.sh svc-identitas
 ```
@@ -90,6 +95,9 @@ Delapan terminal (ditambah Mitra tiruan):
 ```
 ```bash
 ./scripts/jalankan-svc.sh svc-integrasi
+```
+```bash
+./scripts/jalankan-svc.sh svc-pemantauan
 ```
 ```bash
 node scripts/mitra-tiruan.mjs server
@@ -123,7 +131,7 @@ Uji integrasi membuat ulang basis data `db_tatausaha_uji` di PostgreSQL sungguha
 
 ### Uji UI menyeluruh (web)
 
-Menguji halaman sungguhan lewat peramban (Playwright) terhadap tumpukan yang sedang berjalan: delapan proses + Mitra tiruan dari bagian *Menjalankan*, ditambah data demo yang bulan berjalannya masih terbuka.
+Menguji halaman sungguhan lewat peramban (Playwright) terhadap tumpukan yang sedang berjalan: sembilan proses + Mitra tiruan dari bagian *Menjalankan*, ditambah data demo yang bulan berjalannya masih terbuka.
 ```bash
 DEMO_TANPA_TUTUP=1 node scripts/isi-demo.mjs 20100001
 ```
@@ -136,6 +144,7 @@ Cakupan (`apps/web/e2e/`):
 - Balai mengubah batas komponen dan menerbitkan ulang referensi.
 - Kepala Sekolah menolak transaksi; Bendahara melihat alasannya, dan **Catat ulang** membuka formulir terisi.
 - Mitra tiruan mengirim belanja SIPLah; Bendahara memetakan barang ke baris RKAS dan mencatatnya ke BKU; Balai melihat matriks pembukaan.
+- Pemantau menelusuri dasbor Nasional → provinsi → kabupaten → HPP sekolah; Verifikator Dinas terkunci ke wilayahnya.
 - Perubahan Balai tercatat di **Jejak audit** Auditor dengan nilai sebelum/sesudah, dan rantai hash terverifikasi utuh; Kepala Sekolah hanya melihat rantai sekolahnya.
 
 Uji memulihkan data yang diubahnya (di blok `finally`), jadi aman dijalankan berulang. Alamat web dapat diganti dengan `WEB_URL`.

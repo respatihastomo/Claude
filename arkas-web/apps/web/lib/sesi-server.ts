@@ -26,5 +26,6 @@ export function berandaPeran(p: NonNullable<MeDto['peranAktif']>): string {
   if (p.npsn) return ['BENDAHARA', 'KEPSEK', 'KOMITE'].includes(p.peran) ? `/sekolah/${p.npsn}/penatausahaan/bku` : `/sekolah/${p.npsn}/perencanaan`;
   if (p.peran === 'VERIFIKATOR_DINAS' || p.peran === 'TIM_KERJA') return '/penelaahan';
   if (p.peran === 'AUDITOR') return '/audit';
+  if (p.peran === 'PEMANTAU') return '/dasbor';
   return '/admin/pengguna';
 }

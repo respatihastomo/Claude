@@ -22,6 +22,8 @@ export function Kepala({ judul, me, npsn }: { judul: string; me: MeDto; npsn?: s
   const menu = [
     ...(npsn ? [{ href: `/sekolah/${npsn}/perencanaan`, label: 'Penganggaran (RKAS)' }] : []),
     ...(npsn && aktif?.npsn ? [{ href: `/sekolah/${npsn}/penatausahaan/bku`, label: 'Penatausahaan' }] : []),
+    ...(npsn && aktif?.npsn ? [{ href: `/sekolah/${npsn}/hpp`, label: 'HPP' }] : []),
+    ...(aktif && ['PEMANTAU', 'SUPER_ADMIN', 'AUDITOR', 'ADMIN_DINAS', 'VERIFIKATOR_DINAS'].includes(aktif.peran) ? [{ href: '/dasbor', label: 'Pemantauan' }] : []),
     ...(aktif && ['VERIFIKATOR_DINAS', 'TIM_KERJA'].includes(aktif.peran) ? [{ href: '/penelaahan', label: 'Penelaahan' }] : []),
     ...(aktif && ['SUPER_ADMIN', 'ADMIN_DITJEN', 'ADMIN_DIREKTORAT', 'ADMIN_DINAS', 'OPERATOR'].includes(aktif.peran) ? [{ href: '/admin/pengguna', label: 'Kelola pengguna' }] : []),
     ...(aktif?.peran === 'ADMIN_DINAS' ? [{ href: '/dinas/pajak-daerah', label: 'Pajak daerah' }] : []),

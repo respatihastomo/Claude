@@ -32,3 +32,10 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO peran_pengguna (id, pengguna_id, peran, berlaku_sampai) VALUES
   ('8a000000-0000-4000-8000-000000000007', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e06', 'AUDITOR', '2027-12-31T23:59:59+07:00')
 ON CONFLICT (id) DO NOTHING;
+-- Pemantau Pusat (UC-30): dasbor nasional tanpa data pribadi.
+INSERT INTO pengguna (id, email, nama) VALUES
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e07', 'pemantau@pusat.example', 'Ir. Dimas Pratama (Pemantau)')
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO peran_pengguna (id, pengguna_id, peran) VALUES
+  ('8a000000-0000-4000-8000-000000000008', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e07', 'PEMANTAU')
+ON CONFLICT (id) DO NOTHING;
