@@ -9,6 +9,14 @@ const CONTOH = [
   ['verifikator@dinas3201.example', 'Rina A.', 'Verifikator Dinas — wilayah 3201'],
   ['admin@dinas3201.example', 'Hendra P.', 'Admin Dinas — wilayah 3201'],
   ['admin@balai.example', 'Admin Balai SDSP', 'Balai SDSP — nasional'],
+  ['operator@smps2.example', 'Dewi Lestari', 'Operator — SMP Swasta Contoh 2'],
+  ['bendahara@smps2.example', 'Ahmad Fauzi', 'Bendahara — SMP Swasta Contoh 2'],
+  ['kepsek@smps2.example', 'Hj. Siti Aminah, M.Pd.', 'Kepala Sekolah — SMP Swasta Contoh 2'],
+  ['komite@smps2.example', 'Bambang Wijaya', 'Komite Sekolah — SMP Swasta Contoh 2'],
+  ['verifikator@dinas3202.example', 'Rudi Setiawan', 'Verifikator Dinas — wilayah 3202'],
+  ['admin@dit-smp.example', 'Agus Santoso', 'Admin Direktorat SMP'],
+  ['pemantau@pusat.example', 'Ir. Dimas Pratama', 'Pemantau Pusat — nasional'],
+  ['auditor@inspektorat.example', 'Dra. Lestari W.', 'Auditor — nasional'],
 ] as const;
 
 export function HalamanMasuk({ kembali }: { kembali: string }) {

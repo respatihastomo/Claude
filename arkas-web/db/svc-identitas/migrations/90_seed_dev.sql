@@ -50,3 +50,18 @@ INSERT INTO peran_pengguna (id, pengguna_id, peran, direktorat_kode, ditjen_kode
   ('8a000000-0000-4000-8000-00000000000a', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e09', 'ADMIN_DITJEN', NULL, 'PAUDDIKDASMEN'),
   ('8a000000-0000-4000-8000-00000000000b', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e0a', 'TIM_KERJA', 'SMP', NULL)
 ON CONFLICT (id) DO NOTHING;
+-- Sekolah cerita buku panduan & tutorial (SMP Swasta Contoh 2, wilayah 3202).
+INSERT INTO pengguna (id, email, nama) VALUES
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e21', 'operator@smps2.example', 'Dewi Lestari'),
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e22', 'bendahara@smps2.example', 'Ahmad Fauzi'),
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e23', 'kepsek@smps2.example', 'Hj. Siti Aminah, M.Pd.'),
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e24', 'komite@smps2.example', 'Bambang Wijaya'),
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e25', 'verifikator@dinas3202.example', 'Rudi Setiawan')
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO peran_pengguna (id, pengguna_id, peran, npsn, wilayah_kode) VALUES
+  ('8a000000-0000-4000-8000-000000000021', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e21', 'OPERATOR', '20100002', NULL),
+  ('8a000000-0000-4000-8000-000000000022', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e22', 'BENDAHARA', '20100002', NULL),
+  ('8a000000-0000-4000-8000-000000000023', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e23', 'KEPSEK', '20100002', NULL),
+  ('8a000000-0000-4000-8000-000000000024', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e24', 'KOMITE', '20100002', NULL),
+  ('8a000000-0000-4000-8000-000000000025', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e25', 'VERIFIKATOR_DINAS', NULL, '3202')
+ON CONFLICT (id) DO NOTHING;
