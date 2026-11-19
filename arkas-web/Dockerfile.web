@@ -1,0 +1,25 @@
+# Kemasan aplikasi web Next.js.
+#   docker build -f Dockerfile.web -t arkas/web .
+ARG NODE_VERSION=22.12-alpine
+
+FROM node:${NODE_VERSION} AS bangun
+RUN corepack enable
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY packages ./packages
+COPY apps/web ./apps/web
+RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm --filter ./apps/web... build
+
+FROM node:${NODE_VERSION} AS jalan
+ENV NODE_ENV=production
+RUN corepack enable && addgroup -S arkas && adduser -S arkas -G arkas
+WORKDIR /app
+COPY --from=bangun --chown=arkas:arkas /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=bangun --chown=arkas:arkas /app/packages ./packages
+COPY --from=bangun --chown=arkas:arkas /app/apps/web ./apps/web
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts && pnpm store prune
+USER arkas
+WORKDIR /app/apps/web
+EXPOSE 3000
+CMD ["pnpm", "start"]

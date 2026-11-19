@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: 30 91 184;        /* #1E5BB8 */
+  --primary-ink: 255 255 255;
+  --accent-banper: 13 122 95;  /* #0D7A5F */
+  --success: 14 138 62;        /* #0E8A3E */
+  --danger: 201 42 42;         /* #C92A2A */
+  --warning: 180 83 9;         /* #B45309 */
+  --text: 15 23 42;            /* #0F172A */
+  --text-muted: 71 85 105;     /* #475569 */
+  --border: 203 213 225;       /* #CBD5E1 */
+  --surface: 255 255 255;
+  --surface-muted: 241 245 249;/* #F1F5F9 */
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: 76 141 246;     /* #4C8DF6 */
+    --primary-ink: 15 23 42;
+    --accent-banper: 52 211 153;
+    --success: 34 197 94;
+    --danger: 248 113 113;
+    --warning: 251 191 36;
+    --text: 248 250 252;
+    --text-muted: 148 163 184;
+    --border: 51 65 85;
+    --surface: 15 23 42;
+    --surface-muted: 30 41 59;
+  }
+}
+html { color-scheme: light dark; }
+body { @apply bg-canvas text-ink font-sans antialiased; }
+.angka { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid rgb(var(--primary)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; } }

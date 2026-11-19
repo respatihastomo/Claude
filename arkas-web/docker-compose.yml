@@ -1,0 +1,21 @@
+# 16.2 Lingkungan pengembangan lokal (irisan 1: PostgreSQL + Redpanda). Layanan lain ditambahkan saat dirilis.
+services:
+  postgres:
+    image: postgres:16.6-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
+  redpanda:
+    image: redpandadata/redpanda:v24.2.13
+    command: >
+      redpanda start --mode dev-container --smp 1 --overprovisioned
+      --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+    ports: ["19092:19092"]
+volumes:
+  pgdata:

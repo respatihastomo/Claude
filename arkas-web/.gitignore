@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.next/
+.turbo/
+.env
+*.log
+coverage/
+.dev-keys/
+*.tsbuildinfo
+.berkas/
+.berkas-bantuan/
+.env.*
+!.env*.example
