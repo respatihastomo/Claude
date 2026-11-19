@@ -57,7 +57,7 @@ TABEL(['Besaran', 'Jumlah'], [
   ['Topik event', '16 topik CloudEvents 1.0'],
   ['Kebijakan Row Level Security', '66'],
   ['Trigger basis data', '92'],
-  ['Kasus uji', '189 (47 unit aturan, 129 integrasi layanan, 13 e2e peramban)'],
+  ['Kasus uji', '227 — 214 dijalankan `pnpm test` (85 unit aturan, 129 integrasi layanan) ditambah 13 e2e peramban'],
   ['Baris kode', '± 13.500 (apps) + 2.500 (packages) + 2.800 (SQL)'],
 ], [3600, 6038]);
 KOTAK('INGAT', 'Angka di atas berubah seiring pengembangan. Cara menghitung ulangnya ada di Lampiran D.');
@@ -420,6 +420,7 @@ TABEL(['Skrip', 'Kegunaan'], [
   ['`scripts/mitra-tiruan.mjs`', 'Mitra SIPLah tiruan untuk mencoba integrasi dua sisi'],
   ['`scripts/isi-demo.mjs`', 'Mengisi data contoh lintas layanan'],
   ['`scripts/terbit-kk-disahkan.mjs`', 'Menerbitkan ulang event pengesahan RKAS saat menguji konsumen'],
+  ['`scripts/uji-kafka.mjs`', 'Membuktikan adapter Kafka terhadap broker sungguhan (dipakai juga oleh CI)'],
 ], [3100, 6538]);
 
 // ====================================================================== BAB 9
@@ -428,7 +429,7 @@ KOTAK('RINGKAS', ['Susunan pengujian, cara menjalankannya, dan kebiasaan yang di
 GAMBAR('p11-pengujian', 'Piramida pengujian');
 H2('9.1 Tiga lapis pengujian');
 TABEL(['Lapis', 'Lokasi', 'Jumlah', 'Sifat'], [
-  ['Unit aturan', '`packages/aturan/test`', '47', 'Fungsi murni, tanpa basis data; jalan dalam hitungan detik'],
+  ['Unit aturan', '`packages/aturan/test`', '85', 'Fungsi murni, tanpa basis data; seluruh `pnpm test` selesai dalam ± 40 detik'],
   ['Integrasi layanan', '`apps/svc-*/test`', '129', 'Basis data uji sungguhan (`*_uji`), migrasi dijalankan ulang, endpoint diuji lewat HTTP'],
   ['End-to-end peramban', '`apps/web/e2e`', '13', 'Vitest + Playwright pada sistem yang hidup'],
 ], [2000, 2400, 1200, 4038]);
@@ -440,7 +441,17 @@ KODE([
   'pnpm typecheck                             # pemeriksaan tipe seluruh paket',
 ], 'Perintah pengujian');
 P('Uji integrasi membutuhkan `DATABASE_ADMIN_URL`, `API_DB_PASSWORD`, dan `WORKER_DB_PASSWORD`; ketiganya diteruskan Turborepo lewat `passThroughEnv`.');
-H2('9.3 Kebiasaan yang dijaga');
+P('Sebaran kasus uji yang dijalankan `pnpm test`: aturan 85, svc-penatausahaan 44, svc-perencanaan 17, svc-identitas 14, svc-pelaporan 13, svc-integrasi 12, svc-referensi 10, svc-bantuan 9, svc-audit 5, svc-pemantauan 5.');
+H2('9.3 Integrasi berkelanjutan');
+P('Berkas `.github/workflows/ci.yml` menjalankan empat jenis pekerjaan pada setiap push dan pull request.');
+TABEL(['Job', 'Isi', 'Layanan pendukung'], [
+  ['`uji`', '`pnpm build`, `pnpm typecheck`, migrasi sembilan basis data, lalu `pnpm test`', 'PostgreSQL 16'],
+  ['`kafka`', '`scripts/uji-kafka.mjs`: menerbitkan dan mengonsumsi CloudEvent lewat `KafkaBroker` yang sama dengan yang dipakai layanan, lalu memeriksa kelengkapan isi, fan-out dua grup, dan urutan per `subject`', 'Redpanda'],
+  ['`kontainer`', 'Membangun citra sembilan layanan dari `Dockerfile` secara matriks, dengan cache GitHub Actions', '—'],
+  ['`kontainer-web`', 'Membangun citra Next.js dari `Dockerfile.web`', '—'],
+], [1700, 6238, 1700]);
+KOTAK('INGAT', 'Job `kafka` adalah satu-satunya tempat adapter Kafka diuji terhadap broker sungguhan. Pengembangan lokal memakai `BROKER=http`, jadi perubahan pada `kafka-broker.ts` baru terbukti setelah CI berjalan.');
+H2('9.4 Kebiasaan yang dijaga');
 LI([
   '**Aturan bisnis diuji sebagai fungsi murni.** Kasus batas (pembulatan, tarif tanpa NPWP, honor tepat 20%) diuji di lapis unit, bukan lewat antarmuka.',
   '**Basis data diuji dengan SQL asli**, termasuk trigger dan kebijakan RLS — bukan dengan tiruan.',
@@ -456,11 +467,11 @@ H2('10.1 Lingkungan saat ini');
 P('Semua proses dijalankan langsung dengan Node pada satu mesin: sembilan layanan, aplikasi web, dan Mitra tiruan. PostgreSQL menampung sembilan basis data. Broker memakai mode `http`, yaitu pengiriman event langsung antar-proses.');
 H2('10.2 Arah produksi');
 TABEL(['Aspek', 'Rencana', 'Kesiapan kode'], [
-  ['Kemasan', 'Satu kontainer per layanan', 'Build terpisah per paket sudah berjalan lewat Turborepo'],
-  ['Broker', 'Kafka atau Redpanda', 'Sudah ada `kafka-broker.ts`; cukup mengubah `BROKER=kafka`'],
+  ['Kemasan', 'Satu kontainer per layanan', '`Dockerfile` multi-stage (argumen `LAYANAN`) dan `Dockerfile.web` sudah ada; CI membangun seluruh citra pada tiap push'],
+  ['Broker', 'Kafka atau Redpanda', '`kafka-broker.ts` diperiksa terhadap Redpanda sungguhan oleh job `kafka` di CI; peralihan cukup dengan `BROKER=kafka`'],
   ['Penskalaan', 'Beberapa pod per layanan', 'Relay aman berkat `FOR UPDATE SKIP LOCKED`'],
   ['Gateway', 'API Gateway menggantikan BFF', 'Pola penukaran sesi → JWT tetap sama'],
-  ['Rahasia', 'Pengelola rahasia terpusat', 'Semua konfigurasi sudah lewat variabel lingkungan'],
+  ['Rahasia', 'Pengelola rahasia terpusat', 'Semua konfigurasi sudah lewat variabel lingkungan; citra berjalan sebagai pengguna tak-root'],
 ], [1900, 3300, 4438]);
 H2('10.3 Yang perlu dipantau');
 TABEL(['Sinyal', 'Arti', 'Tindakan'], [
@@ -528,8 +539,8 @@ OL([
 ]);
 H2('12.1 Pekerjaan lanjutan');
 TABEL(['Bidang', 'Rencana'], [
-  ['Penyebaran', 'Kemasan kontainer, pipeline CI/CD, dan API Gateway produksi'],
-  ['Broker', 'Beralih ke Kafka/Redpanda beserta pemantauan lag konsumen'],
+  ['Penyebaran', 'Mendorong citra ke registry dan menyiapkan API Gateway produksi (kemasan kontainer dan CI sudah ada)'],
+  ['Broker', 'Menjalankan lingkungan dengan `BROKER=kafka` beserta pemantauan lag konsumen'],
   ['Observabilitas', 'Log terstruktur, metrik, dan penelusuran terdistribusi memakai `traceparent` yang sudah dibawa setiap event'],
   ['Tanda tangan', 'Mengganti tanda tangan simulasi dengan TTE resmi'],
   ['Kinerja', 'Evaluasi indeks pada tabel partisi saat data lintas tahun bertambah'],
@@ -574,8 +585,9 @@ KODE([
   '# jumlah endpoint per layanan',
   'for s in apps/svc-*; do echo "$s $(grep -rhoE \'@(Get|Post|Put|Patch|Delete)\\(\' $s/src | wc -l)"; done',
   '',
-  '# jumlah kasus uji',
-  'grep -rhoE "\\b(it|test)\\(" packages/aturan/test apps/svc-*/test apps/web/e2e | wc -l',
+  '# jumlah kasus uji — hitung dari hasil eksekusi, bukan dari grep,',
+  '# karena satu baris it.each menghasilkan banyak kasus',
+  'pnpm test 2>&1 | grep -oE "Tests  [0-9]+ passed" | grep -oE "[0-9]+" | paste -sd+ | bc',
   '',
   '# jumlah kebijakan RLS',
   'grep -rho "CREATE POLICY" db | wc -l',

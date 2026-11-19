@@ -195,13 +195,13 @@ const DIAGRAM = {
       { w: 'merah', judul: 'Uji & kirim', isi: '<span class="m">pnpm test</span>, <span class="m">pnpm typecheck</span>, lalu pull request', ikon: '✅' },
     ], 4)}`),
 
-  'p11-pengujian': halaman('Piramida pengujian', '189 kasus uji: unit cepat di bawah, uji ujung-ke-ujung sedikit di atas', `
+  'p11-pengujian': halaman('Piramida pengujian', '227 kasus uji: unit cepat di bawah, uji ujung-ke-ujung sedikit di atas', `
     <div style="max-width:980px;margin:0 auto">
       ${kotak('merah', '13 uji e2e peramban (apps/web/e2e)', 'Vitest + Playwright menjalankan alur nyata di aplikasi yang hidup: audit, bantuan, transaksi ditolak, pemantauan, referensi, SIPLah')}
       <div class="pan" style="font-size:22px">▲</div>
-      ${kotak('oranye', '129 uji integrasi layanan (apps/svc-*/test)', 'Satu basis data uji per berkas (<span class="m">*_uji</span>), migrasi dijalankan ulang, lalu endpoint diuji lewat HTTP termasuk RLS dan trigger')}
+      ${kotak('oranye', '129 uji integrasi layanan (apps/svc-*/test)', 'Satu basis data uji per berkas (<span class="m">*_uji</span>), migrasi dijalankan ulang, endpoint diuji lewat HTTP termasuk RLS dan trigger. Penatausahaan 44, perencanaan 17, identitas 14, pelaporan 13, integrasi 12, referensi 10, bantuan 9, audit 5, pemantauan 5')}
       <div class="pan" style="font-size:22px">▲</div>
-      ${kotak('hijau', '47 uji unit aturan (packages/aturan/test)', 'Fungsi murni tanpa basis data: hitung pajak, tarif efektif, validasi juknis, penutupan, peran, pemisahan tugas')}
+      ${kotak('hijau', '85 uji unit aturan (packages/aturan/test)', 'Fungsi murni tanpa basis data: hitung pajak, tarif efektif, validasi juknis, penutupan, peran, pemisahan tugas — seluruh pnpm test selesai dalam ± 40 detik')}
     </div>
     <div style="margin-top:16px">${kolom([
       kotak('abu', 'Menjalankan', '<span class="m">pnpm test</span> (seluruh monorepo, berurutan) atau <span class="m">pnpm --filter svc-penatausahaan test</span>'),

@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/.next
+**/*.tsbuildinfo
+.git
+.dev-keys
+.env
+.env.*
+!.env*.example
+.berkas
+.berkas-bantuan
+docs

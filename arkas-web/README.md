@@ -159,7 +159,37 @@ Cakupan (`apps/web/e2e/`):
 Uji memulihkan data yang diubahnya (di blok `finally`), jadi aman dijalankan berulang. Alamat web dapat diganti dengan `WEB_URL`.
 
 ## Kafka / Redpanda
-`BROKER=kafka` dan `BROKER_BROKERS=localhost:19092` setelah `docker compose up -d redpanda`. Adapter Kafka sudah dikompilasi tetapi **belum diuji terhadap broker sungguhan** (lihat dokumen irisan).
+`BROKER=kafka` dan `BROKER_BROKERS=localhost:19092` setelah `docker compose up -d redpanda`.
+
+Adapter diperiksa terhadap broker sungguhan oleh `scripts/uji-kafka.mjs`: ia menerbitkan tiga CloudEvent lewat `KafkaBroker` yang sama dengan yang dipakai layanan, lalu memeriksa kelengkapan isi, fan-out ke dua grup konsumen, dan urutan per `subject`.
+
+```bash
+docker compose up -d redpanda
+pnpm --filter @arkas/common-ms build
+node scripts/uji-kafka.mjs            # BROKER_BROKERS untuk alamat lain
+```
+
+Pemeriksaan ini juga berjalan otomatis pada setiap push lewat job **kafka** di `.github/workflows/ci.yml` (Redpanda sebagai service container).
+
+## Integrasi berkelanjutan & kontainer
+
+`.github/workflows/ci.yml` menjalankan empat jenis pekerjaan pada setiap push dan pull request:
+
+| Job | Isi |
+|---|---|
+| `uji` | `pnpm build`, `pnpm typecheck`, migrasi sembilan basis data pada PostgreSQL 16, lalu `pnpm test` (214 kasus uji) |
+| `kafka` | `scripts/uji-kafka.mjs` terhadap Redpanda sungguhan |
+| `kontainer` | Membangun citra sembilan layanan dari `Dockerfile` (matriks, cache GHA) |
+| `kontainer-web` | Membangun citra Next.js dari `Dockerfile.web` |
+
+Membangun citra secara manual:
+
+```bash
+docker build --build-arg LAYANAN=svc-penatausahaan -t arkas/svc-penatausahaan .
+docker build -f Dockerfile.web -t arkas/web .
+```
+
+Keduanya multi-stage, berjalan sebagai pengguna tak-root, dan hanya memasang dependensi produksi pada tahap akhir.
 
 ## Dokumentasi pengembangan
 
