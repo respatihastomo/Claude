@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { CloudEvent, consumeIdempotent } from '@arkas/common-ms';
-import { KertasKerjaDisahkanData, ReferensiDiubahData } from '@arkas/kontrak';
+import { KertasKerjaDisahkanData, ReferensiDiubahData, SumberDanaDisahkanData } from '@arkas/kontrak';
 import { POOL_WORKER, SKEMA } from '../infra/tokens';
 import { bukaSumberDana, tutupSumberDana } from '../pembukaan';
 
@@ -77,5 +77,18 @@ export class KonsumenIntegrasi {
        ON CONFLICT (sumber_dana_kode, tahun, npsn) DO UPDATE SET nilai = EXCLUDED.nilai, diubah_at = now() WHERE integrasi.sekolah_berhak_lokal.asal = 'RKAS'`,
       [d.sumberDanaKode, d.tahun, d.npsn, nilai]);
     this.log.log(`RKAS ${d.npsn} ${d.sumberDanaKode} ${d.tahun} v${d.versi}: ${d.baris.length} baris diproyeksikan untuk Mitra`);
+  }
+
+  /** SumberDanaDisahkan (Bantuan Pemerintah): sekolah berhak = penerima sah (12.3). Pembukaan di Mitra dipicu ReferensiDiubah dari svc-referensi. */
+  async sumberDanaDisahkan(event: CloudEvent): Promise<void> {
+    const d = SumberDanaDisahkanData.parse(event.data);
+    await consumeIdempotent(this.pool, SKEMA, { ...event, data: d }, async (tx) => {
+      await tx.query(`DELETE FROM integrasi.sekolah_berhak_lokal WHERE sumber_dana_kode = $1 AND tahun = $2 AND asal = 'PENERIMA'`, [d.kode, d.tahun]);
+      for (const p of d.penerima) {
+        await tx.query(`INSERT INTO integrasi.sekolah_berhak_lokal (sumber_dana_kode, tahun, npsn, nilai, asal) VALUES ($1,$2,$3,$4,'PENERIMA')
+          ON CONFLICT (sumber_dana_kode, tahun, npsn) DO UPDATE SET nilai = EXCLUDED.nilai, asal = 'PENERIMA', diubah_at = now()`, [d.kode, d.tahun, p.npsn, p.nilai]);
+      }
+      this.log.log(`SumberDanaDisahkan ${d.kode}: ${d.penerima.length} sekolah berhak`);
+    });
   }
 }

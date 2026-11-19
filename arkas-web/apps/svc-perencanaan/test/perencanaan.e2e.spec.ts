@@ -233,3 +233,13 @@ describe('UC-09 pergeseran dengan realisasi', () => {
     await expect(superDb.query(`UPDATE perencanaan.kertas_kerja SET status = 'DRAF' WHERE id = $1`, [kkId])).rejects.toMatchObject({ message: 'TRANSISI_TIDAK_SAH' });
   });
 });
+
+describe('SumberDanaDisahkan (svc-bantuan) -> pagu BANPER per penerima', () => {
+  it('pagu terbentuk untuk sekolah penerima; sekolah yang belum diproyeksikan -> 422 agar dicoba ulang', async () => {
+    const ev = (penerima: Array<{ npsn: string; nilai: number }>) => ({ topik: 'arkas.banper.sumber-dana-disahkan', event: { specversion: '1.0', id: randomUUID(), source: 'svc-bantuan', type: 'SumberDanaDisahkan',
+      time: new Date().toISOString(), data: { kode: 'BANPER_TIK', nama: 'Bantuan TIK', kategori: 'BANPER', direktoratKode: 'SMP', tahun: TAHUN, jenjang: ['SMP'], komponen: [], penerima, disahkanAt: new Date().toISOString() } } });
+    expect((await http.post('/internal/v1/events').set('X-Internal-Token', TOKEN).send(ev([{ npsn: '29999999', nilai: 1 }]))).status).toBe(422);
+    expect((await http.post('/internal/v1/events').set('X-Internal-Token', TOKEN).send(ev([{ npsn: NPSN, nilai: 50_000_000 }]))).status).toBe(202);
+    expect((await http.get(`/api/v1/sekolah/${NPSN}/pagu`).query({ tahun: TAHUN, sumberDanaKode: 'BANPER_TIK' }).set(await ks())).body.nilai).toBe(50_000_000);
+  });
+});

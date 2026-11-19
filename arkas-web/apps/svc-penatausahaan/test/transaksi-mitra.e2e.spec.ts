@@ -81,3 +81,15 @@ describe('UC-12 memetakan transaksi Mitra SIPLah', () => {
     expect(r.status).toBe(403);
   });
 });
+
+describe('SK-09 PenyaluranDicatat -> draf penerimaan', () => {
+  it('penyaluran tercatat sekali (idempoten) dan hanya terlihat oleh sekolahnya', async () => {
+    const id = randomUUID();
+    const ev = { topik: 'arkas.banper.penyaluran-dicatat', event: { specversion: '1.0', id: randomUUID(), source: 'svc-bantuan', type: 'PenyaluranDicatat', time: new Date().toISOString(),
+      data: { penyaluranId: id, sumberDanaKode: 'BANPER_TIK', npsn: h.npsn, tahun: TAHUN, tahap: 1, tanggal: HARI_INI, nilai: 25_000_000, bankKode: 'BRI', nomorReferensi: 'TRF-001' } } };
+    expect((await h.kirimEvent(ev)).status).toBe(202);
+    expect((await h.kirimEvent(ev)).status).toBe(202);
+    const r = await h.http.get(`/api/v1/sekolah/${h.npsn}/penyaluran-bantuan`).set(await h.auth('BENDAHARA', h.bendahara, h.npsn));
+    expect(r.body.data).toEqual([expect.objectContaining({ id, sumberDanaKode: 'BANPER_TIK', tahap: 1, nilai: 25_000_000, transaksiId: null })]);
+  });
+});

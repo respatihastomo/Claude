@@ -8,3 +8,4 @@ export * from './peran';
 export * from './tarif-efektif';
 export * from './status-pembukaan';
 export * from './kategori-hpp';
+export * from './bantuan';

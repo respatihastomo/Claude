@@ -5,3 +5,4 @@ export * from './perencanaan';
 export * from './identitas';
 export * from './referensi';
 export * from './integrasi';
+export * from './bantuan';

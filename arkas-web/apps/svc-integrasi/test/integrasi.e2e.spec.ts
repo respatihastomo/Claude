@@ -229,3 +229,14 @@ describe('UC-34/37/39 pengelolaan Balai SDSP', () => {
     expect((await mitra('POST', '/mitra/v1/sumber-dana/BOSP_REG/konfirmasi', { status: 'DIBUKA', versi: 2 })).body.kode).toBe('SUMBER_DANA_DITUTUP');
   });
 });
+
+describe('SumberDanaDisahkan (svc-bantuan) -> sekolah berhak', () => {
+  it('penerima sah menjadi sekolah berhak; pembukaan dibuat lewat ReferensiDiubah', async () => {
+    await broker.publish(TOPIK.SUMBER_DANA_DISAHKAN, ev('SumberDanaDisahkan', { kode: 'BANPER_TIK', nama: 'Bantuan TIK', kategori: 'BANPER', direktoratKode: 'SMP', tahun: TAHUN, jenjang: ['SMP'],
+      komponen: [], penerima: [{ npsn: '20100001', nilai: 50_000_000 }, { npsn: '20100002', nilai: 75_000_000 }], disahkanAt: new Date().toISOString() }));
+    await broker.publish(TOPIK.REFERENSI_DIUBAH, ev('ReferensiDiubah', { entitas: 'SUMBER_DANA', kunci: 'BANPER_TIK', versi: 50, aktif: true, data: { kode: 'BANPER_TIK', nama: 'Bantuan TIK', kategori: 'BANPER' } }));
+    expect((await db.query(`SELECT count(*)::int n FROM integrasi.pembukaan_sumber_dana WHERE sumber_dana_kode = 'BANPER_TIK'`)).rows[0].n).toBe(2); // MITRA_DEV & MITRA_B
+    const r = await db.query(`SELECT npsn, nilai::float8, asal FROM integrasi.sekolah_berhak_lokal WHERE sumber_dana_kode = 'BANPER_TIK' ORDER BY npsn`);
+    expect(r.rows).toEqual([{ npsn: '20100001', nilai: 50_000_000, asal: 'PENERIMA' }, { npsn: '20100002', nilai: 75_000_000, asal: 'PENERIMA' }]);
+  });
+});

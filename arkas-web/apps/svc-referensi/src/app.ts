@@ -7,6 +7,9 @@ import type { Konfigurasi } from './config';
 import { BROKER, KONFIGURASI, POOL_API, POOL_WORKER, SKEMA } from './infra/tokens';
 import { ReferensiController } from './referensi/referensi.controller';
 import { ReferensiService } from './referensi/referensi.service';
+import { InternalEventsController } from './events/internal-events.controller';
+import { KonsumenReferensi } from './events/konsumen';
+import { TOPIK } from '@arkas/kontrak';
 
 @Controller('health')
 class HealthController {
@@ -23,7 +26,7 @@ function modul(cfg: Konfigurasi, broker: Broker): DynamicModule {
   @Module({}) class AppModule {}
   return {
     module: AppModule,
-    controllers: [ReferensiController, HealthController],
+    controllers: [ReferensiController, HealthController, ...(cfg.devEvents || cfg.broker === 'http' ? [InternalEventsController] : [])],
     providers: [
       { provide: KONFIGURASI, useValue: cfg },
       { provide: BROKER, useValue: broker },
@@ -32,7 +35,7 @@ function modul(cfg: Konfigurasi, broker: Broker): DynamicModule {
       { provide: DbContextService, useFactory: (p: Pool) => new DbContextService(p), inject: [POOL_API] },
       { provide: VerifikatorJwt, useFactory: () => new VerifikatorJwt(cfg.jwtPublicKey, cfg.jwtIssuer, cfg.jwtAudience) },
       { provide: ScopeGuard, useFactory: (r: Reflector, j: VerifikatorJwt) => new ScopeGuard(r, j), inject: [Reflector, VerifikatorJwt] },
-      ReferensiService, Penutup,
+      ReferensiService, KonsumenReferensi, Penutup,
     ],
   };
 }
@@ -48,6 +51,8 @@ export async function buatAplikasi(cfg: Konfigurasi, opsi: { broker?: Broker; lo
   app.useGlobalFilters(new ProblemFilter());
   app.enableShutdownHooks();
   app.getHttpAdapter().getInstance().disable('x-powered-by');
+  const k = app.get(KonsumenReferensi);
+  await broker.subscribe(TOPIK.SUMBER_DANA_DISAHKAN, `${cfg.serviceName}.sumber-dana-disahkan`, (e) => k.sumberDanaDisahkan(e));
   const log = new Logger('OutboxRelay');
   const relay = new OutboxRelay(app.get<Pool>(POOL_WORKER), broker, { skema: SKEMA, source: cfg.serviceName, intervalMs: cfg.outboxIntervalMs, ukuranBatch: 500, log: (m) => log.warn(m) });
   return { app, broker, relay };

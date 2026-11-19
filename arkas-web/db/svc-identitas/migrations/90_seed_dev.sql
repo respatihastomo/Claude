@@ -39,3 +39,14 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO peran_pengguna (id, pengguna_id, peran) VALUES
   ('8a000000-0000-4000-8000-000000000008', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e07', 'PEMANTAU')
 ON CONFLICT (id) DO NOTHING;
+-- Pengguna pusat untuk Bantuan Pemerintah (UC-17–29).
+INSERT INTO pengguna (id, email, nama) VALUES
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e08', 'admin@dit-smp.example', 'Agus Santoso (Direktorat SMP)'),
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e09', 'admin@ditjen-paud.example', 'Dr. Wulan Sari (Ditjen PAUD Dikdasmen)'),
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e0a', 'timkerja@dit-smp.example', 'Rudi Hartono (Tim Kerja SMP)')
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO peran_pengguna (id, pengguna_id, peran, direktorat_kode, ditjen_kode) VALUES
+  ('8a000000-0000-4000-8000-000000000009', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e08', 'ADMIN_DIREKTORAT', 'SMP', NULL),
+  ('8a000000-0000-4000-8000-00000000000a', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e09', 'ADMIN_DITJEN', NULL, 'PAUDDIKDASMEN'),
+  ('8a000000-0000-4000-8000-00000000000b', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e0a', 'TIM_KERJA', 'SMP', NULL)
+ON CONFLICT (id) DO NOTHING;

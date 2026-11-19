@@ -30,6 +30,7 @@ export const TOPIK = {
   SUMBER_DANA_DISAHKAN: 'arkas.banper.sumber-dana-disahkan',
   PENYALURAN_DICATAT: 'arkas.banper.penyaluran-dicatat',
   HPP_DIHITUNG: 'arkas.pemantauan.hpp-dihitung',
+  PENGAJUAN_SEKOLAH_DIPUTUSKAN: 'arkas.banper.pengajuan-sekolah-diputuskan',
 } as const;
 
 export const CloudEventSchema = z.object({

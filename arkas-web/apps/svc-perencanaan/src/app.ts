@@ -54,6 +54,7 @@ export async function buatAplikasi(cfg: Konfigurasi, opsi: { broker?: Broker; lo
   app.getHttpAdapter().getInstance().disable('x-powered-by');
   const k = app.get(KonsumenPerencanaan);
   await broker.subscribe(TOPIK.TRANSAKSI_DISETUJUI, `${cfg.serviceName}.transaksi-disetujui`, (e) => k.transaksiDisetujui(e));
+  await broker.subscribe(TOPIK.SUMBER_DANA_DISAHKAN, `${cfg.serviceName}.sumber-dana-disahkan`, (e) => k.sumberDanaDisahkan(e));
   const ref = app.get(ReferensiConsumer);
   await broker.subscribe(TOPIK.REFERENSI_DIUBAH, `${cfg.serviceName}.referensi`, (e) => ref.tangani(e));
   const log = new Logger('OutboxRelay');

@@ -15,6 +15,7 @@ const SVC = {
   audit: process.env.SVC_AUDIT_URL ?? 'http://localhost:3108',
   integrasi: process.env.SVC_INTEGRASI_URL ?? 'http://localhost:3109',
   pemantauan: process.env.SVC_PEMANTAUAN_URL ?? 'http://localhost:3110',
+  bantuan: process.env.SVC_BANTUAN_URL ?? 'http://localhost:3111',
 };
 function tujuan(path: string[]): keyof typeof SVC {
   if (path[0] === 'auth' || path[0] === 'me' || (path[0] === 'admin' && path[1] === 'pengguna')) return 'identitas';
@@ -24,6 +25,9 @@ function tujuan(path: string[]): keyof typeof SVC {
   if (path[0] === 'laporan') return 'pelaporan';
   if (path[0] === 'audit') return 'audit'; // 11.2.16
   if (path[0] === 'dasbor' || path[0] === 'hpp') return 'pemantauan'; // 11.2.13, 11.2.14
+  // 11.2.5–11.2.7 Bantuan Pemerintah (kecuali /sumber-dana/{kode}/tutup -> svc-integrasi, ditangani di bawah)
+  if ((path[0] === 'sumber-dana' && path[2] !== 'tutup') || ['dokumen', 'impor', 'bank', 'pengajuan-bantuan'].includes(path[0])) return 'bantuan';
+  if (path[0] === 'sekolah' && path[2] === 'pengajuan-bantuan') return 'bantuan';
   // 11.2.17: /admin/mitra-siplah*, /pembukaan-sumber-dana*, /sumber-dana/{kode}/tutup, /integrasi/*
   if ((path[0] === 'admin' && path[1] === 'mitra-siplah') || path[0] === 'pembukaan-sumber-dana' || path[0] === 'integrasi' || (path[0] === 'sumber-dana' && path[2] === 'tutup')) return 'integrasi';
   if (path[0] === 'kertas-kerja' || path[0] === 'penelaahan') return 'perencanaan';
@@ -31,7 +35,7 @@ function tujuan(path: string[]): keyof typeof SVC {
   return 'tatausaha';
 }
 const TERUSKAN = ['content-type', 'idempotency-key', 'if-match', 'accept', 'user-agent'];
-const BALIK = ['content-type', 'etag', 'location', 'idempotent-replayed', 'content-disposition', 'cache-control'];
+const BALIK = ['content-type', 'etag', 'location', 'idempotent-replayed', 'content-disposition', 'cache-control', 'x-sha256'];
 
 async function teruskan(req: NextRequest, { params }: { params: { path: string[] } }) {
   const layanan = tujuan(params.path);
@@ -53,7 +57,7 @@ async function teruskan(req: NextRequest, { params }: { params: { path: string[]
     if (!t.ok) return new Response(await t.arrayBuffer(), { status: t.status, headers: { 'content-type': t.headers.get('content-type') ?? 'application/problem+json' } });
     h.set('authorization', `Bearer ${((await t.json()) as { accessToken: string }).accessToken}`);
   }
-  const res = await fetch(url, { method: req.method, headers: h, body: ['GET', 'HEAD'].includes(req.method) ? undefined : await req.text(), cache: 'no-store', redirect: 'manual' });
+  const res = await fetch(url, { method: req.method, headers: h, body: ['GET', 'HEAD'].includes(req.method) ? undefined : await req.arrayBuffer(), cache: 'no-store', redirect: 'manual' });
   const out = new Headers();
   for (const k of BALIK) { const v = res.headers.get(k); if (v) out.set(k, v); }
   for (const c of res.headers.getSetCookie?.() ?? []) out.append('set-cookie', c);

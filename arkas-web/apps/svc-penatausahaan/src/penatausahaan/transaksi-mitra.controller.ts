@@ -14,6 +14,12 @@ export class TransaksiMitraController {
     return { data: await this.svc.daftar(ctx, npsn, f) };
   }
 
+  /** SK-09: penyaluran Bantuan Pemerintah yang sudah diterima dari svc-bantuan (draf penerimaan). */
+  @Get('sekolah/:npsn/penyaluran-bantuan')
+  async penyaluran(@Ctx() ctx: RequestContext, @Param('npsn', new ZodPipe(Npsn)) npsn: string) {
+    return { data: await this.svc.penyaluran(ctx, npsn) };
+  }
+
   @Post('transaksi-mitra/:id/catat')
   @Izinkan('BENDAHARA')
   catat(@Ctx() ctx: RequestContext, @Param('id', new ParseUUIDPipe()) id: string, @Body(new ZodPipe(CatatTransaksiMitraInput)) i: CatatTransaksiMitraInput) {

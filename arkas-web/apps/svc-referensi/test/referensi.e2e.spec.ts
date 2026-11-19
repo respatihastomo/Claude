@@ -155,3 +155,20 @@ describe('UC-32 pajak daerah oleh Dinas', () => {
       .rejects.toMatchObject({ code: '23514' });
   });
 });
+
+describe('SumberDanaDisahkan (svc-bantuan) -> referensi BANPER', () => {
+  it('sumber dana, jenjang & komponen aktif lalu ReferensiDiubah terbit; event ulang tidak menaikkan versi', async () => {
+    await eventBaru();
+    const data = { kode: 'BANPER_UJI', nama: 'Bantuan Uji SMP', kategori: 'BANPER', direktoratKode: 'SMP', tahun: 2026, jenjang: ['SMP'],
+      komponen: [{ kode: '01', nama: 'Pengadaan laptop', maksPersen: 80 }], penerima: [{ npsn: '20100001', nilai: 1_000_000 }], disahkanAt: new Date().toISOString() };
+    const kirim = () => broker.publish('arkas.banper.sumber-dana-disahkan', { specversion: '1.0', id: randomUUID(), source: 'svc-bantuan', type: 'SumberDanaDisahkan', time: new Date().toISOString(), datacontenttype: 'application/json', data });
+    await kirim();
+    const ev = await eventBaru();
+    expect(ev.find((e) => e.entitas === 'SUMBER_DANA' && e.kunci === 'BANPER_UJI')).toMatchObject({ aktif: true, data: { kategori: 'BANPER', direktoratKode: 'SMP' } });
+    expect(ev.find((e) => e.entitas === 'KOMPONEN' && e.kunci === 'BANPER_UJI:01')).toMatchObject({ data: { maksPersen: 80 } });
+    const bendahara = await auth('BENDAHARA', { npsn: '20100001' });
+    expect((await http.get('/api/v1/sekolah/20100001/sumber-dana').set(bendahara)).body.data.map((s: { kode: string }) => s.kode)).toContain('BANPER_UJI');
+    await kirim();
+    expect((await eventBaru()).filter((e) => e.entitas === 'SUMBER_DANA' || e.entitas === 'KOMPONEN')).toEqual([]);
+  });
+});

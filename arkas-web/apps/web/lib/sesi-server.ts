@@ -27,5 +27,6 @@ export function berandaPeran(p: NonNullable<MeDto['peranAktif']>): string {
   if (p.peran === 'VERIFIKATOR_DINAS' || p.peran === 'TIM_KERJA') return '/penelaahan';
   if (p.peran === 'AUDITOR') return '/audit';
   if (p.peran === 'PEMANTAU') return '/dasbor';
+  if (['ADMIN_DIREKTORAT', 'ADMIN_DITJEN', 'TIM_KERJA'].includes(p.peran)) return '/bantuan';
   return '/admin/pengguna';
 }

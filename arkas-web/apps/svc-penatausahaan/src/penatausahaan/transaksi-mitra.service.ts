@@ -54,4 +54,10 @@ export class TransaksiMitraService {
     });
     return { masuk, transaksi };
   }
+
+  penyaluran(ctx: RequestContext, npsn: string) {
+    return this.db.run(ctx, async (tx) => (await tx.query(
+      `SELECT id, tahun, sumber_dana_kode AS "sumberDanaKode", tahap, tanggal::text, nilai::float8, bank_kode AS "bankKode", nomor_referensi AS "nomorReferensi", transaksi_id AS "transaksiId"
+       FROM tatausaha.penyaluran_masuk WHERE npsn = $1 ORDER BY tanggal DESC, tahap`, [npsn])).rows);
+  }
 }

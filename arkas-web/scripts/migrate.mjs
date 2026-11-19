@@ -21,6 +21,7 @@ const LAYANAN = {
   'svc-audit': { db: 'db_audit', api: 'api_audit_login', worker: 'worker_audit_login' },
   'svc-integrasi': { db: 'db_integrasi', api: 'api_integrasi_login', worker: 'worker_integrasi_login' },
   'svc-pemantauan': { db: 'db_pemantauan', api: 'api_pemantauan_login', worker: 'worker_pemantauan_login' },
+  'svc-bantuan': { db: 'db_banper', api: 'api_banper_login', worker: 'worker_banper_login' },
 };
 const lay = LAYANAN[svc];
 if (!lay) { console.error(`layanan tidak dikenal: ${svc}`); process.exit(2); }

@@ -61,6 +61,7 @@ export async function buatAplikasi(cfg: Konfigurasi, opsi: { broker?: Broker; lo
   const k = app.get(KonsumenIntegrasi);
   await broker.subscribe(TOPIK.REFERENSI_DIUBAH, `${cfg.serviceName}.referensi-diubah`, (e) => k.referensiDiubah(e));
   await broker.subscribe(TOPIK.KERTAS_KERJA_DISAHKAN, `${cfg.serviceName}.kk-disahkan`, (e) => k.kertasKerjaDisahkan(e));
+  await broker.subscribe(TOPIK.SUMBER_DANA_DISAHKAN, `${cfg.serviceName}.sumber-dana-disahkan`, (e) => k.sumberDanaDisahkan(e));
   const log = new Logger('OutboxRelay');
   const relay = new OutboxRelay(app.get<Pool>(POOL_WORKER), broker, { skema: SKEMA, source: cfg.serviceName, intervalMs: cfg.outboxIntervalMs, log: (m) => log.warn(m) });
   return { app, broker, relay, pengirim: app.get(PengirimPembukaan) };

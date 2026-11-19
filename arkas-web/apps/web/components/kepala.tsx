@@ -23,6 +23,8 @@ export function Kepala({ judul, me, npsn }: { judul: string; me: MeDto; npsn?: s
     ...(npsn ? [{ href: `/sekolah/${npsn}/perencanaan`, label: 'Penganggaran (RKAS)' }] : []),
     ...(npsn && aktif?.npsn ? [{ href: `/sekolah/${npsn}/penatausahaan/bku`, label: 'Penatausahaan' }] : []),
     ...(npsn && aktif?.npsn ? [{ href: `/sekolah/${npsn}/hpp`, label: 'HPP' }] : []),
+    ...(npsn && aktif?.npsn ? [{ href: `/sekolah/${npsn}/bantuan`, label: 'Bantuan' }] : []),
+    ...(aktif && ['ADMIN_DIREKTORAT', 'ADMIN_DITJEN', 'TIM_KERJA', 'SUPER_ADMIN', 'PEMANTAU', 'AUDITOR'].includes(aktif.peran) ? [{ href: '/bantuan', label: 'Bantuan Pemerintah' }] : []),
     ...(aktif && ['PEMANTAU', 'SUPER_ADMIN', 'AUDITOR', 'ADMIN_DINAS', 'VERIFIKATOR_DINAS'].includes(aktif.peran) ? [{ href: '/dasbor', label: 'Pemantauan' }] : []),
     ...(aktif && ['VERIFIKATOR_DINAS', 'TIM_KERJA'].includes(aktif.peran) ? [{ href: '/penelaahan', label: 'Penelaahan' }] : []),
     ...(aktif && ['SUPER_ADMIN', 'ADMIN_DITJEN', 'ADMIN_DIREKTORAT', 'ADMIN_DINAS', 'OPERATOR'].includes(aktif.peran) ? [{ href: '/admin/pengguna', label: 'Kelola pengguna' }] : []),
