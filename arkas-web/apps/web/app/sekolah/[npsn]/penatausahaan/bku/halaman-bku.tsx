@@ -11,6 +11,7 @@ import { PanelPajak } from '@/components/panel-pajak';
 import { PanelPenutupan } from '@/components/panel-penutupan';
 import { PanelLaporan } from '@/components/panel-laporan';
 import { PanelDitolak } from '@/components/panel-ditolak';
+import { PanelSiplah } from '@/components/panel-siplah';
 import { GalatApi } from '@/lib/api';
 import { Buku, useBku, useDitolak, usePutuskan, useRingkasan } from '@/lib/hooks';
 
@@ -52,6 +53,10 @@ function IsiBku({ npsn, tahun, me }: { npsn: string; tahun: number; me: MeDto })
         {galat && <Spanduk nada="bahaya" judul={galat.problem.detail ?? galat.problem.title}>Kode: {galat.problem.kode}</Spanduk>}
 
         <Ringkasan r={ringkasan.data} />
+
+        {(peran === 'BENDAHARA' || peran === 'KEPSEK') && (
+          <PanelSiplah buku={buku} peran={peran} bolehCatat={ringkasan.data?.periodeBerjalan?.status === 'BUKA'} />
+        )}
 
         {(peran === 'BENDAHARA' || peran === 'KEPSEK') && (
           <PanelDitolak data={ditolak.data ?? []} untukBendahara={peran === 'BENDAHARA'} onCatatUlang={peran === 'BENDAHARA' && ringkasan.data?.periodeBerjalan?.status === 'BUKA' ? (t) => {

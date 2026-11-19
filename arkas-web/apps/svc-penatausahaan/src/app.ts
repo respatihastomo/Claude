@@ -14,6 +14,9 @@ import { PeriodeService } from './penatausahaan/periode.service';
 import { PenatausahaanService } from './penatausahaan/penatausahaan.service';
 import { KertasKerjaDisahkanConsumer } from './events/kertas-kerja-disahkan.consumer';
 import { ReferensiConsumer } from './events/referensi.consumer';
+import { TransaksiMitraConsumer } from './events/transaksi-mitra.consumer';
+import { TransaksiMitraController } from './penatausahaan/transaksi-mitra.controller';
+import { TransaksiMitraService } from './penatausahaan/transaksi-mitra.service';
 import { InternalEventsController } from './events/internal-events.controller';
 import { HealthController } from './health.controller';
 
@@ -29,7 +32,7 @@ function modulAplikasi(cfg: Konfigurasi, broker: Broker): DynamicModule {
   class AppModule {}
   return {
     module: AppModule,
-    controllers: [BkuController, TransaksiController, PajakController, PeriodeController, HealthController, ...(cfg.devEvents || cfg.broker === 'http' ? [InternalEventsController] : [])],
+    controllers: [BkuController, TransaksiController, PajakController, PeriodeController, TransaksiMitraController, HealthController, ...(cfg.devEvents || cfg.broker === 'http' ? [InternalEventsController] : [])],
     providers: [
       { provide: KONFIGURASI, useValue: cfg },
       { provide: BROKER, useValue: broker },
@@ -42,6 +45,8 @@ function modulAplikasi(cfg: Konfigurasi, broker: Broker): DynamicModule {
       PeriodeService,
       KertasKerjaDisahkanConsumer,
       ReferensiConsumer,
+      TransaksiMitraConsumer,
+      TransaksiMitraService,
       Penutup,
     ],
   };
@@ -66,6 +71,9 @@ export async function buatAplikasi(cfg: Konfigurasi, opsi: { broker?: Broker; lo
   await broker.subscribe(TOPIK.KERTAS_KERJA_DISAHKAN, `${cfg.serviceName}.kk-disahkan`, async (e) => { await consumer.tangani(e); });
   const ref = app.get(ReferensiConsumer);
   await broker.subscribe(TOPIK.REFERENSI_DIUBAH, `${cfg.serviceName}.referensi`, (e) => ref.tangani(e));
+  const mitra = app.get(TransaksiMitraConsumer);
+  await broker.subscribe(TOPIK.TRANSAKSI_MITRA_DITERIMA, `${cfg.serviceName}.trx-mitra-diterima`, (e) => mitra.diterima(e));
+  await broker.subscribe(TOPIK.TRANSAKSI_MITRA_DIBATALKAN, `${cfg.serviceName}.trx-mitra-dibatalkan`, (e) => mitra.dibatalkan(e));
 
   const log = new Logger('OutboxRelay');
   const relay = new OutboxRelay(app.get<Pool>(POOL_WORKER), broker, {

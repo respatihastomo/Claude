@@ -13,6 +13,7 @@ const SVC = {
   pelaporan: process.env.SVC_PELAPORAN_URL ?? 'http://localhost:3106',
   perencanaan: process.env.SVC_PERENCANAAN_URL ?? 'http://localhost:3107',
   audit: process.env.SVC_AUDIT_URL ?? 'http://localhost:3108',
+  integrasi: process.env.SVC_INTEGRASI_URL ?? 'http://localhost:3109',
 };
 function tujuan(path: string[]): keyof typeof SVC {
   if (path[0] === 'auth' || path[0] === 'me' || (path[0] === 'admin' && path[1] === 'pengguna')) return 'identitas';
@@ -21,6 +22,8 @@ function tujuan(path: string[]): keyof typeof SVC {
   if (path[0] === 'sekolah' && (path.length === 2 || path[2] === 'rekening' || path[2] === 'sumber-dana')) return 'referensi';
   if (path[0] === 'laporan') return 'pelaporan';
   if (path[0] === 'audit') return 'audit'; // 11.2.16
+  // 11.2.17: /admin/mitra-siplah*, /pembukaan-sumber-dana*, /sumber-dana/{kode}/tutup, /integrasi/*
+  if ((path[0] === 'admin' && path[1] === 'mitra-siplah') || path[0] === 'pembukaan-sumber-dana' || path[0] === 'integrasi' || (path[0] === 'sumber-dana' && path[2] === 'tutup')) return 'integrasi';
   if (path[0] === 'kertas-kerja' || path[0] === 'penelaahan') return 'perencanaan';
   if (path[0] === 'sekolah' && (path[2] === 'kertas-kerja' || path[2] === 'pagu')) return 'perencanaan';
   return 'tatausaha';

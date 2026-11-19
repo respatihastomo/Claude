@@ -160,6 +160,8 @@ export class PenatausahaanService {
           uraian: baru.uraian, noBukti: baru.noBukti, caraBayar: baru.caraBayar, namaToko: baru.namaToko,
           items: baru.items.map((i) => ({ barisId: i.barisId, kodeRekening: i.kodeRekening, jumlah: i.jumlah, uraian: i.uraian })),
           pajak: baru.pajak.map((p) => ({ jenis: p.jenis, nilai: p.nilai })),
+          sumberMitra: (await tx.query<{ mitraKode: string; transactionId: string; transaksiMitraId: string }>(
+            `SELECT mitra_kode AS "mitraKode", transaction_id AS "transactionId", id AS "transaksiMitraId" FROM tatausaha.transaksi_mitra_masuk WHERE transaksi_id = $1`, [baru.id])).rows[0] ?? null,
         };
         await tulisOutbox(tx, SKEMA, {
           topik: TOPIK.TRANSAKSI_DISETUJUI, tipe: 'TransaksiDisetujui', agregatId: baru.id, correlationId: ctx.requestId, payload: data,

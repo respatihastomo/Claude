@@ -24,6 +24,12 @@ export const TOPIK = {
   PENGGUNA_DIBUAT: 'arkas.identitas.pengguna-dibuat',
   PERAN_DIUBAH: 'arkas.identitas.peran-diubah',
   AUDIT_DICATAT: 'arkas.audit.dicatat',
+  TRANSAKSI_MITRA_DITERIMA: 'arkas.integrasi.transaksi-mitra-diterima',
+  TRANSAKSI_MITRA_DIBATALKAN: 'arkas.integrasi.transaksi-mitra-dibatalkan',
+  PEMBUKAAN_DIKONFIRMASI: 'arkas.integrasi.pembukaan-dikonfirmasi',
+  SUMBER_DANA_DISAHKAN: 'arkas.banper.sumber-dana-disahkan',
+  PENYALURAN_DICATAT: 'arkas.banper.penyaluran-dicatat',
+  HPP_DIHITUNG: 'arkas.pemantauan.hpp-dihitung',
 } as const;
 
 export const CloudEventSchema = z.object({
@@ -85,6 +91,8 @@ export interface TransaksiDisetujuiData {
   namaToko?: string | null;
   items: Array<{ barisId: string; kodeRekening: string; jumlah: number; uraian?: string }>;
   pajak: Array<{ jenis: string; nilai: number }>;
+  /** aditif: belanja ini berasal dari transaksi Mitra SIPLah (UC-12) — konsumen dapat menghindari hitung ganda */
+  sumberMitra?: { mitraKode: string; transactionId: string; transaksiMitraId: string } | null;
 }
 
 /** Diterbitkan svc-penatausahaan saat Kepala Sekolah menutup buku kas bulanan; dikonsumsi svc-pelaporan (laporan bulanan). */

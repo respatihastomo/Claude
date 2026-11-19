@@ -6,3 +6,5 @@ export * from './penutupan';
 export * from './validasi-kertas-kerja';
 export * from './peran';
 export * from './tarif-efektif';
+export * from './status-pembukaan';
+export * from './kategori-hpp';
