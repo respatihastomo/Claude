@@ -161,6 +161,10 @@ Uji memulihkan data yang diubahnya (di blok `finally`), jadi aman dijalankan ber
 ## Kafka / Redpanda
 `BROKER=kafka` dan `BROKER_BROKERS=localhost:19092` setelah `docker compose up -d redpanda`. Adapter Kafka sudah dikompilasi tetapi **belum diuji terhadap broker sungguhan** (lihat dokumen irisan).
 
+## Dokumentasi pengembangan
+
+Dokumen teknis lengkap (arsitektur, model data, kontrak antarlayanan, keamanan, pengujian, operasional) dalam DOCX & PDF: [docs/buku-pengembangan](docs/buku-pengembangan/README.md).
+
 ## Buku untuk sekolah
 
 Buku Panduan dan Buku Tutorial ARKAS Web untuk Sekolah (DOCX & PDF): [docs/buku-sekolah](docs/buku-sekolah/README.md).

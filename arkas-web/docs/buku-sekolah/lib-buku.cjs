@@ -8,9 +8,11 @@ const {
 
 const BIRU = '1F4E8C';
 const FONT = 'Calibri';
-const DIR = { gambar: path.join(__dirname, 'gambar'), diagram: path.join(__dirname, 'diagram') };
+const DIR_BAWAAN = { gambar: path.join(__dirname, 'gambar'), diagram: path.join(__dirname, 'diagram') };
 
-function buatBuku(judulHeader) {
+function buatBuku(judulHeader, opsi = {}) {
+  const DIR = { ...DIR_BAWAAN, ...(opsi.dir ?? {}) };
+  const polaDiagram = opsi.polaDiagram ?? /^d\d/;
   let bab = 0; let nomorGambar = 0; let sub = ''; let daftarNomor = 0;
   const anak = []; const nomorRefs = [];
   const tambah = (...x) => anak.push(...x);
@@ -48,7 +50,7 @@ function buatBuku(judulHeader) {
     },
     /** gambar dari folder gambar/ (tangkapan layar) atau diagram/ (awalan d) */
     GAMBAR(file, keterangan, lebarCm = 16.5, maksTinggiCm = 21) {
-      const full = path.join(/^d\d/.test(file) ? DIR.diagram : DIR.gambar, file.endsWith('.png') ? file : `${file}.png`);
+      const full = path.join(polaDiagram.test(file) ? DIR.diagram : DIR.gambar, file.endsWith('.png') ? file : `${file}.png`);
       const { w, h, data } = ukuranPng(full);
       const maxW = Math.round(lebarCm / 2.54 * 96); const maxH = Math.round(maksTinggiCm / 2.54 * 96);
       let tw = maxW; let th = Math.round(h * maxW / w);
@@ -116,7 +118,7 @@ function buatBuku(judulHeader) {
             children: [...daftarIsi, ...anak] },
         ],
       });
-      return Packer.toBuffer(doc).then((buf) => { const out = path.join(__dirname, nama); fs.writeFileSync(out, buf); console.log('ditulis', out, buf.length, 'byte'); });
+      return Packer.toBuffer(doc).then((buf) => { const out = path.isAbsolute(nama) ? nama : path.join(opsi.dirKeluaran ?? __dirname, nama); fs.writeFileSync(out, buf); console.log('ditulis', out, buf.length, 'byte'); });
     },
   };
   return B;
