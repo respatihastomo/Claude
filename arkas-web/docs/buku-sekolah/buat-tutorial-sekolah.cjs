@@ -115,10 +115,10 @@ TABEL(['Komponen', 'Kode rekening', 'Uraian', 'Volume', 'Satuan', 'Harga'], [
   ['07', '5.1.02.02.01.0061', 'Langganan internet sekolah', '12', 'bulan', '150.000'],
   ['08', '5.1.02.02.01.0013', 'Servis AC dan printer', '2', 'kali', '250.000'],
   ['12', '5.1.02.02.01.0003', 'Honor narasumber in house training', '2', 'orang', '1.250.000'],
-], [1100, 2000, 3138, 900, 1200, 1300]);
+], [1400, 2100, 2938, 1000, 1000, 1200]);
 TUT('Tutorial 3c-3 — Membaca peringatan juknis', 'Operator Sekolah', 'Kamu tahu persis apa yang harus diperbaiki');
 OL(['Lihat bilah **12. Pembayaran honor**: merah, 20,83%, melewati batas 20%.', 'Baca kotak **Belum dapat diajukan**. Isinya daftar pekerjaan rumahmu: sisa pagu Rp100.000 dan honor yang kelebihan.']);
-GAMBAR('10-komponen-melebihi', 'Bilah merah dan daftar yang harus diperbaiki');
+GAMBAR('10-komponen-melebihi', '① bilah honor berubah merah, ② kotak kepatuhan menuliskan daftar perbaikannya', 8.6);
 TUT('Tutorial 3c-4 — Mengubah baris', 'Operator Sekolah', 'Honor kembali di bawah batas');
 OL(['Pada baris **Honor narasumber in house training**, klik **Ubah**.', 'Ganti **Volume** jadi `2` dan **Harga satuan** jadi `600000`.', 'Klik [[Simpan baris]].']);
 GAMBAR('11-ubah-baris', 'Mengubah volume dan harga', 15);
@@ -351,7 +351,7 @@ const KASUS = (judul, gejala, kenapa, langkah, gambar) => {
   if (gambar) GAMBAR(gambar[0], gambar[1], gambar[2] ?? 14);
 };
 H2('5.1 Penganggaran');
-KASUS('Kasus 1 — Tombol Ajukan ke Dinas tidak bisa diklik', 'Tombolnya abu-abu', 'Kertas kerja belum lolos juknis, atau kamu bukan Kepala Sekolah', ['Baca kotak **Belum dapat diajukan** di kiri.', 'Beresin satu per satu (sisa pagu, batas komponen).', 'Minta Kepala Sekolah yang menekan tombolnya.'], ['10-komponen-melebihi', 'Daftar yang harus diperbaiki']);
+KASUS('Kasus 1 — Tombol Ajukan ke Dinas tidak bisa diklik', 'Tombolnya abu-abu', 'Kertas kerja belum lolos juknis, atau kamu bukan Kepala Sekolah', ['Baca kotak **Belum dapat diajukan** di kiri.', 'Beresin satu per satu (sisa pagu, batas komponen).', 'Minta Kepala Sekolah yang menekan tombolnya.'], ['10-komponen-melebihi', 'Daftar yang harus diperbaiki ada di kotak ②', 8.6]);
 KASUS('Kasus 2 — Baris tidak tersimpan: total melebihi pagu', 'Pesan merah saat menyimpan', 'Total semua baris jadi lebih besar dari pagu', ['Kurangi volume/harga baris yang sedang diisi.', 'Atau kurangi baris lain dulu, baru simpan lagi.']);
 KASUS('Kasus 3 — Kertas kerja dikembalikan Dinas', 'Status balik ke Draf, ada kotak oranye', 'Verifikator menemukan yang perlu diperbaiki', ['Baca alasan umum dan catatan per baris.', 'Perbaiki baris terkait (Tutorial 3e-2).', 'Ajukan kembali — tidak perlu mengulang dari nol.'], ['18-dikembalikan', 'Alasan & catatan dari Dinas']);
 KASUS('Kasus 4 — Pergeseran ditolak karena realisasi', '“Total baris tidak boleh di bawah realisasinya”', 'Baris itu sudah dibelanjakan lebih besar dari nilai barunya', ['Lihat kolom **Realisasi** dulu.', 'Kurangi baris lain yang sisanya masih ada.'], ['63-di-bawah-realisasi', 'Pesan di bawah realisasi', 15]);

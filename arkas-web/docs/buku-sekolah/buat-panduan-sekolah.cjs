@@ -171,7 +171,7 @@ GAMBAR('e11-total-simpan', 'Totalnya dihitung aplikasi. Tinggal simpan.', 11);
 KOTAK('TIPS', ['Susun dari yang pasti-pasti dulu: listrik, internet, kebersihan. Sisanya baru kegiatan.', 'Pakai harga yang wajar menurut standar harga daerah — ini penyebab nomor satu kertas kerja dikembalikan Dinas.', 'Uraian yang jelas itu hadiah untuk Bendahara. “Kertas HVS A4 untuk pembelajaran” jauh lebih membantu daripada sekadar “Kertas”.']);
 H3('Kalau ada aturan yang dilanggar');
 P('Tidak perlu panik, dan tidak perlu menebak-nebak. Bilah komponennya berubah merah, dan kotak **Belum dapat diajukan** menuliskan persis apa yang harus diperbaiki.');
-GAMBAR('10-komponen-melebihi', 'Honor 20,83% melewati batas 20%: bilah merah dan daftar perbaikan');
+GAMBAR('10-komponen-melebihi', 'Honor 20,83% melewati batas 20%. ① bilah berubah merah, ② kotak kepatuhan merinci apa yang harus diperbaiki.', 8.6);
 KOTAK('CONTOH', 'Sekolah cerita sempat kebablasan: honor narasumber 2 × Rp1.250.000 = Rp2.500.000, alias 20,83% dari pagu. Setelah diturunkan jadi 2 × Rp600.000, honornya tinggal 10% dan bilahnya kembali biru. Beres.');
 P('Kalau sudah muncul tanda **✓ Memenuhi aturan juknis** dan sisa pagu Rp0, berarti kertas kerjamu siap naik ke meja Kepala Sekolah.');
 GAMBAR('e05-anatomi-tabel', 'Tabel kertas kerja dikelompokkan per komponen; kolom Realisasi menunjukkan yang sudah dibelanjakan', 16.5, 19);
