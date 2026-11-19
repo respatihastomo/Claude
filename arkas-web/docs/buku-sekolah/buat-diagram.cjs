@@ -63,6 +63,20 @@ function mindmap(pusat, cabang, tinggi = 860) {
 const dua = (a, b) => `<div class="baris" style="gap:22px"><div style="flex:1">${a}</div><div style="flex:1">${b}</div></div>`;
 const kartu = (w, judul, daftar) => `<div class="k" style="border-color:${W[w]};background:${MUDA[w]};padding:20px"><b style="color:${W[w]};font-size:24px;margin-bottom:10px">${judul}</b><div style="font-size:18px;line-height:1.6">${daftar.map((d) => `<div>• ${d}</div>`).join('')}</div></div>`;
 
+
+/** Pohon keputusan: pertanyaan di atas, cabang jawaban di bawah. cabang=[{jawab, w, judul, isi, lanjut:[..]}] */
+function pohon(tanya, cabang) {
+  const kol = cabang.map((c) => `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px">
+      <div style="font-size:30px;color:#94a3b8;line-height:1">↓</div>
+      <div style="font-weight:800;font-size:17px;color:${W[c.w]};background:${MUDA[c.w]};border:2px solid ${W[c.w]};border-radius:999px;padding:4px 16px">${c.jawab}</div>
+      <div style="width:100%">${kotak(c.w, c.judul, c.isi, c.ikon)}</div>
+      ${(c.lanjut ?? []).map((l) => `<div style="font-size:22px;color:#94a3b8;line-height:1">↓</div><div style="width:100%" class="k" style="border-color:#cbd5e1">${l}</div>`).join('')}
+    </div>`).join('<div style="width:18px"></div>');
+  return `<div class="k" style="border-color:#0f172a;background:#0f172a;color:#fff;font-size:23px;font-weight:800;text-align:center;padding:18px;margin-bottom:6px">${tanya}</div>
+    <div class="baris" style="align-items:flex-start">${kol}</div>`;
+}
+const langkahKecil = (teks) => `<div style="font-size:16px;color:#334155;border:2px dashed #cbd5e1;border-radius:12px;padding:10px 12px;width:100%;background:#f8fafc">${teks}</div>`;
+
 const DIAGRAM = {
   'd01-peta-peran': halaman('Siapa mengerjakan apa?', 'Peran di ARKAS Web untuk satu sekolah — setiap orang hanya melihat menu sesuai perannya', `
     <div class="baris" style="gap:16px;margin-bottom:16px">
@@ -149,6 +163,44 @@ const DIAGRAM = {
     { judul: 'BKP Pajak', w: 'oranye', ikon: '🧾', daun: ['Pungutan PPN/PPh/pajak daerah', 'Setoran dengan NTPN', 'Saldo pajak terutang'] },
     { judul: 'Penutupan & laporan', w: 'ungu', ikon: '🔒', daun: ['Ringkasan per buku', 'Rekonsiliasi', 'Laporan BKU bulanan'] },
   ], 500)),
+  'd12-mindmap-memulai': halaman('Peta Bab 2: Memulai aplikasi', 'Yang perlu kamu kuasai sebelum masuk ke penganggaran', mindmap('Memulai<br>ARKAS Web', [
+    { judul: 'Masuk', w: 'biru', ikon: '🔑', daun: ['Buka alamat dari Dinas', 'Tombol Masuk dengan SSO', 'Akun contoh (lingkungan uji coba)'] },
+    { judul: 'Peran aktif', w: 'ungu', ikon: '👤', daun: ['Satu akun bisa punya banyak peran', 'Pilih peran saat pertama masuk', 'Ganti lewat pojok kanan atas'] },
+    { judul: 'Menu modul', w: 'hijau', ikon: '🧭', daun: ['Penganggaran (RKAS)', 'Penatausahaan', 'HPP & Bantuan', 'Kelola pengguna / Jejak audit'] },
+    { judul: 'Kebiasaan aman', w: 'oranye', ikon: '🛡️', daun: ['Jangan berbagi akun', 'Keluar bila meninggalkan komputer', 'Simpan bukti fisik rapi'] },
+  ], 470)),
+  'd13-mindmap-penganggaran': halaman('Peta Bab 3: Penganggaran', 'Semua yang terjadi pada kertas kerja sampai menjadi RKAS', mindmap('Penganggaran<br>(Bab 3)', [
+    { judul: '3a Kertas kerja & RKAS', w: 'abu', ikon: '📘', daun: ['Kertas kerja = rancangan', 'RKAS = sudah disahkan', 'Versi & status'] },
+    { judul: '3b Pengaktifan', w: 'biru', ikon: '🔓', daun: ['Sekali di awal tahun', 'Operator/Bendahara', 'Versi 1 berstatus Draf'] },
+    { judul: '3c Penyusunan', w: 'biru', ikon: '📝', daun: ['Tambah baris per komponen', 'Total harus sama dengan pagu', 'Honor maksimal 20%', 'Cek kotak juknis'] },
+    { judul: '3d Pengajuan', w: 'ungu', ikon: '📤', daun: ['Hanya Kepala Sekolah', 'Kertas kerja terkunci'] },
+    { judul: '3e Pengesahan', w: 'oranye', ikon: '🏛️', daun: ['Dinas menelaah', 'Catatan per baris', 'Dikembalikan atau disahkan'] },
+    { judul: '3f & 3g Perubahan/pergeseran', w: 'hijau', ikon: '🔀', daun: ['Satu tombol, dua keperluan', 'Pagu berubah vs pagu tetap', 'Tidak boleh di bawah realisasi'] },
+  ], 620)),
+  'd14-mindmap-pajak': halaman('Peta Bab 4c: Perpajakan sekolah', 'Pajak dipungut otomatis — tugas sekolah adalah menyetor dan mencatat', mindmap('Perpajakan<br>(Bab 4c)', [
+    { judul: 'PPN', w: 'biru', ikon: '🧾', daun: ['11% dari DPP', 'Harga nota sudah termasuk PPN', 'DPP = bruto ÷ 1,11'] },
+    { judul: 'PPh Pasal 23', w: 'ungu', ikon: '🔧', daun: ['Jasa: 2% dari bruto', 'Tanpa NPWP: 4%'] },
+    { judul: 'PPh Pasal 21', w: 'teal', ikon: '👩‍🏫', daun: ['Honor orang pribadi', 'Tarif 5% (6% tanpa NPWP)'] },
+    { judul: 'Pajak daerah (SSPD)', w: 'oranye', ikon: '🍽️', daun: ['Makan minum/katering', '10% dari bruto', 'Tarif bisa beda per wilayah'] },
+    { judul: 'Menyetor', w: 'hijau', ikon: '🏦', daun: ['Satu setoran = satu jenis pajak', 'Isi tanggal & NTPN 16 karakter', 'Disetujui Kepala Sekolah'] },
+    { judul: 'Memeriksa', w: 'abu', ikon: '🔍', daun: ['Tab BKP Pajak', 'Pajak belum disetor', 'Saldo pajak harus Rp0 saat tutup buku'] },
+  ], 600)),
+  'd15-mindmap-masalah': halaman('Peta Bab 5: Masalah yang sering muncul', 'Kenali gejalanya, temukan babnya, selesaikan sendiri', mindmap('Masalah &<br>Solusi', [
+    { judul: 'Tombol tidak bisa diklik', w: 'merah', ikon: '🚫', daun: ['Belum memenuhi juknis', 'Bukan peran yang berwenang', 'Status sedang terkunci'] },
+    { judul: 'Angka ditolak', w: 'oranye', ikon: '🔢', daun: ['Total melebihi pagu', 'Di bawah realisasi', 'Melebihi sisa anggaran baris'] },
+    { judul: 'Periode & saldo', w: 'kuning', ikon: '📅', daun: ['Periode belum dibuka/sudah ditutup', 'Tanggal melewati hari ini', 'Saldo tunai tidak cukup'] },
+    { judul: 'Bukti & persetujuan', w: 'ungu', ikon: '📎', daun: ['Transaksi ditolak Kepala Sekolah', 'Catat ulang setelah bukti lengkap'] },
+    { judul: 'SIPLah', w: 'teal', ikon: '🛒', daun: ['Barang belum dipetakan', 'Pesanan dibatalkan/retur'] },
+    { judul: 'Pajak & tutup buku', w: 'abu', ikon: '🧾', daun: ['NTPN salah/sudah dipakai', 'Centang NPWP keliru', 'Selisih belum dijelaskan'] },
+  ], 620)),
+  'd16-pilih-perubahan-pergeseran': halaman('Perubahan atau pergeseran? Ikuti pertanyaan ini', 'Keduanya memakai tombol yang sama; yang membedakan adalah pagunya', pohon('Apakah <u>pagu</u> sekolah berubah?', [
+    { jawab: 'YA, pagu berubah', w: 'biru', ikon: '📈', judul: 'Perubahan anggaran', isi: 'Total RKAS harus mengikuti pagu baru', lanjut: [langkahKecil('Pagu naik → tambah baris/kegiatan baru sampai sisa pagu Rp0'), langkahKecil('Pagu turun → kurangi baris yang belum dibelanjakan'), langkahKecil('Ajukan → disahkan Dinas → versi baru berlaku')] },
+    { jawab: 'TIDAK, pagu tetap', w: 'hijau', ikon: '🔀', judul: 'Pergeseran anggaran', isi: 'Total RKAS tidak berubah, nilai dipindahkan antarbaris', lanjut: [langkahKecil('Kurangi baris yang berlebih — tidak boleh di bawah realisasi'), langkahKecil('Tambahkan nilai yang sama ke baris yang kurang'), langkahKecil('Ajukan → disahkan Dinas → versi baru berlaku')] },
+  ])),
+  'd17-pilih-cara-catat': halaman('Belanja sudah terjadi — dicatat lewat mana?', 'Tentukan jalurnya dulu, supaya tidak dobel catat', pohon('Belanjanya dipesan lewat aplikasi SIPLah?', [
+    { jawab: 'YA (daring)', w: 'kuning', ikon: '🛒', judul: 'Lewat panel Transaksi SIPLah', isi: 'Mitra sudah mengirim datanya ke ARKAS', lanjut: [langkahKecil('Jangan pakai tombol “Catat belanja” — nanti dobel'), langkahKecil('Petakan barang ke baris RKAS, lalu “Catat ke BKU”')] },
+    { jawab: 'TIDAK (luring)', w: 'hijau', ikon: '🏪', judul: 'Lewat tombol “+ Catat belanja”', isi: 'Wizard 3 langkah', lanjut: [langkahKecil('Bayar tunai? pastikan saldo tunai cukup (tarik tunai dulu)'), langkahKecil('Bayar transfer? pilih Non-tunai (bank)')] },
+  ])),
 };
 
 (async () => {
