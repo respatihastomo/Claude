@@ -499,6 +499,38 @@ P('Buka tab **Laporan** dan klik **Lihat PDF**. Laporannya sama persis dengan ya
 GAMBAR('m03-laporan.png', 'Tab Laporan untuk Komite');
 
 // ======================================================================
+// BAB BELANJA DARING (SIPLah) & HPP
+// ======================================================================
+H1('Belanja Daring lewat SIPLah dan Halaman HPP');
+P('Selain belanja langsung ke toko, sekolah bisa berbelanja daring lewat aplikasi Mitra SIPLah. Bedanya cuma satu: kamu tidak perlu mengetik transaksinya — Mitra yang mengirimkannya ke ARKAS.');
+KOTAK('PENTING', 'Jangan mencatat belanja SIPLah lewat tombol **+ Catat belanja**. Kalau itu dilakukan, belanjanya tercatat dua kali.');
+
+H2('Mencatat belanja SIPLah');
+P('Setelah pesanan di aplikasi Mitra selesai, transaksinya muncul sendiri di panel biru **Transaksi SIPLah** di atas BKU.');
+GAMBAR('/home/user/claude/arkas-web/docs/buku-sekolah/gambar/35-siplah-masuk.png', 'Pesanan SIPLah masuk sendiri; satu barang masih perlu dipetakan ke baris RKAS');
+OL([
+  'Barang yang sudah membawa baris RKAS dari Mitra bertanda ✓, jadi tidak perlu diapa-apakan.',
+  'Untuk barang yang belum, pilih baris RKAS di kotak **Pilih baris RKAS…**. Tanda ★ menandai baris dengan kode rekening yang sama.',
+  'Setelah semua barang terpetakan, klik [[Catat ke BKU]].',
+]);
+GAMBAR('/home/user/claude/arkas-web/docs/buku-sekolah/gambar/36-siplah-petakan.png', 'Semua barang sudah dipetakan, tombol Catat ke BKU aktif');
+P('Belanja tercatat sebagai belanja non-tunai dengan nomor bukti berupa nomor transaksi SIPLah, lengkap dengan pajaknya. Seperti transaksi lain, ia menunggu persetujuan Kepala Sekolah.');
+GAMBAR('/home/user/claude/arkas-web/docs/buku-sekolah/gambar/37-siplah-bku.png', 'Belanja SIPLah di BKU menunggu persetujuan');
+KOTAK('TIPS', 'Kalau Mitra membatalkan atau meretur pesanan, panel SIPLah menampilkan peringatan kuning. Kalau belanjanya belum disetujui, Kepala Sekolah tinggal menolaknya; kalau sudah disetujui, catat pengembalian dananya sebagai penerimaan setelah uang benar-benar kembali.');
+
+H2('Membaca halaman HPP');
+P('Menu **HPP** membandingkan rencana di RKAS dengan belanja yang benar-benar dilakukan lewat SIPLah. Dinas dan pusat melihat halaman yang sama, jadi ada baiknya kamu memeriksanya lebih dulu.');
+GAMBAR('/home/user/claude/arkas-web/docs/buku-sekolah/gambar/e29-kartu-hpp.png', 'Empat kartu ringkasan di halaman HPP', 16);
+TABEL(['Kartu', 'Artinya', 'Yang perlu dilakukan'], [
+  ['Sesuai rencana', 'Belanja cocok dengan baris RKAS-nya', 'Tidak ada — ini yang diharapkan'],
+  ['Melebihi rencana', 'Belanja melampaui nilai baris RKAS', 'Lakukan pergeseran anggaran supaya rencana dan kenyataan cocok'],
+  ['Di luar rencana', 'Barang yang dibeli tidak ada di RKAS', 'Periksa pemetaannya; bila memang kebutuhan baru, masukkan lewat pergeseran'],
+  ['Belum dibelanjakan', 'Baris RKAS yang belum dipakai sama sekali', 'Wajar di awal tahun; jadi perhatian kalau mendekati akhir tahun'],
+], [2300, 3800, 3538]);
+GAMBAR('/home/user/claude/arkas-web/docs/buku-sekolah/gambar/38-hpp.png', 'Halaman HPP beserta rincian per baris RKAS');
+KOTAK('INGAT', 'HPP hanya menghitung belanja lewat SIPLah. Belanja luring tetap masuk BKU dan mengurangi sisa anggaran, tetapi tidak muncul di halaman ini.');
+
+// ======================================================================
 // BAB 7 PENANGANAN MASALAH
 // ======================================================================
 H1('Penanganan Masalah');

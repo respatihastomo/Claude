@@ -398,6 +398,55 @@ KOTAK('INGAT', 'Terbitkan ulang **nggak menaikkan versi**. Modul lain otomatis m
 // ======================================================================
 // BAB 7 PENANGANAN MASALAH
 // ======================================================================
+H1('Memantau Serapan Nasional');
+KOTAK('INGAT', 'Dasbor Balai memperlihatkan seluruh provinsi. Angkanya berasal dari transaksi yang sudah disetujui Kepala Sekolah di tiap sekolah, dikumpulkan lewat event antarlayanan, jadi tidak perlu meminta laporan manual ke daerah.');
+P('Setelah referensi ditetapkan dan RKAS sekolah berjalan, Balai memantau pelaksanaannya secara nasional. Satu halaman merangkum berapa sekolah yang sudah punya RKAS berlaku, seberapa jauh dananya terserap, dan daerah mana yang tertinggal.');
+GAMBAR('bl01-dasbor-nasional.png', 'Dasbor nasional: ringkasan dan rincian per provinsi');
+TABEL(['Bagian', 'Isinya'], [
+  ['Kartu ringkasan', 'Jumlah sekolah dengan RKAS disahkan, serapan anggaran, belanja disetujui, dan jumlah sekolah yang terlambat menutup buku'],
+  ['Serapan & kepatuhan per provinsi', 'Satu baris per provinsi; klik untuk turun ke kabupaten/kota, lalu ke sekolah'],
+  ['Pemetaan belanja SIPLah per jenjang', 'Perbandingan rencana dengan belanja daring, dikelompokkan menurut jenjang pendidikan'],
+], [2600, 7038]);
+KOTAK('TIPS', 'Serapan yang rendah di awal tahun itu wajar karena RKAS baru disahkan. Yang perlu diperhatikan adalah provinsi yang serapannya tetap jauh tertinggal menjelang akhir semester.');
+
+H1('Bantuan Pemerintah');
+KOTAK('INGAT', 'Alurnya berjenjang: **Direktorat** menyusun dan mengajukan, **Ditjen** menyetujui juknis, lalu **Balai SDSP** memverifikasi dan mengesahkan. Sekolah baru bisa mengajukan setelah sumber dana berstatus Disahkan.');
+H2('Daftar sumber dana bantuan');
+GAMBAR('bl02-bantuan-daftar.png', 'Daftar sumber dana Bantuan Pemerintah beserta statusnya');
+P('Kolom **Penerima**, **Nilai**, dan **Disalurkan** memperlihatkan sejauh mana bantuan sudah sampai ke sekolah. Statusnya menunjukkan tahap mana yang sedang berjalan.');
+H2('Memeriksa satu bantuan sebelum disahkan');
+P('Klik salah satu baris untuk membuka rinciannya. Halaman ini memuat seluruh berkas yang perlu Bapak/Ibu periksa sebelum menekan tombol pengesahan.');
+GAMBAR('bl03-bantuan-detail.png', 'Rincian bantuan: kelengkapan, dokumen, komponen, penerima, PKS bank, penyaluran, dan pengajuan sekolah');
+TABEL(['Bagian', 'Yang diperiksa'], [
+  ['Kelengkapan', 'Penanda hijau berarti seluruh syarat terpenuhi; selama masih merah, tombol pengesahan tidak aktif'],
+  ['Dokumen', 'Petunjuk teknis dan panduan pelaksanaan — unduh dan baca sebelum mengesahkan'],
+  ['Komponen bantuan', 'Rincian barang atau kegiatan yang dibiayai beserta porsinya'],
+  ['Penerima', 'Daftar sekolah penerima beserta nilainya; diimpor dari berkas Excel oleh Direktorat'],
+  ['PKS bank & penyaluran', 'Perjanjian kerja sama penyalur dan catatan dana yang sudah disalurkan'],
+  ['Pengajuan sekolah', 'Permohonan dari sekolah penerima yang perlu diputuskan'],
+], [2600, 7038]);
+KOTAK('PENTING', 'Setelah disahkan, sumber dana otomatis dibuka di seluruh Mitra SIPLah dan pagunya mengalir ke perencanaan sekolah. Karena itu pastikan daftar penerima dan nilainya sudah benar sebelum pengesahan.');
+
+H1('Mitra SIPLah');
+P('Sekolah berbelanja daring melalui Mitra SIPLah. Halaman **Mitra SIPLah** memperlihatkan siapa saja mitra yang terdaftar dan apakah sumber dana sudah benar-benar terbuka di sistem mereka.');
+GAMBAR('bl04-mitra.png', 'Pembukaan sumber dana di Mitra, daftar Mitra terdaftar, dan transaksi terbaru');
+TABEL(['Bagian', 'Isinya'], [
+  ['Pembukaan sumber dana di Mitra', 'Setiap sumber dana yang disahkan dibuka otomatis di semua Mitra aktif; sekolah baru bisa belanja setelah statusnya **Dibuka**'],
+  ['Mitra terdaftar', 'Alamat IP yang diizinkan dan status tiap Mitra; dari sini Mitra baru didaftarkan'],
+  ['Transaksi dari Mitra terbaru', 'Transaksi belanja yang dikirim Mitra, beserta sekolah dan nilainya'],
+], [2900, 6738]);
+KOTAK('PENTING', 'Bila sebuah sumber dana berstatus belum dibuka padahal sudah disahkan, sekolah akan melapor tidak bisa berbelanja. Periksa status Mitra di halaman ini lebih dulu sebelum menelusuri lebih jauh.');
+
+H1('Jejak Audit');
+P('Setiap perubahan data penting di seluruh layanan dicatat dan tidak bisa dihapus. Lencana **Terverifikasi utuh** berarti rantai catatan masih utuh — tidak ada entri yang disunting diam-diam.');
+GAMBAR('bl05-jejak-audit.png', 'Jejak audit nasional dengan penyaring tahun, rantai, layanan, dan jenis perubahan');
+LI([
+  'Gunakan penyaring **Layanan** untuk memisahkan perubahan referensi dari perubahan transaksi sekolah.',
+  'Tombol **Lihat isi** pada sebuah entri memperlihatkan nilai sebelum dan sesudah perubahan.',
+  'Tombol **Periksa ulang** menghitung ulang rantai hash; lakukan bila ada dugaan data berubah di luar aplikasi.',
+]);
+KOTAK('INGAT', 'Jejak audit melengkapi, bukan menggantikan, pemeriksaan biasa. Ia menjawab pertanyaan "siapa mengubah apa dan kapan", bukan "apakah keputusannya tepat".');
+
 H1('Penanganan Masalah');
 KOTAK('BAB', 'arti pesan yang mungkin muncul, masalah yang paling sering dilaporkan, dan cara menyelesaikannya.');
 H2('7.1 Cara membaca pesan dari aplikasi');

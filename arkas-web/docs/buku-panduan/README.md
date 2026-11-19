@@ -1,9 +1,11 @@
 # Buku Panduan & Tutorial ARKAS Web
 
 Ada tiga buku dengan susunan yang sama:
-- **untuk sekolah** (`Buku-Panduan-ARKAS-Web.*`, Edisi 2, 53 halaman: termasuk pergeseran RKAS dan dampak perubahan referensi);
-- **untuk Dinas Pendidikan** (`Buku-Panduan-ARKAS-Web-Dinas.*`, Edisi 2, 31 halaman: Verifikator Dinas & Admin Dinas, gambar dari `../tutorial-dinas/`);
-- **untuk Balai SDSP** (`Buku-Panduan-ARKAS-Web-Balai.*`, 33 halaman: pengguna tingkat pusat & referensi nasional termasuk formulir tambah/ubah/nonaktifkan, gambar dari `../tutorial-balai/`).
+- **untuk sekolah** (`Buku-Panduan-ARKAS-Web.*`, Edisi 3, 57 halaman: termasuk pergeseran RKAS, dampak perubahan referensi, belanja daring SIPLah, dan halaman HPP);
+- **untuk Dinas Pendidikan** (`Buku-Panduan-ARKAS-Web-Dinas.*`, Edisi 3, 34 halaman: Verifikator Dinas & Admin Dinas, ditambah bab pemantauan wilayah dan HPP sekolah, gambar dari `../tutorial-dinas/`);
+- **untuk Balai SDSP** (`Buku-Panduan-ARKAS-Web-Balai.*`, Edisi 2, 41 halaman: pengguna tingkat pusat & referensi nasional, ditambah bab dasbor nasional, Bantuan Pemerintah, Mitra SIPLah, dan jejak audit, gambar dari `../tutorial-balai/`).
+
+Buku khusus sekolah yang lebih baru dan lebih bergambar ada di [`../buku-sekolah`](../buku-sekolah/README.md).
 
 ## Buku sekolah
 

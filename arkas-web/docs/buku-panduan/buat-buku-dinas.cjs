@@ -385,6 +385,32 @@ KOTAK('TIPS', 'Mau kembali memungut pajak? Klik **Atur** lagi, hapus centang *Ti
 // ======================================================================
 // BAB 6 PENANGANAN MASALAH
 // ======================================================================
+H1('Memantau Sekolah di Wilayah');
+KOTAK('INGAT', 'Menu **Pemantauan** memperlihatkan seluruh sekolah dalam cakupan wilayah Bapak/Ibu. Angkanya dihitung dari transaksi yang sudah disetujui Kepala Sekolah, jadi mencerminkan belanja yang benar-benar terjadi.');
+P('Setelah RKAS disahkan, pekerjaan Dinas berpindah dari menelaah rencana menjadi memantau pelaksanaannya. Semua yang dibutuhkan ada di satu halaman: berapa sekolah yang sudah punya RKAS, seberapa jauh dananya terserap, dan siapa yang tertinggal menutup buku.');
+H2('Membaca kartu ringkasan');
+GAMBAR('dn01-dasbor.png', 'Dasbor pemantauan untuk satu wilayah');
+TABEL(['Kartu', 'Artinya', 'Yang perlu Bapak/Ibu lakukan'], [
+  ['Sekolah dengan RKAS disahkan', 'Jumlah sekolah yang RKAS-nya sudah berlaku', 'Sekolah yang belum muncul berarti RKAS-nya belum disahkan — periksa antrean penelaahan'],
+  ['Serapan anggaran', 'Persentase belanja disetujui terhadap pagu', 'Serapan yang sangat rendah mendekati akhir tahun perlu ditanyakan'],
+  ['Belanja disetujui', 'Nilai rupiah belanja yang sudah final', 'Bandingkan dengan jadwal kegiatan sekolah'],
+  ['Terlambat tutup buku', 'Jumlah sekolah yang periodenya belum ditutup sesuai jadwal', 'Hubungi sekolah yang tercantum; buku yang tidak ditutup menghambat laporan'],
+], [2300, 3800, 3538]);
+H2('Menelusuri per sekolah');
+P('Tabel di bawah kartu merinci tiap sekolah: pagu, realisasi, persentase serapan, bulan terakhir yang bukunya ditutup, dan catatan HPP. Dari sinilah Bapak/Ibu menentukan sekolah mana yang perlu didampingi lebih dulu.');
+GAMBAR('dn02-dasbor-kepatuhan.png', 'Kolom kepatuhan: bulan terakhir yang ditutup dan keterlambatannya. Angka 0 pada kartu "Terlambat tutup buku" berarti seluruh sekolah masih tepat waktu.');
+KOTAK('TIPS', 'Pakai urutan prioritas ini saat mendampingi: sekolah yang belum menutup buku dua bulan atau lebih, lalu yang serapannya jauh di bawah rata-rata wilayah, baru yang catatan HPP-nya banyak.');
+H2('Melihat HPP sebuah sekolah');
+P('HPP (Halaman Pemetaan Pembelanjaan) membandingkan rencana di RKAS dengan belanja yang benar-benar dilakukan lewat SIPLah. Halaman ini membantu Bapak/Ibu melihat apakah belanja daring sekolah sesuai dengan yang direncanakan.');
+GAMBAR('dn03-hpp-sekolah.png', 'HPP satu sekolah: empat kategori dan rinciannya per baris RKAS');
+TABEL(['Kategori', 'Artinya'], [
+  ['Sesuai rencana', 'Barang yang dibeli cocok dengan baris RKAS dan nilainya masih dalam batas'],
+  ['Melebihi rencana', 'Belanja melampaui nilai baris RKAS-nya — perlu pergeseran anggaran'],
+  ['Di luar rencana', 'Barang yang dibeli tidak ada padanannya di RKAS'],
+  ['Belum dibelanjakan', 'Baris RKAS yang sampai sekarang belum dipakai'],
+], [2600, 7038]);
+KOTAK('PENTING', 'Angka HPP hanya mencakup belanja lewat SIPLah. Belanja luring tetap terlihat pada serapan anggaran, tetapi tidak muncul di pemetaan ini.');
+
 H1('Penanganan Masalah');
 P('Kalau ada yang nggak berjalan sesuai harapan, jangan khawatir. Bab ini berisi arti pesan yang muncul dan solusi untuk masalah yang paling sering terjadi.');
 
