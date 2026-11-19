@@ -15,6 +15,7 @@ const AKUN = {
   kepsek: ['kepsek@smpn1.example', '8a000000-0000-4000-8000-000000000003'],
   adminDinas: ['admin@dinas3201.example', '8a000000-0000-4000-8000-000000000005'],
   balai: ['admin@balai.example', '8a000000-0000-4000-8000-000000000006'],
+  auditor: ['auditor@inspektorat.example', '8a000000-0000-4000-8000-000000000007'],
 } as const;
 export type Akun = keyof typeof AKUN;
 

@@ -23,6 +23,7 @@ export const TOPIK = {
   REFERENSI_DIUBAH: 'arkas.ref.referensi-diubah',
   PENGGUNA_DIBUAT: 'arkas.identitas.pengguna-dibuat',
   PERAN_DIUBAH: 'arkas.identitas.peran-diubah',
+  AUDIT_DICATAT: 'arkas.audit.dicatat',
 } as const;
 
 export const CloudEventSchema = z.object({
@@ -148,3 +149,23 @@ export const ReferensiDiubahData = z.object({
   data: z.record(z.unknown()),
 });
 export type ReferensiDiubahData = z.infer<typeof ReferensiDiubahData>;
+
+/**
+ * Audit stream (D7): ditulis trigger `catat_audit()` di tiap layanan ke outbox lokalnya, dikonsumsi svc-audit
+ * dan dirangkai dengan SHA-256 ke db_audit.jejak. Layanan asal diambil dari `source` CloudEvent.
+ */
+export const AuditDicatatData = z.object({
+  tabel: z.string().min(1).max(60),
+  aksi: z.enum(['INSERT', 'UPDATE', 'DELETE']),
+  kunci: z.string().max(200),
+  npsn: z.string().regex(/^\d{8}$/).nullable(),
+  pelakuId: z.string().uuid().nullable(),
+  peran: z.string().max(20).nullable(),
+  ip: z.string().max(45).nullable(),
+  requestId: z.string().max(64).nullable(),
+  alasan: z.string().max(500).nullable(),
+  sebelum: z.record(z.unknown()).nullable(),
+  sesudah: z.record(z.unknown()).nullable(),
+  terjadiAt: z.string().datetime({ offset: true }),
+});
+export type AuditDicatatData = z.infer<typeof AuditDicatatData>;

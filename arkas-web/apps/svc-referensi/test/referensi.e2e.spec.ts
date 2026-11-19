@@ -24,7 +24,7 @@ const dinas = (wilayah = '3201') => auth('ADMIN_DINAS', { wilayah });
 async function eventBaru(): Promise<ReferensiDiubahData[]> {
   const sebelum = broker.terbit.length;
   while (await A.relay.tick()) { /* kuras */ }
-  return broker.terbit.slice(sebelum).map((e) => ReferensiDiubahData.parse(e.event.data));
+  return broker.terbit.slice(sebelum).filter((e) => e.event.type === 'ReferensiDiubah').map((e) => ReferensiDiubahData.parse(e.event.data));
 }
 
 beforeAll(async () => {

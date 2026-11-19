@@ -165,7 +165,7 @@ describe('UC-20 / SK-12 pengelolaan pengguna berjenjang', () => {
     penggunaBaru = r.body.id;
     const sebelum = broker.terbit.length;
     await A.relay.tick();
-    expect(broker.terbit.slice(sebelum).map((e) => e.event.type)).toEqual(['PenggunaDibuat', 'PeranDiubah']);
+    expect(broker.terbit.slice(sebelum).filter((e) => e.event.type !== 'AuditDicatat').map((e) => e.event.type)).toEqual(['PenggunaDibuat', 'PeranDiubah']);
   });
 
   it('di luar kewenangan / cakupan ditolak dengan kode jelas', async () => {

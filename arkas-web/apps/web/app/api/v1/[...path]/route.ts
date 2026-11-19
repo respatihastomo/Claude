@@ -12,6 +12,7 @@ const SVC = {
   tatausaha: process.env.SVC_PENATAUSAHAAN_URL ?? 'http://localhost:3105',
   pelaporan: process.env.SVC_PELAPORAN_URL ?? 'http://localhost:3106',
   perencanaan: process.env.SVC_PERENCANAAN_URL ?? 'http://localhost:3107',
+  audit: process.env.SVC_AUDIT_URL ?? 'http://localhost:3108',
 };
 function tujuan(path: string[]): keyof typeof SVC {
   if (path[0] === 'auth' || path[0] === 'me' || (path[0] === 'admin' && path[1] === 'pengguna')) return 'identitas';
@@ -19,6 +20,7 @@ function tujuan(path: string[]): keyof typeof SVC {
   // 11.2.4: /sekolah/{npsn}, /sekolah/{npsn}/{rekening,sumber-dana} -> svc-referensi
   if (path[0] === 'sekolah' && (path.length === 2 || path[2] === 'rekening' || path[2] === 'sumber-dana')) return 'referensi';
   if (path[0] === 'laporan') return 'pelaporan';
+  if (path[0] === 'audit') return 'audit'; // 11.2.16
   if (path[0] === 'kertas-kerja' || path[0] === 'penelaahan') return 'perencanaan';
   if (path[0] === 'sekolah' && (path[2] === 'kertas-kerja' || path[2] === 'pagu')) return 'perencanaan';
   return 'tatausaha';

@@ -133,7 +133,7 @@ describe('UC-05/06 validasi & ajukan', () => {
     expect(a.body).toMatchObject({ status: 'DIAJUKAN', diajukanOleh: U.kepsek });
     const sebelum = broker.terbit.length;
     await A.relay.tick();
-    expect(broker.terbit.slice(sebelum).map((e) => e.event.type)).toEqual(['KertasKerjaDiajukan']);
+    expect(broker.terbit.slice(sebelum).filter((e) => e.event.type !== 'AuditDicatat').map((e) => e.event.type)).toEqual(['KertasKerjaDiajukan']);
   });
 
   it('kertas kerja DIAJUKAN terkunci', async () => {

@@ -1,7 +1,7 @@
 # ARKAS Web — monorepo microservices
 
 Implementasi bertahap dari *Dokumen Rancangan Teknis ARKAS Berbasis Web (Edisi Microservices)*.
-Isi saat ini — **`svc-identitas`** (Tahap 0: SSO, sesi, peran, JWT internal), **`svc-referensi`** (Tahap 0: data induk nasional & pajak daerah, disebar lewat event `ReferensiDiubah`) dan alur Tahap 1 "BOSP Inti" lintas layanan: **`svc-perencanaan`** (RKAS disusun → diajukan → disahkan Dinas) → **`svc-penatausahaan`** (BKU, pajak, penutupan buku) → **`svc-pelaporan`** (laporan PDF & tanda tangan).
+Isi saat ini — **`svc-identitas`** (Tahap 0: SSO, sesi, peran, JWT internal), **`svc-referensi`** (Tahap 0: data induk nasional & pajak daerah, disebar lewat event `ReferensiDiubah`) dan alur Tahap 1 "BOSP Inti" lintas layanan: **`svc-perencanaan`** (RKAS disusun → diajukan → disahkan Dinas) → **`svc-penatausahaan`** (BKU, pajak, penutupan buku) → **`svc-pelaporan`** (laporan PDF & tanda tangan), serta **`svc-audit`** (jejak audit berantai hash SHA-256 dari semua layanan).
 Rincian cakupan, alur, dan keputusan:
 - [`docs/irisan-1-penatausahaan.md`](docs/irisan-1-penatausahaan.md) — BKU, belanja, persetujuan
 - [`docs/irisan-2-setor-pajak.md`](docs/irisan-2-setor-pajak.md) — setor pajak (NTPN) & BKP Pajak
@@ -10,6 +10,7 @@ Rincian cakupan, alur, dan keputusan:
 - [`docs/svc-perencanaan.md`](docs/svc-perencanaan.md) — pagu, kertas kerja RKAS, validasi juknis, penelaahan & pengesahan Dinas
 - [`docs/svc-identitas.md`](docs/svc-identitas.md) — SSO OIDC, sesi, peran aktif, JWT internal & JWKS, pengelolaan pengguna berjenjang
 - [`docs/svc-referensi.md`](docs/svc-referensi.md) — referensi nasional (Balai SDSP), pajak daerah (Dinas), proyeksi lokal di layanan lain
+- [`docs/svc-audit.md`](docs/svc-audit.md) — jejak audit append-only berantai hash, verifikasi & deteksi perusakan (UC-31)
 
 ```
 apps/
@@ -18,12 +19,14 @@ apps/
   svc-penatausahaan/   NestJS: BKU, BKP, pajak, periode (db_tatausaha) — :3105
   svc-pelaporan/       NestJS: laporan PDF & tanda tangan (db_pelaporan) — :3106
   svc-perencanaan/     NestJS: pagu, kertas kerja RKAS, penelaahan (db_perencanaan) — :3107
+  svc-audit/           NestJS: jejak audit berantai hash SHA-256, verifikasi rantai (db_audit) — :3108
   web/                 Next.js App Router + Tailwind + TanStack Query (halaman BKU & wizard belanja)
 packages/
   aturan/              fungsi murni: hitungPajak, pilihTarifEfektif, transisi status, pemisahan tugas (uji unit >= 90%)
   kontrak/             skema Zod bersama + CloudEvents + topik broker
   common-ms/           DbContextService (RLS), ScopeGuard, ProblemFilter (RFC 9457), Outbox Relay, Inbox Consumer, broker Kafka/memori
 db/<layanan>/migrations/           SQL per basis data layanan (Database-per-Service)
+db/_bersama/                       templat SQL lintas layanan (trigger audit catat_audit)
 scripts/               migrate, dev-keys, dev-token, terbit-kk-disahkan, jalankan-svc
 ```
 
@@ -56,9 +59,12 @@ DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scr
 DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scripts/migrate.mjs svc-referensi --seed
 ```
 ```bash
+DATABASE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres node scripts/migrate.mjs svc-audit
+```
+```bash
 pnpm build
 ```
-Enam terminal:
+Tujuh terminal:
 ```bash
 ./scripts/jalankan-svc.sh svc-identitas
 ```
@@ -73,6 +79,9 @@ Enam terminal:
 ```
 ```bash
 ./scripts/jalankan-svc.sh svc-pelaporan
+```
+```bash
+./scripts/jalankan-svc.sh svc-audit
 ```
 ```bash
 pnpm --filter @arkas/web start
@@ -103,7 +112,7 @@ Uji integrasi membuat ulang basis data `db_tatausaha_uji` di PostgreSQL sungguha
 
 ### Uji UI menyeluruh (web)
 
-Menguji halaman sungguhan lewat peramban (Playwright) terhadap tumpukan yang sedang berjalan: enam proses dari bagian *Menjalankan*, ditambah data demo yang bulan berjalannya masih terbuka.
+Menguji halaman sungguhan lewat peramban (Playwright) terhadap tumpukan yang sedang berjalan: tujuh proses dari bagian *Menjalankan*, ditambah data demo yang bulan berjalannya masih terbuka.
 ```bash
 DEMO_TANPA_TUTUP=1 node scripts/isi-demo.mjs 20100001
 ```
@@ -115,6 +124,7 @@ Cakupan (`apps/web/e2e/`):
 - Admin Dinas ditolak membuka referensi nasional dan mengatur wilayah lain.
 - Balai mengubah batas komponen dan menerbitkan ulang referensi.
 - Kepala Sekolah menolak transaksi; Bendahara melihat alasannya, dan **Catat ulang** membuka formulir terisi.
+- Perubahan Balai tercatat di **Jejak audit** Auditor dengan nilai sebelum/sesudah, dan rantai hash terverifikasi utuh; Kepala Sekolah hanya melihat rantai sekolahnya.
 
 Uji memulihkan data yang diubahnya (di blok `finally`), jadi aman dijalankan berulang. Alamat web dapat diganti dengan `WEB_URL`.
 

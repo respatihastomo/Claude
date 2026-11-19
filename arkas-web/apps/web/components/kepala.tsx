@@ -26,6 +26,7 @@ export function Kepala({ judul, me, npsn }: { judul: string; me: MeDto; npsn?: s
     ...(aktif && ['SUPER_ADMIN', 'ADMIN_DITJEN', 'ADMIN_DIREKTORAT', 'ADMIN_DINAS', 'OPERATOR'].includes(aktif.peran) ? [{ href: '/admin/pengguna', label: 'Kelola pengguna' }] : []),
     ...(aktif?.peran === 'ADMIN_DINAS' ? [{ href: '/dinas/pajak-daerah', label: 'Pajak daerah' }] : []),
     ...(aktif?.peran === 'SUPER_ADMIN' ? [{ href: '/admin/referensi', label: 'Referensi' }] : []),
+    ...(aktif && ['AUDITOR', 'SUPER_ADMIN', 'KEPSEK'].includes(aktif.peran) ? [{ href: '/audit', label: 'Jejak audit' }] : []),
   ];
   return (
     <header className="border-b border-line bg-surface">

@@ -25,3 +25,10 @@ INSERT INTO peran_pengguna (id, pengguna_id, peran, npsn, wilayah_kode) VALUES
   ('8a000000-0000-4000-8000-000000000005', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e04', 'ADMIN_DINAS', NULL, '3201'),
   ('8a000000-0000-4000-8000-000000000006', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e05', 'SUPER_ADMIN', NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
+-- Auditor (UC-31): peran berbatas waktu sesuai surat tugas.
+INSERT INTO pengguna (id, email, nama) VALUES
+  ('6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e06', 'auditor@inspektorat.example', 'Dra. Lestari W. (Auditor)')
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO peran_pengguna (id, pengguna_id, peran, berlaku_sampai) VALUES
+  ('8a000000-0000-4000-8000-000000000007', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e06', 'AUDITOR', '2027-12-31T23:59:59+07:00')
+ON CONFLICT (id) DO NOTHING;

@@ -18,12 +18,18 @@ const LAYANAN = {
   'svc-perencanaan': { db: 'db_perencanaan', api: 'api_perencanaan_login', worker: 'worker_perencanaan_login' },
   'svc-identitas': { db: 'db_auth', api: 'api_auth_login', worker: 'worker_auth_login' },
   'svc-referensi': { db: 'db_ref', api: 'api_ref_login', worker: 'worker_ref_login' },
+  'svc-audit': { db: 'db_audit', api: 'api_audit_login', worker: 'worker_audit_login' },
 };
 const lay = LAYANAN[svc];
 if (!lay) { console.error(`layanan tidak dikenal: ${svc}`); process.exit(2); }
 const dbName = process.env.DB_NAME ?? lay.db;
 if (!/^[a-z_][a-z0-9_]*$/.test(dbName)) throw new Error('DB_NAME tidak valid');
 const dir = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'db', svc, 'migrations');
+
+// `-- #sertakan _bersama/x.sql skema` -> isi db/_bersama/x.sql dengan {{skema}} diganti (templat lintas layanan).
+const dbDir = path.resolve(dir, '..', '..');
+const sertakan = (sql) => sql.replace(/^-- #sertakan (\S+) ([a-z_]+)\s*$/gm, (_, f, skema) =>
+  fs.readFileSync(path.join(dbDir, f), 'utf8').replaceAll('{{skema}}', skema));
 
 const admin = new pg.Client({ connectionString: adminUrl });
 await admin.connect();
@@ -44,7 +50,7 @@ await db.connect();
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort().filter((f) => seed || !f.startsWith('9'));
 for (const f of files) {
   process.stdout.write(`menjalankan ${f} ... `);
-  await db.query(fs.readFileSync(path.join(dir, f), 'utf8'));
+  await db.query(sertakan(fs.readFileSync(path.join(dir, f), 'utf8')));
   console.log('ok');
 }
 const sandiApi = process.env.API_DB_PASSWORD ?? 'api_dev';
