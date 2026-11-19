@@ -191,6 +191,15 @@ docker build -f Dockerfile.web -t arkas/web .
 
 Keduanya multi-stage, berjalan sebagai pengguna tak-root, dan hanya memasang dependensi produksi pada tahap akhir.
 
+## Menjalankan di komputer Windows
+
+Panduan lengkap beserta skrip PowerShell siap pakai (`scripts/windows/`): [docs/jalan-di-windows](docs/jalan-di-windows/README.md).
+
+```powershell
+.\scripts\windows\pasang-lokal.ps1      # sekali saja
+.\scripts\windows\jalankan-semua.ps1    # lalu buka http://localhost:3000
+```
+
 ## Dokumentasi pengembangan
 
 Dokumen teknis lengkap (arsitektur, model data, kontrak antarlayanan, keamanan, pengujian, operasional) dalam DOCX & PDF: [docs/buku-pengembangan](docs/buku-pengembangan/README.md).

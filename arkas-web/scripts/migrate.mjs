@@ -4,6 +4,7 @@
 // DB_NAME            : nama basis data layanan (bawaan per layanan, lihat LAYANAN)
 // API_DB_PASSWORD / WORKER_DB_PASSWORD : kata sandi role login layanan
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import pg from 'pg';
 
@@ -27,7 +28,7 @@ const lay = LAYANAN[svc];
 if (!lay) { console.error(`layanan tidak dikenal: ${svc}`); process.exit(2); }
 const dbName = process.env.DB_NAME ?? lay.db;
 if (!/^[a-z_][a-z0-9_]*$/.test(dbName)) throw new Error('DB_NAME tidak valid');
-const dir = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'db', svc, 'migrations');
+const dir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'db', svc, 'migrations');
 
 // `-- #sertakan _bersama/x.sql skema` -> isi db/_bersama/x.sql dengan {{skema}} diganti (templat lintas layanan).
 const dbDir = path.resolve(dir, '..', '..');

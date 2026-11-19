@@ -7,13 +7,14 @@
 // Butuh ketiga layanan berjalan dengan BROKER=http dan TUTUP_SEBELUM_AKHIR_BULAN=true. Pakai: node scripts/isi-demo.mjs [npsn]
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 const npsn = process.argv[2] ?? '20100001';
 const S = process.env.SVC_URL ?? 'http://localhost:3105';
 const P = process.env.SVC_PERENCANAAN_URL ?? 'http://localhost:3107';
-const token = (peran, sub) => execFileSync('node', [new URL('./dev-token.mjs', import.meta.url).pathname, peran, npsn, sub]).toString();
+const token = (peran, sub) => execFileSync('node', [fileURLToPath(new URL('./dev-token.mjs', import.meta.url)), peran, npsn, sub]).toString();
 const B = token('BENDAHARA', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e01');
 const K = token('KEPSEK', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e02');
-const V = execFileSync('node', [new URL('./dev-token.mjs', import.meta.url).pathname, 'VERIFIKATOR_DINAS', process.env.DEV_WILAYAH ?? '3201', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e03']).toString();
+const V = execFileSync('node', [fileURLToPath(new URL('./dev-token.mjs', import.meta.url)), 'VERIFIKATOR_DINAS', process.env.DEV_WILAYAH ?? '3201', '6f1d6c0e-0d3a-4b8e-9a51-1b2f3c4d5e03']).toString();
 const hari = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const tahun = Number(hari.slice(0, 4));
 const buku = { tahun, sumberDanaKode: 'BOSP_REG' };

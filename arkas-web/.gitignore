@@ -11,3 +11,7 @@ coverage/
 .berkas-bantuan/
 .env.*
 !.env*.example
+
+# menjalankan di komputer lokal (skrip Windows)
+logs/
+.lokal-pid.json
