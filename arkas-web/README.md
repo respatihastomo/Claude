@@ -165,6 +165,10 @@ Uji memulihkan data yang diubahnya (di blok `finally`), jadi aman dijalankan ber
 
 Dokumen teknis lengkap (arsitektur, model data, kontrak antarlayanan, keamanan, pengujian, operasional) dalam DOCX & PDF: [docs/buku-pengembangan](docs/buku-pengembangan/README.md).
 
+## Kode sumber sebagai dokumen
+
+Seluruh kode sumber dicetak per unit (DOCX & PDF, 486 halaman): [docs/kode-sumber](docs/kode-sumber/README.md).
+
 ## Buku untuk sekolah
 
 Buku Panduan dan Buku Tutorial ARKAS Web untuk Sekolah (DOCX & PDF): [docs/buku-sekolah](docs/buku-sekolah/README.md).
